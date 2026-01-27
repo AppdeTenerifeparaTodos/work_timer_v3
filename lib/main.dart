@@ -6,6 +6,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'app_localizations.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:fl_chart/fl_chart.dart';
 
 void main() {
   runApp(const WorkStudyTimerApp());
@@ -61,9 +62,725 @@ class _WorkStudyTimerAppState extends State<WorkStudyTimerApp> {
           ),
         ),
       ),
-      home: HomePage(
+      home: MainTabScreen(
         onLanguageChange: _changeLanguage,
         currentLocale: _locale,
+      ),
+    );
+  }
+}
+
+
+// NOWY MODEL - CEL
+class Goal {
+  final String id;
+  final String name;
+  final double targetHours;
+  final String period;
+  final String? activityType;
+  final DateTime createdAt;
+
+  Goal({
+    required this.id,
+    required this.name,
+    required this.targetHours,
+    required this.period,
+    this.activityType,
+    required this.createdAt,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'targetHours': targetHours,
+      'period': period,
+      'activityType': activityType,
+      'createdAt': createdAt.toIso8601String(),
+    };
+  }
+
+  factory Goal.fromJson(Map<String, dynamic> json) {
+    return Goal(
+      id: json['id'] as String,
+      name: json['name'] as String,
+      targetHours: (json['targetHours'] as num).toDouble(),
+      period: json['period'] as String,
+      activityType: json['activityType'] as String?,
+      createdAt: DateTime.parse(json['createdAt'] as String),
+    );
+  }
+}
+
+// Główny ekran z zakładkami
+class MainTabScreen extends StatefulWidget {
+  final Function(String) onLanguageChange;
+  final Locale currentLocale;
+
+  const MainTabScreen({
+    super.key,
+    required this.onLanguageChange,
+    required this.currentLocale,
+  });
+
+  @override
+  State<MainTabScreen> createState() => _MainTabScreenState();
+}
+
+class _MainTabScreenState extends State<MainTabScreen> {
+  int _currentIndex = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: IndexedStack(
+        index: _currentIndex,
+        children: [
+          HomePage(
+            onLanguageChange: widget.onLanguageChange,
+            currentLocale: widget.currentLocale,
+          ),
+          StatisticsPageWrapper(),
+        ],
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _currentIndex,
+        onTap: (index) {
+          setState(() {
+            _currentIndex = index;
+          });
+        },
+        selectedItemColor: Colors.indigo,
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.timer),
+            label: 'Timer',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.bar_chart),
+            label: 'Statystyki',
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// Wrapper dla StatisticsPage który przekazuje historię z HomePage
+class StatisticsPageWrapper extends StatelessWidget {
+  const StatisticsPageWrapper({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    // Znajdź HomePage w drzewie widgetów i pobierz historię
+    return StatisticsPageContent();
+  }
+}
+
+class StatisticsPageContent extends StatefulWidget {
+  const StatisticsPageContent({super.key});
+
+  @override
+  State<StatisticsPageContent> createState() => _StatisticsPageContentState();
+}
+
+class _StatisticsPageContentState extends State<StatisticsPageContent> {
+  List<SessionEntry> _history = [];
+  String _selectedPeriod = 'week';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadHistory();
+  }
+
+  Future<void> _loadHistory() async {
+    final prefs = await SharedPreferences.getInstance();
+    final encoded = prefs.getString('history');
+    if (encoded == null || encoded.isEmpty) return;
+    try {
+      final List<dynamic> decoded = jsonDecode(encoded);
+      setState(() {
+        _history.clear();
+        for (var item in decoded) {
+          _history.add(SessionEntry.fromJson(item as Map<String, dynamic>));
+        }
+      });
+    } catch (e) {
+      debugPrint('Błąd podczas ładowania historii: $e');
+    }
+  }
+
+  List<SessionEntry> get _filteredHistory {
+    final now = DateTime.now();
+
+    return _history.where((entry) {
+      switch (_selectedPeriod) {
+        case 'week':
+          final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
+          final weekStart = DateTime(startOfWeek.year, startOfWeek.month, startOfWeek.day);
+          final entryDay = DateTime(entry.start.year, entry.start.month, entry.start.day);
+          return !entryDay.isBefore(weekStart);
+
+        case 'month':
+          return entry.start.year == now.year && entry.start.month == now.month;
+
+        case '30days':
+          final thirtyDaysAgo = now.subtract(const Duration(days: 30));
+          return entry.start.isAfter(thirtyDaysAgo);
+
+        case 'all':
+        default:
+          return true;
+      }
+    }).toList();
+  }
+
+  Map<String, Duration> _getTotalByType() {
+    final map = <String, Duration>{};
+
+    for (final entry in _filteredHistory) {
+      final key = entry.type;
+      map[key] = (map[key] ?? Duration.zero) + entry.duration;
+    }
+
+    return map;
+  }
+
+  List<BarChartGroupData> _getBarChartData() {
+    final now = DateTime.now();
+    final last7Days = <DateTime>[];
+
+    for (int i = 6; i >= 0; i--) {
+      last7Days.add(DateTime(
+        now.year,
+        now.month,
+        now.day - i,
+      ));
+    }
+
+    final dataByDay = <DateTime, double>{};
+    for (final day in last7Days) {
+      dataByDay[day] = 0.0;
+    }
+
+    for (final entry in _filteredHistory) {
+      final entryDay = DateTime(
+        entry.start.year,
+        entry.start.month,
+        entry.start.day,
+      );
+
+      if (dataByDay.containsKey(entryDay)) {
+        dataByDay[entryDay] = dataByDay[entryDay]! + entry.duration.inMinutes / 60.0;
+      }
+    }
+
+    final barGroups = <BarChartGroupData>[];
+    for (int i = 0; i < last7Days.length; i++) {
+      final hours = dataByDay[last7Days[i]] ?? 0.0;
+      barGroups.add(
+        BarChartGroupData(
+          x: i,
+          barRods: [
+            BarChartRodData(
+              toY: hours,
+              color: Colors.indigo,
+              width: 16,
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(6),
+                topRight: Radius.circular(6),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return barGroups;
+  }
+
+  List<PieChartSectionData> _getPieChartData() {
+    final totalByType = _getTotalByType();
+    if (totalByType.isEmpty) return [];
+
+    final totalMinutes = totalByType.values
+        .fold<int>(0, (sum, duration) => sum + duration.inMinutes);
+
+    final colors = {
+      'nauka': Colors.blue,
+      'praca_platna': Colors.green,
+      'praca_nieplatna': Colors.orange,
+      'sport': Colors.red,
+      'czas_wolny': Colors.purple,
+    };
+
+    final sections = <PieChartSectionData>[];
+    int colorIndex = 0;
+
+    totalByType.forEach((type, duration) {
+      final percentage = (duration.inMinutes / totalMinutes * 100);
+      final color = colors[type] ?? Colors.primaries[colorIndex % Colors.primaries.length];
+      colorIndex++;
+
+      sections.add(
+        PieChartSectionData(
+          value: duration.inMinutes.toDouble(),
+          title: '${percentage.toStringAsFixed(0)}%',
+          color: color,
+          radius: 100,
+          titleStyle: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+      );
+    });
+
+    return sections;
+  }
+
+  String _formatDuration(Duration d) {
+    final hours = d.inHours;
+    final minutes = d.inMinutes.remainder(60);
+    return '${hours}h ${minutes}min';
+  }
+
+  String _typeLabel(String type) {
+    switch (type) {
+      case 'nauka':
+        return 'Nauka';
+      case 'praca_platna':
+        return 'Praca płatna';
+      case 'praca_nieplatna':
+        return 'Praca niepłatna';
+      case 'sport':
+        return 'Sport';
+      case 'czas_wolny':
+        return 'Czas wolny';
+      default:
+        return type;
+    }
+  }
+
+  Color _getColorForType(String type) {
+    switch (type) {
+      case 'nauka':
+        return Colors.blue;
+      case 'praca_platna':
+        return Colors.green;
+      case 'praca_nieplatna':
+        return Colors.orange;
+      case 'sport':
+        return Colors.red;
+      case 'czas_wolny':
+        return Colors.purple;
+      default:
+        return Colors.grey;
+    }
+  }
+
+  double _getMaxY(List<BarChartGroupData> data) {
+    if (data.isEmpty) return 10;
+    final maxValue = data
+        .map((group) => group.barRods.first.toY)
+        .reduce((a, b) => a > b ? a : b);
+    return (maxValue * 1.2).ceilToDouble();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final totalByType = _getTotalByType();
+    final totalTime = totalByType.values
+        .fold<Duration>(Duration.zero, (sum, duration) => sum + duration);
+
+    final pieData = _getPieChartData();
+    final barData = _getBarChartData();
+
+    String mostProductiveDay = '-';
+    if (_filteredHistory.isNotEmpty) {
+      final dayTotals = <DateTime, Duration>{};
+      for (final entry in _filteredHistory) {
+        final day = DateTime(entry.start.year, entry.start.month, entry.start.day);
+        dayTotals[day] = (dayTotals[day] ?? Duration.zero) + entry.duration;
+      }
+      if (dayTotals.isNotEmpty) {
+        final maxDay = dayTotals.entries.reduce((a, b) =>
+        a.value.inMinutes > b.value.inMinutes ? a : b);
+        mostProductiveDay = '${maxDay.key.day}.${maxDay.key.month}.${maxDay.key.year}';
+      }
+    }
+
+    final dayCount = _selectedPeriod == 'week' ? 7 :
+    _selectedPeriod == 'month' ? 30 :
+    _selectedPeriod == '30days' ? 30 :
+    1;
+    final avgPerDay = Duration(minutes: totalTime.inMinutes ~/ dayCount);
+
+    return Scaffold(
+      backgroundColor: Colors.grey[100],
+      appBar: AppBar(
+        title: const Text('Statystyki'),
+        centerTitle: true,
+      ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Filtry okresów
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    _buildPeriodChip('Ten tydzień', 'week'),
+                    const SizedBox(width: 8),
+                    _buildPeriodChip('Ten miesiąc', 'month'),
+                    const SizedBox(width: 8),
+                    _buildPeriodChip('Ostatnie 30 dni', '30days'),
+                    const SizedBox(width: 8),
+                    _buildPeriodChip('Wszystko', 'all'),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+
+              // Kluczowe statystyki
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildStatCard(
+                      'Suma czasu',
+                      _formatDuration(totalTime),
+                      Icons.timer,
+                      Colors.indigo,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _buildStatCard(
+                      'Sesji',
+                      '${_filteredHistory.length}',
+                      Icons.list_alt,
+                      Colors.green,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildStatCard(
+                      'Średnio/dzień',
+                      _formatDuration(avgPerDay),
+                      Icons.calendar_today,
+                      Colors.orange,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _buildStatCard(
+                      'Najlepszy dzień',
+                      mostProductiveDay,
+                      Icons.star,
+                      Colors.amber,
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 24),
+
+              // Wykres słupkowy
+              Card(
+                elevation: 2,
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Ostatnie 7 dni',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      SizedBox(
+                        height: 200,
+                        child: barData.isEmpty
+                            ? const Center(child: Text('Brak danych'))
+                            : BarChart(
+                          BarChartData(
+                            alignment: BarChartAlignment.spaceAround,
+                            maxY: _getMaxY(barData),
+                            barGroups: barData,
+                            titlesData: FlTitlesData(
+                              leftTitles: AxisTitles(
+                                sideTitles: SideTitles(
+                                  showTitles: true,
+                                  reservedSize: 30,
+                                  getTitlesWidget: (value, meta) {
+                                    return Text(
+                                      '${value.toInt()}h',
+                                      style: TextStyle(fontSize: 10),
+                                    );
+                                  },
+                                ),
+                              ),
+                              bottomTitles: AxisTitles(
+                                sideTitles: SideTitles(
+                                  showTitles: true,
+                                  getTitlesWidget: (value, meta) {
+                                    final now = DateTime.now();
+                                    final day = now.subtract(Duration(days: 6 - value.toInt()));
+                                    final weekdays = ['Pn', 'Wt', 'Śr', 'Cz', 'Pt', 'So', 'Nd'];
+                                    return Text(
+                                      weekdays[(day.weekday - 1) % 7],
+                                      style: TextStyle(fontSize: 10),
+                                    );
+                                  },
+                                ),
+                              ),
+                              rightTitles: const AxisTitles(
+                                sideTitles: SideTitles(showTitles: false),
+                              ),
+                              topTitles: const AxisTitles(
+                                sideTitles: SideTitles(showTitles: false),
+                              ),
+                            ),
+                            gridData: FlGridData(
+                              show: true,
+                              drawVerticalLine: false,
+                            ),
+                            borderData: FlBorderData(show: false),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 24),
+
+              // Wykres kołowy
+              Card(
+                elevation: 2,
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Podział czasu',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      if (pieData.isEmpty)
+                        const Center(
+                          child: Padding(
+                            padding: EdgeInsets.all(32),
+                            child: Text('Brak danych'),
+                          ),
+                        )
+                      else
+                        Row(
+                          children: [
+                            Expanded(
+                              flex: 2,
+                              child: SizedBox(
+                                height: 200,
+                                child: PieChart(
+                                  PieChartData(
+                                    sections: pieData,
+                                    centerSpaceRadius: 0,
+                                    sectionsSpace: 2,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              flex: 1,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: totalByType.entries.map((entry) {
+                                  final color = _getColorForType(entry.key);
+                                  return Padding(
+                                    padding: const EdgeInsets.symmetric(vertical: 4),
+                                    child: Row(
+                                      children: [
+                                        Container(
+                                          width: 16,
+                                          height: 16,
+                                          decoration: BoxDecoration(
+                                            color: color,
+                                            shape: BoxShape.circle,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: Text(
+                                            _typeLabel(entry.key),
+                                            style: TextStyle(fontSize: 12),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                }).toList(),
+                              ),
+                            ),
+                          ],
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 24),
+
+              // Szczegółowe podsumowanie
+              Card(
+                elevation: 2,
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Szczegółowe podsumowanie',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      if (totalByType.isEmpty)
+                        const Text('Brak danych')
+                      else
+                        ...totalByType.entries.map((entry) {
+                          final percentage = totalTime.inMinutes > 0
+                              ? (entry.value.inMinutes / totalTime.inMinutes * 100)
+                              : 0.0;
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      _typeLabel(entry.key),
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                    Text(
+                                      _formatDuration(entry.value),
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 4),
+                                LinearProgressIndicator(
+                                  value: percentage / 100,
+                                  backgroundColor: Colors.grey[200],
+                                  color: _getColorForType(entry.key),
+                                  minHeight: 8,
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  '${percentage.toStringAsFixed(1)}% całkowitego czasu',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey[600],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }),
+                    ],
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 24),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPeriodChip(String label, String value) {
+    final isSelected = _selectedPeriod == value;
+    return ChoiceChip(
+      label: Text(label),
+      selected: isSelected,
+      onSelected: (selected) {
+        if (selected) {
+          setState(() {
+            _selectedPeriod = value;
+          });
+        }
+      },
+      selectedColor: Colors.indigo,
+      labelStyle: TextStyle(
+        color: isSelected ? Colors.white : Colors.black,
+        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+      ),
+    );
+  }
+
+  Widget _buildStatCard(String label, String value, IconData icon, Color color) {
+    return Card(
+      elevation: 2,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(icon, color: color, size: 20),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey[600],
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              value,
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -141,6 +858,10 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final List<String> _customTypes = [];
+  // NOWE - Lista celów
+  final List<Goal> _goals = [];
+
+
   final List<String> _savedDescriptions = [];
 
   String? _backgroundImagePath;
@@ -179,6 +900,7 @@ class _HomePageState extends State<HomePage> {
     _loadIconColor();
     _loadSavedDescriptions();
     _loadCustomTypes();
+    _loadGoals(); // NOWE
     _loadActiveSession(); // NOWE - Wczytaj aktywną sesję jeśli była
 
     // Listenery dla focus
@@ -222,6 +944,214 @@ class _HomePageState extends State<HomePage> {
         .where((desc) => desc.toLowerCase().contains(_manualDescriptionController.text.toLowerCase()))
         .take(5)
         .toList();
+  }
+
+
+  // NOWE - Zarządzanie celami
+  Future<void> _loadGoals() async {
+    final prefs = await SharedPreferences.getInstance();
+    final encoded = prefs.getString('goals');
+    if (encoded == null || encoded.isEmpty) return;
+    try {
+      final List<dynamic> decoded = jsonDecode(encoded);
+      setState(() {
+        _goals.clear();
+        for (var item in decoded) {
+          _goals.add(Goal.fromJson(item as Map<String, dynamic>));
+        }
+      });
+    } catch (e) {
+      debugPrint('Błąd podczas ładowania celów: $e');
+    }
+  }
+
+  Future<void> _saveGoals() async {
+    final prefs = await SharedPreferences.getInstance();
+    final jsonList = _goals.map((e) => e.toJson()).toList();
+    final encoded = jsonEncode(jsonList);
+    await prefs.setString('goals', encoded);
+  }
+
+  void _addGoalDialog() async {
+    final loc = AppLocalizations.of(context)!;
+    final nameController = TextEditingController();
+    final hoursController = TextEditingController();
+    String selectedPeriod = 'week';
+    String? selectedType;
+
+    await showDialog(
+      context: context,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (ctx, setStateDialog) {
+            return AlertDialog(
+              title: Text(loc.translate('add_goal')),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextField(
+                      controller: nameController,
+                      decoration: InputDecoration(
+                        labelText: loc.translate('goal_name'),
+                        hintText: loc.translate('goal_name_hint'),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    TextField(
+                      controller: hoursController,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        labelText: loc.translate('goal_hours'),
+                        hintText: loc.translate('goal_hours_hint'),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Text(loc.translate('goal_period') + ': '),
+                        const SizedBox(width: 8),
+                        DropdownButton<String>(
+                          value: selectedPeriod,
+                          items: const [
+                            DropdownMenuItem(value: 'week', child: Text('Tydzień')),
+                            DropdownMenuItem(value: 'month', child: Text('Miesiąc')),
+                          ],
+                          onChanged: (value) {
+                            if (value != null) {
+                              setStateDialog(() {
+                                selectedPeriod = value;
+                              });
+                            }
+                          },
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Text(loc.translate('goal_type') + ': '),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: DropdownButton<String?>(
+                            value: selectedType,
+                            isExpanded: true,
+                            items: [
+                              const DropdownMenuItem(value: null, child: Text('Wszystkie')),
+                              const DropdownMenuItem(value: 'nauka', child: Text('Nauka')),
+                              const DropdownMenuItem(value: 'praca_platna', child: Text('Praca płatna')),
+                              const DropdownMenuItem(value: 'praca_nieplatna', child: Text('Praca niepłatna')),
+                              const DropdownMenuItem(value: 'sport', child: Text('Sport')),
+                              const DropdownMenuItem(value: 'czas_wolny', child: Text('Czas wolny')),
+                              ..._customTypes.map((type) => DropdownMenuItem(value: type, child: Text(type))),
+                            ],
+                            onChanged: (value) {
+                              setStateDialog(() {
+                                selectedType = value;
+                              });
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(ctx).pop(),
+                  child: Text(loc.translate('cancel_btn')),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    final name = nameController.text.trim();
+                    final hoursText = hoursController.text.trim();
+
+                    if (name.isEmpty || hoursText.isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(loc.translate('fill_all_fields'))),
+                      );
+                      return;
+                    }
+
+                    final hours = double.tryParse(hoursText);
+                    if (hours == null || hours <= 0) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(loc.translate('goal_invalid_hours'))),
+                      );
+                      return;
+                    }
+
+                    final newGoal = Goal(
+                      id: DateTime.now().millisecondsSinceEpoch.toString(),
+                      name: name,
+                      targetHours: hours,
+                      period: selectedPeriod,
+                      activityType: selectedType,
+                      createdAt: DateTime.now(),
+                    );
+
+                    setState(() {
+                      _goals.add(newGoal);
+                    });
+                    _saveGoals();
+
+                    Navigator.of(ctx).pop();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(loc.translate('goal_added'))),
+                    );
+                  },
+                  child: Text(loc.translate('add_btn')),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+
+    nameController.dispose();
+    hoursController.dispose();
+  }
+
+  void _deleteGoal(String goalId) {
+    final loc = AppLocalizations.of(context)!;
+    setState(() {
+      _goals.removeWhere((g) => g.id == goalId);
+    });
+    _saveGoals();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(loc.translate('goal_deleted'))),
+    );
+  }
+
+  double _calculateGoalProgress(Goal goal) {
+    final now = DateTime.now();
+    List<SessionEntry> relevantEntries = [];
+
+    for (final entry in _history) {
+      if (goal.activityType != null && entry.type != goal.activityType) {
+        continue;
+      }
+
+      if (goal.period == 'week') {
+        final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
+        final weekStart = DateTime(startOfWeek.year, startOfWeek.month, startOfWeek.day);
+        final entryDay = DateTime(entry.start.year, entry.start.month, entry.start.day);
+        if (entryDay.isBefore(weekStart)) continue;
+      } else if (goal.period == 'month') {
+        if (entry.start.year != now.year || entry.start.month != now.month) continue;
+      }
+
+      relevantEntries.add(entry);
+    }
+
+    final totalMinutes = relevantEntries.fold<int>(
+      0,
+          (sum, entry) => sum + entry.duration.inMinutes,
+    );
+    final totalHours = totalMinutes / 60.0;
+    return totalHours;
   }
 
   Future<void> _pickBackgroundImage() async {
@@ -1207,7 +2137,7 @@ class _HomePageState extends State<HomePage> {
                     const SizedBox(width: 12),
                     Text(
                       loc.translate('change_background'),
-                      style: const TextStyle(fontSize: 16),
+                      style: TextStyle(fontSize: 16),
                     ),
                   ],
                 ),
@@ -1220,7 +2150,7 @@ class _HomePageState extends State<HomePage> {
                     const SizedBox(width: 12),
                     Text(
                       loc.translate('remove_background'),
-                      style: const TextStyle(fontSize: 16),
+                      style: TextStyle(fontSize: 16),
                     ),
                   ],
                 ),
@@ -1234,7 +2164,7 @@ class _HomePageState extends State<HomePage> {
                     const SizedBox(width: 12),
                     Text(
                       loc.translate('icon_color_picker'),
-                      style: const TextStyle(fontSize: 16),
+                      style: TextStyle(fontSize: 16),
                     ),
                   ],
                 ),
@@ -1247,7 +2177,7 @@ class _HomePageState extends State<HomePage> {
                     const SizedBox(width: 12),
                     Text(
                       loc.translate('manage_custom_types'),
-                      style: const TextStyle(fontSize: 16),
+                      style: TextStyle(fontSize: 16),
                     ),
                   ],
                 ),
@@ -1327,7 +2257,7 @@ class _HomePageState extends State<HomePage> {
                         children: [
                           Text(
                             loc.translate('summary_title'),
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
                             ),
@@ -1349,12 +2279,184 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ),
 
+
+                  const SizedBox(height: 16),
+
+                  // SEKCJA CELÓW 🎯
+                  Card(
+                    color: Colors.indigo.shade50,
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Row(
+                                children: [
+                                  Icon(Icons.flag, color: Colors.indigo),
+                                  SizedBox(width: 8),
+                                  Text(
+                                    loc.translate('goals_title'),
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.indigo,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              ElevatedButton.icon(
+                                onPressed: _addGoalDialog,
+                                icon: const Icon(Icons.add, size: 18),
+                                label: Text(loc.translate('add_goal')),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.indigo,
+                                  foregroundColor: Colors.white,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          if (_goals.isEmpty)
+                            Center(
+                              child: Padding(
+                                padding: EdgeInsets.all(16),
+                                child: Text(
+                                  loc.translate('no_goals'),
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                              ),
+                            )
+                          else
+                            ..._goals.map((goal) {
+                              final progress = _calculateGoalProgress(goal);
+                              final percentage = (progress / goal.targetHours * 100).clamp(0, 100);
+                              final isCompleted = progress >= goal.targetHours;
+
+                              return Card(
+                                elevation: 2,
+                                margin: const EdgeInsets.only(bottom: 12),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(12),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  goal.name,
+                                                  style: TextStyle(
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                                const SizedBox(height: 4),
+                                                Text(
+                                                  '${goal.period == 'week' ? 'Tydzień' : 'Miesiąc'}'
+                                                      '${goal.activityType != null ? ' • ${_typeLabel(goal.activityType!, context)}' : ' • Wszystkie'}',
+                                                  style: TextStyle(
+                                                    fontSize: 12,
+                                                    color: Colors.grey[600],
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          IconButton(
+                                            icon: const Icon(Icons.delete, size: 20),
+                                            onPressed: () => _deleteGoal(goal.id),
+                                            color: Colors.red,
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 12),
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                            '${progress.toStringAsFixed(1)}h / ${goal.targetHours.toStringAsFixed(0)}h',
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                          Text(
+                                            '${percentage.toStringAsFixed(0)}%',
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.bold,
+                                              color: isCompleted ? Colors.green : Colors.indigo,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 8),
+                                      ClipRRect(
+                                        borderRadius: BorderRadius.circular(8),
+                                        child: LinearProgressIndicator(
+                                          value: percentage / 100,
+                                          minHeight: 10,
+                                          backgroundColor: Colors.grey[300],
+                                          valueColor: AlwaysStoppedAnimation<Color>(
+                                            isCompleted ? Colors.green : Colors.indigo,
+                                          ),
+                                        ),
+                                      ),
+                                      if (isCompleted)
+                                        Padding(
+                                          padding: const EdgeInsets.only(top: 8),
+                                          child: Row(
+                                            children: [
+                                              Icon(Icons.celebration, size: 16, color: Colors.green),
+                                              const SizedBox(width: 4),
+                                              Text(
+                                                loc.translate('goal_completed') + ' 🎉',
+                                                style: TextStyle(
+                                                  fontSize: 12,
+                                                  color: Colors.green,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        )
+                                      else
+                                        Padding(
+                                          padding: const EdgeInsets.only(top: 8),
+                                          child: Text(
+                                            'Jeszcze ${(goal.targetHours - progress).toStringAsFixed(1)}h do celu',
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              color: Colors.grey[600],
+                                            ),
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            }),
+                        ],
+                      ),
+                    ),
+                  ),
+
                   const Divider(height: 32),
 
                   // SEKCJA 1: START / STOP z AUTOCOMPLETE
                   Text(
                     loc.translate('start_stop_section'),
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),
 
@@ -1441,7 +2543,7 @@ class _HomePageState extends State<HomePage> {
                       '${loc.translate('running_since')}: '
                           '${_activeStartTime!.hour.toString().padLeft(2, '0')}:'
                           '${_activeStartTime!.minute.toString().padLeft(2, '0')}',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                       ),
@@ -1477,7 +2579,7 @@ class _HomePageState extends State<HomePage> {
                   // SEKCJA 2: DODAWANIE MANUALNE z AUTOCOMPLETE
                   Text(
                     loc.translate('add_manual'),
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),
 
@@ -1636,7 +2738,7 @@ class _HomePageState extends State<HomePage> {
                     children: [
                       Text(
                         '${loc.translate('history_title')} (${_rangeLabel(_selectedRange, context)})',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),

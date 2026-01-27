@@ -45,7 +45,7 @@ class AppLocalizations {
       'close': 'Zamknij',
       'close_btn': 'Zamknij',
 
-      // NOWE - START/STOP SECTION
+      // START/STOP SECTION
       'start_stop_section': 'Start / Stop',
       'running_since': 'Trwa od',
 
@@ -115,6 +115,26 @@ class AppLocalizations {
       'remove_background': 'Usuń tło',
       'icon_color_picker': 'Kolor ikon',
       'slide_to_change_color': 'Przesuń suwak aby zmienić kolor',
+
+      // NOWE - CELE 🎯
+      'goals_title': 'Moje Cele',
+      'add_goal': 'Dodaj cel',
+      'no_goals': 'Brak celów. Dodaj pierwszy cel!',
+      'goal_name': 'Nazwa celu',
+      'goal_name_hint': 'np. Nauka angielskiego',
+      'goal_hours': 'Cel w godzinach',
+      'goal_hours_hint': 'np. 10',
+      'goal_period': 'Okres',
+      'goal_week': 'Tydzień',
+      'goal_month': 'Miesiąc',
+      'goal_type': 'Typ',
+      'goal_all_types': 'Wszystkie',
+      'goal_added': 'Cel dodany!',
+      'goal_deleted': 'Cel usunięty',
+      'goal_completed': 'Cel osiągnięty! Świetna robota!',
+      'goal_remaining': 'Jeszcze {hours}h do celu',
+      'goal_progress': '{current}h / {target}h',
+      'goal_invalid_hours': 'Podaj prawidłową liczbę godzin',
     },
 
     'es': {
@@ -149,7 +169,7 @@ class AppLocalizations {
       'close': 'Cerrar',
       'close_btn': 'Cerrar',
 
-      // NOWE - START/STOP SECTION
+      // START/STOP SECTION
       'start_stop_section': 'Iniciar / Detener',
       'running_since': 'Ejecutando desde',
 
@@ -219,6 +239,26 @@ class AppLocalizations {
       'remove_background': 'Eliminar fondo',
       'icon_color_picker': 'Color de iconos',
       'slide_to_change_color': 'Desliza para cambiar el color',
+
+      // NOWE - CELE 🎯 (HISZPAŃSKI)
+      'goals_title': 'Mis Objetivos',
+      'add_goal': 'Añadir objetivo',
+      'no_goals': '¡Sin objetivos. Añade el primero!',
+      'goal_name': 'Nombre del objetivo',
+      'goal_name_hint': 'ej. Aprender inglés',
+      'goal_hours': 'Objetivo en horas',
+      'goal_hours_hint': 'ej. 10',
+      'goal_period': 'Período',
+      'goal_week': 'Semana',
+      'goal_month': 'Mes',
+      'goal_type': 'Tipo',
+      'goal_all_types': 'Todos',
+      'goal_added': '¡Objetivo añadido!',
+      'goal_deleted': 'Objetivo eliminado',
+      'goal_completed': '¡Objetivo alcanzado! ¡Excelente trabajo!',
+      'goal_remaining': 'Faltan {hours}h para el objetivo',
+      'goal_progress': '{current}h / {target}h',
+      'goal_invalid_hours': 'Ingresa un número válido de horas',
     },
   };
 

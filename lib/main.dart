@@ -423,6 +423,23 @@ class _StatisticsPageContentState extends State<StatisticsPageContent> {
       appBar: AppBar(
         title: const Text('Statystyki'),
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            tooltip: 'Odśwież',
+            onPressed: () {
+              setState(() {
+                _loadHistory();
+              });
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Statystyki odświeżone'),
+                  duration: Duration(seconds: 1),
+                ),
+              );
+            },
+          ),
+        ],
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -970,6 +987,8 @@ class _HomePageState extends State<HomePage> {
     final jsonList = _goals.map((e) => e.toJson()).toList();
     final encoded = jsonEncode(jsonList);
     await prefs.setString('goals', encoded);
+    // Auto-refresh - odświeża UI
+    setState(() {});
   }
 
   void _addGoalDialog() async {
@@ -1264,6 +1283,8 @@ class _HomePageState extends State<HomePage> {
     final jsonList = _history.map((e) => e.toJson()).toList();
     final encoded = jsonEncode(jsonList);
     await prefs.setString('history', encoded);
+    // Auto-refresh - odświeża statystyki
+    setState(() {});
   }
 
   Future<void> _loadHistory() async {
@@ -2195,58 +2216,7 @@ class _HomePageState extends State<HomePage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // FILTR OKRESU
-                  Wrap(
-                    spacing: 8,
-                    children: [
-                      ChoiceChip(
-                        label: Text(loc.translate('today')),
-                        selected: _selectedRange == 'dzisiaj',
-                        onSelected: (selected) {
-                          if (selected) {
-                            setState(() {
-                              _selectedRange = 'dzisiaj';
-                            });
-                          }
-                        },
-                      ),
-                      ChoiceChip(
-                        label: Text(loc.translate('this_week')),
-                        selected: _selectedRange == 'tydzien',
-                        onSelected: (selected) {
-                          if (selected) {
-                            setState(() {
-                              _selectedRange = 'tydzien';
-                            });
-                          }
-                        },
-                      ),
-                      ChoiceChip(
-                        label: Text(loc.translate('this_month')),
-                        selected: _selectedRange == 'miesiac',
-                        onSelected: (selected) {
-                          if (selected) {
-                            setState(() {
-                              _selectedRange = 'miesiac';
-                            });
-                          }
-                        },
-                      ),
-                      ChoiceChip(
-                        label: Text(loc.translate('all')),
-                        selected: _selectedRange == 'wszystko',
-                        onSelected: (selected) {
-                          if (selected) {
-                            setState(() {
-                              _selectedRange = 'wszystko';
-                            });
-                          }
-                        },
-                      ),
-                    ],
-                  ),
 
-                  const SizedBox(height: 16),
 
                   // PODSUMOWANIE
                   Card(
@@ -2760,6 +2730,65 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ],
                   ),
+
+                  const SizedBox(height: 12),
+                  // Filtry przeniesione tutaj
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      ChoiceChip(
+                        label: Text(loc.translate('today')),
+                        selected: _selectedRange == 'dzisiaj',
+                        selectedColor: Colors.indigo,
+                        onSelected: (selected) {
+                          if (selected) {
+                            setState(() {
+                              _selectedRange = 'dzisiaj';
+                            });
+                          }
+                        },
+                      ),
+                      ChoiceChip(
+                        label: Text(loc.translate('this_week')),
+                        selected: _selectedRange == 'tydzien',
+                        selectedColor: Colors.indigo,
+                        onSelected: (selected) {
+                          if (selected) {
+                            setState(() {
+                              _selectedRange = 'tydzien';
+                            });
+                          }
+                        },
+                      ),
+                      ChoiceChip(
+                        label: Text(loc.translate('this_month')),
+                        selected: _selectedRange == 'miesiac',
+                        selectedColor: Colors.indigo,
+                        onSelected: (selected) {
+                          if (selected) {
+                            setState(() {
+                              _selectedRange = 'miesiac';
+                            });
+                          }
+                        },
+                      ),
+                      ChoiceChip(
+                        label: Text(loc.translate('all')),
+                        selected: _selectedRange == 'wszystko',
+                        selectedColor: Colors.indigo,
+                        onSelected: (selected) {
+                          if (selected) {
+                            setState(() {
+                              _selectedRange = 'wszystko';
+                            });
+                          }
+                        },
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+
                   const SizedBox(height: 8),
                   TextField(
                     decoration: InputDecoration(

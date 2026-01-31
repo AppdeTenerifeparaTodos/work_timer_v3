@@ -1,0 +1,4 @@
+storePassword=Teneryfa2026
+keyPassword=Teneryfa2026
+keyAlias=upload
+storeFile=C:\\Users\\Administrator\\upload-keystore.jks

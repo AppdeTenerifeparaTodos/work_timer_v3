@@ -1929,27 +1929,46 @@ class _HomePageState extends State<HomePage> {
     }
 
     try {
+      // 1. Katalog dokumentów aplikacji (prywatny, ale stały)
       final dir = await getApplicationDocumentsDirectory();
-      final now = DateTime.now();
-      final filename =
-          'history_${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}_${now.hour}${now.minute}.json';
-      final file = File('${dir.path}/$filename');
 
+      // 2. Podkatalog na backupy
+      final backupDir = Directory('${dir.path}/WorkStudyTimer');
+      if (!await backupDir.exists()) {
+        await backupDir.create(recursive: true);
+      }
+
+      // 3. Jeden stały plik backup.json
+      final file = File('${backupDir.path}/backup.json');
+
+      // 4. JSON z całej historii
       final jsonList = _history.map((e) => e.toJson()).toList();
       final encoded = jsonEncode(jsonList);
+
+      // 5. Zapis do pliku
       await file.writeAsString(encoded);
 
       if (!mounted) return;
+
+      // 6. Komunikat dla użytkownika – gdzie jest plik
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('${loc.translate('export_success')}: ${file.path}')),
+        SnackBar(
+          content: Text(
+            '${loc.translate('export_success')}: ${file.path}',
+          ),
+          duration: const Duration(seconds: 5),
+        ),
       );
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('${loc.translate('export_error')}: $e')),
+        SnackBar(
+          content: Text('${loc.translate('export_error')}: $e'),
+        ),
       );
     }
   }
+
 
   Future<void> _importHistory() async {
     final loc = AppLocalizations.of(context)!;

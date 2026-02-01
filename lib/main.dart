@@ -7,6 +7,8 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'app_localizations.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:share_plus/share_plus.dart';
+
 
 void main() {
   runApp(const WorkStudyTimerApp());
@@ -1969,6 +1971,46 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  // NOWA FUNKCJA – najpierw zapisuje backup.json, potem otwiera okno udostępniania
+  Future<void> _shareHistoryBackup() async {
+    final loc = AppLocalizations.of(context)!;
+
+    if (_history.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(loc.translate('history_empty'))),
+      );
+      return;
+    }
+
+    try {
+      // 1. Najpierw zapisujemy backup tak jak w _exportHistory
+      final dir = await getApplicationDocumentsDirectory();
+      final backupDir = Directory('${dir.path}/WorkStudyTimer');
+      if (!await backupDir.exists()) {
+        await backupDir.create(recursive: true);
+      }
+      final file = File('${backupDir.path}/backup.json');
+
+      final jsonList = _history.map((e) => e.toJson()).toList();
+      final encoded = jsonEncode(jsonList);
+      await file.writeAsString(encoded);
+
+      if (!mounted) return;
+
+      // 2. Otwieramy systemowe okno „Udostępnij”
+      await Share.shareXFiles(
+        [XFile(file.path)],
+        text:
+        'Backup historii z aplikacji Work Study Timer. Zapisz ten plik w bezpiecznym miejscu.',
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('${loc.translate('export_error')}: $e')),
+      );
+    }
+  }
+
 
   Future<void> _importHistory() async {
     final loc = AppLocalizations.of(context)!;
@@ -2721,34 +2763,30 @@ class _HomePageState extends State<HomePage> {
 
                   const Divider(height: 32),
 
-                  // SEKCJA 3: HISTORIA
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(
-                        '${loc.translate('history_title')} (${_rangeLabel(_selectedRange, context)})',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
+                      // 1. Zapisz na telefonie
+                      IconButton(
+                        tooltip: loc.translate('export'), // np. „Eksport (telefon)”
+                        icon: const Icon(Icons.upload_file),
+                        onPressed: _exportHistory,
                       ),
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          IconButton(
-                            tooltip: loc.translate('export'),
-                            icon: const Icon(Icons.upload_file),
-                            onPressed: _exportHistory,
-                          ),
-                          IconButton(
-                            tooltip: loc.translate('import'),
-                            icon: const Icon(Icons.download),
-                            onPressed: _importHistory,
-                          ),
-                        ],
+                      // 2. Udostępnij (e‑mail, WhatsApp itd.)
+                      IconButton(
+                        tooltip: 'Udostępnij backup', // później możesz dodać do lokalizacji
+                        icon: const Icon(Icons.share),
+                        onPressed: _shareHistoryBackup,
+                      ),
+                      // 3. Import
+                      IconButton(
+                        tooltip: loc.translate('import'),
+                        icon: const Icon(Icons.download),
+                        onPressed: _importHistory,
                       ),
                     ],
                   ),
+
 
                   const SizedBox(height: 12),
                   // Filtry przeniesione tutaj

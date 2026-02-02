@@ -1,4 +1,5 @@
 package com.appdetenerife.worktimer
 
-class MainActivity {
-}
+import io.flutter.embedding.android.FlutterActivity
+
+class MainActivity : FlutterActivity()

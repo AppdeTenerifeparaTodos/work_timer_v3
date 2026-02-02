@@ -2,7 +2,10 @@ name: work_timer_v3
 description: "Track your time, achieve your goals. Productivity timer with statistics and goal tracking."
 publish_to: 'none'
 
-version: 1.0.0+1
+version: 1.0.6+6
+
+
+
 
 environment:
   sdk: ^3.10.7

@@ -8,6 +8,8 @@ import 'app_localizations.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:share_plus/share_plus.dart';
+import 'instructions_screen.dart';
+
 
 
 void main() {
@@ -2193,7 +2195,14 @@ class _HomePageState extends State<HomePage> {
               borderRadius: BorderRadius.circular(12),
             ),
             onSelected: (value) {
-              if (value == 'change_bg') {
+              if (value == 'instructions') {
+                // otwieramy ekran instrukcji
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => const InstructionsScreen(),
+                  ),
+                );
+              } else if (value == 'change_bg') {
                 _pickBackgroundImage();
               } else if (value == 'remove_bg') {
                 setState(() {
@@ -2210,6 +2219,7 @@ class _HomePageState extends State<HomePage> {
                 });
               }
             },
+
             itemBuilder: (context) => [
               PopupMenuItem(
                 value: 'change_bg',
@@ -2219,7 +2229,7 @@ class _HomePageState extends State<HomePage> {
                     const SizedBox(width: 12),
                     Text(
                       loc.translate('change_background'),
-                      style: TextStyle(fontSize: 16),
+                      style: const TextStyle(fontSize: 16),
                     ),
                   ],
                 ),
@@ -2232,7 +2242,7 @@ class _HomePageState extends State<HomePage> {
                     const SizedBox(width: 12),
                     Text(
                       loc.translate('remove_background'),
-                      style: TextStyle(fontSize: 16),
+                      style: const TextStyle(fontSize: 16),
                     ),
                   ],
                 ),
@@ -2246,7 +2256,7 @@ class _HomePageState extends State<HomePage> {
                     const SizedBox(width: 12),
                     Text(
                       loc.translate('icon_color_picker'),
-                      style: TextStyle(fontSize: 16),
+                      style: const TextStyle(fontSize: 16),
                     ),
                   ],
                 ),
@@ -2259,7 +2269,21 @@ class _HomePageState extends State<HomePage> {
                     const SizedBox(width: 12),
                     Text(
                       loc.translate('manage_custom_types'),
-                      style: TextStyle(fontSize: 16),
+                      style: const TextStyle(fontSize: 16),
+                    ),
+                  ],
+                ),
+              ),
+              // ⬇️ OSTATNIA POZYCJA – Instrukcja obsługi
+              PopupMenuItem(
+                value: 'instructions',
+                child: Row(
+                  children: [
+                    const Icon(Icons.help_outline, color: Colors.indigo),
+                    const SizedBox(width: 12),
+                    Text(
+                      AppLocalizations.of(context).translate('instructions_title'),
+                      style: const TextStyle(fontSize: 16),
                     ),
                   ],
                 ),

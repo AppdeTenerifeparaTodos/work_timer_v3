@@ -24,6 +24,31 @@ class AppLocalizations {
       'all': 'Wszystko',
       'search_hint': 'Szukaj po opisie (np. Margarita, Finca)',
 
+      // INSTRUKCJA OBSŁUGI
+      'instructions_title': 'Instrukcja obsługi',
+      'instructions_content':
+      'Work Study Timer pomaga śledzić czas nauki i pracy.\n\n'
+          '1. Start timera\n'
+          '• Na ekranie głównym kliknij przycisk START, aby rozpocząć sesję.\n'
+          '• Kliknij STOP, aby zakończyć – sesja zapisze się w historii.\n\n'
+          '2. Sesje ręczne\n'
+          '• Użyj przycisku dodawania sesji, aby wpisać czas ręcznie (np. gdy zapomniałeś włączyć timer).\n\n'
+          '3. Kategorie\n'
+          '• Wybierz typ aktywności (nauka, praca płatna, praca niepłatna, sport, czas wolny).\n'
+          '• Możesz tworzyć własne kategorie w ustawieniach.\n\n'
+          '4. Statystyki\n'
+          '• Zakładka Statystyki pokazuje wykres słupkowy z ostatnich 7 dni i wykres kołowy podziału czasu.\n\n'
+          '5. Cele\n'
+          '• Dodaj cele tygodniowe lub miesięczne (np. 10h nauki).\n'
+          '• Obserwuj pasek postępu dla każdego celu.\n\n'
+          '6. Eksport danych\n'
+          '• W zakładce Historia użyj opcji eksportu, aby zapisać dane do pliku JSON w pamięci telefonu.\n\n'
+          '7. Import danych\n'
+          '• Użyj opcji importu, aby wczytać wcześniej zapisany plik JSON.\n\n'
+          '8. Prywatność\n'
+          '• Wszystkie dane są zapisywane tylko lokalnie w pamięci urządzenia.',
+
+
       // TYPY
       'learning': 'Nauka',
       'paid_work': 'Praca płatna',
@@ -147,6 +172,34 @@ class AppLocalizations {
       'this_month': 'Este mes',
       'all': 'Todo',
       'search_hint': 'Buscar por descripción (p. ej. Margarita, Finca)',
+
+      // INSTRUCCIONES DE USO
+      'instructions_title': 'Instrucciones de uso',
+      'instructions_content':
+      'Work Study Timer te ayuda a seguir tu tiempo de estudio y trabajo.\n\n'
+          '1. Iniciar el temporizador\n'
+          '• En la pantalla principal pulsa START para comenzar una sesión.\n'
+          '• Pulsa STOP para terminarla: la sesión se guardará en el historial.\n\n'
+          '2. Sesiones manuales\n'
+          '• Usa el botón de añadir sesión para introducir el tiempo manualmente '
+          '(por ejemplo, si olvidaste iniciar el temporizador).\n\n'
+          '3. Categorías\n'
+          '• Elige el tipo de actividad (aprendizaje, trabajo remunerado, trabajo no remunerado, deporte, tiempo libre).\n'
+          '• Puedes crear tus propias categorías en los ajustes.\n\n'
+          '4. Estadísticas\n'
+          '• La pestaña de Estadísticas muestra un gráfico de barras con los últimos 7 días '
+          'y un gráfico circular con la distribución del tiempo.\n\n'
+          '5. Objetivos\n'
+          '• Añade objetivos semanales o mensuales (por ejemplo, 10 h de estudio).\n'
+          '• Sigue la barra de progreso para cada objetivo.\n\n'
+          '6. Exportar datos\n'
+          '• En la pestaña de Historial utiliza la opción de exportar para guardar los datos '
+          'en un archivo JSON en el dispositivo.\n\n'
+          '7. Importar datos\n'
+          '• Utiliza la opción de importar para cargar un archivo JSON guardado anteriormente.\n\n'
+          '8. Privacidad\n'
+          '• Todos los datos se guardan solo de forma local en tu dispositivo.',
+
 
       // TYPY
       'learning': 'Aprendizaje',

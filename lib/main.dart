@@ -1,3 +1,5 @@
+import 'dart:math';
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -145,6 +147,7 @@ class _MainTabScreenState extends State<MainTabScreen> {
             currentLocale: widget.currentLocale,
           ),
           StatisticsPageWrapper(),
+          GamesMenuPage(), // ← ZMIENIONE!
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
@@ -155,16 +158,634 @@ class _MainTabScreenState extends State<MainTabScreen> {
           });
         },
         selectedItemColor: Colors.indigo,
-        items: const [
+        items: [
           BottomNavigationBarItem(
             icon: Icon(Icons.timer),
             label: 'Timer',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.bar_chart),
-            label: 'Statystyki',
+            label: AppLocalizations.of(context)!.translate('summary_title'),
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.gamepad),
+            label: AppLocalizations.of(context)!.translate('games_tab'),
           ),
         ],
+      ),
+    );
+  }
+}
+
+// ========================================
+// 🎮 MEMORY GAME - NOWA GRA!
+// ========================================
+// 🎮 NOWA STRONA: MENU GIER
+// Wklej to PRZED klasą MemoryCard w main.dart
+
+class GamesMenuPage extends StatelessWidget {
+  const GamesMenuPage({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
+
+    return Scaffold(
+      backgroundColor: Colors.indigo.shade50,
+      appBar: AppBar(
+        title: Text(loc.translate('games_tab')),
+        centerTitle: true,
+        backgroundColor: Colors.indigo,
+        foregroundColor: Colors.white,
+      ),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Nagłówek
+              Text(
+                loc.translate('choose_game'),
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.indigo.shade900,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                loc.translate('games_subtitle'),
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey[600],
+                ),
+              ),
+              const SizedBox(height: 24),
+
+              // Lista gier
+              Expanded(
+                child: ListView(
+                  children: [
+                    // Memory Game
+                    _buildGameCard(
+                      context,
+                      icon: Icons.psychology,
+                      color: Colors.purple,
+                      title: loc.translate('memory_game_title'),
+                      description: loc.translate('memory_game_desc'),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const MemoryGamePage(),
+                          ),
+                        );
+                      },
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    // Snake - Coming Soon
+                    _buildGameCard(
+                      context,
+                      icon: Icons.casino,
+                      color: Colors.green,
+                      title: '🐍 Snake',
+                      description: loc.translate('coming_soon'),
+                      isLocked: true,
+                      onTap: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(loc.translate('coming_soon')),
+                            duration: Duration(seconds: 2),
+                          ),
+                        );
+                      },
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    // 2048 - Coming Soon
+                    _buildGameCard(
+                      context,
+                      icon: Icons.grid_4x4,
+                      color: Colors.orange,
+                      title: '🎯 2048',
+                      description: loc.translate('coming_soon'),
+                      isLocked: true,
+                      onTap: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(loc.translate('coming_soon')),
+                            duration: Duration(seconds: 2),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGameCard(
+      BuildContext context, {
+        required IconData icon,
+        required Color color,
+        required String title,
+        required String description,
+        required VoidCallback onTap,
+        bool isLocked = false,
+      }) {
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            gradient: LinearGradient(
+              colors: [
+                Colors.white,
+                color.withOpacity(0.1),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+          child: Row(
+            children: [
+              // Ikona
+              Container(
+                width: 60,
+                height: 60,
+                decoration: BoxDecoration(
+                  color: color.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  isLocked ? Icons.lock : icon,
+                  size: 32,
+                  color: color,
+                ),
+              ),
+
+              const SizedBox(width: 16),
+
+              // Tekst
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.indigo.shade900,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      description,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Strzałka
+              Icon(
+                Icons.arrow_forward_ios,
+                color: isLocked ? Colors.grey : Colors.indigo,
+                size: 20,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class MemoryCard {
+  final String emoji;
+  final int id;
+  bool isFlipped;
+  bool isMatched;
+
+  MemoryCard({
+    required this.emoji,
+    required this.id,
+    this.isFlipped = false,
+    this.isMatched = false,
+  });
+}
+
+class MemoryGamePage extends StatefulWidget {
+  const MemoryGamePage({super.key});
+
+  @override
+  State<MemoryGamePage> createState() => _MemoryGamePageState();
+}
+
+// 🎮 ZAMIEŃ CAŁĄ KLASĘ _MemoryGamePageState NA TEN KOD:
+
+class _MemoryGamePageState extends State<MemoryGamePage> {
+  List<MemoryCard> _cards = [];
+  List<int> _flippedIndices = [];
+
+  int _moves = 0;
+  int _seconds = 0;
+  Timer? _timer;
+  bool _gameStarted = false;
+  bool _gameWon = false;
+
+  int? _bestTime;
+  int? _bestMoves;
+
+  final List<String> _emojis = [
+    '🍎', '🍊', '🍋', '🍌',
+    '🍉', '🍇', '🍓', '🍒',
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadHighScores();
+    _initializeGame();
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _loadHighScores() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _bestTime = prefs.getInt('memory_game_best_time');
+      _bestMoves = prefs.getInt('memory_game_best_moves');
+    });
+  }
+
+  Future<void> _saveHighScores() async {
+    if (!_gameWon) return;
+
+    final prefs = await SharedPreferences.getInstance();
+
+    if (_bestTime == null || _seconds < _bestTime!) {
+      await prefs.setInt('memory_game_best_time', _seconds);
+      setState(() {
+        _bestTime = _seconds;
+      });
+    }
+
+    if (_bestMoves == null || _moves < _bestMoves!) {
+      await prefs.setInt('memory_game_best_moves', _moves);
+      setState(() {
+        _bestMoves = _moves;
+      });
+    }
+  }
+
+  void _initializeGame() {
+    _timer?.cancel();
+
+    final cards = <MemoryCard>[];
+    for (int i = 0; i < _emojis.length; i++) {
+      cards.add(MemoryCard(emoji: _emojis[i], id: i));
+      cards.add(MemoryCard(emoji: _emojis[i], id: i));
+    }
+
+    cards.shuffle(Random());
+
+    setState(() {
+      _cards = cards;
+      _flippedIndices.clear();
+      _moves = 0;
+      _seconds = 0;
+      _gameStarted = false;
+      _gameWon = false;
+    });
+  }
+
+  void _startTimer() {
+    if (_gameStarted) return;
+
+    _gameStarted = true;
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      setState(() {
+        _seconds++;
+      });
+    });
+  }
+
+  void _onCardTap(int index) {
+    if (_flippedIndices.length >= 2) return;
+    if (_cards[index].isFlipped || _cards[index].isMatched) return;
+    if (_gameWon) return;
+
+    if (!_gameStarted) {
+      _startTimer();
+    }
+
+    setState(() {
+      _cards[index].isFlipped = true;
+      _flippedIndices.add(index);
+    });
+
+    if (_flippedIndices.length == 2) {
+      _moves++;
+      _checkMatch();
+    }
+  }
+
+  void _checkMatch() {
+    final index1 = _flippedIndices[0];
+    final index2 = _flippedIndices[1];
+
+    final card1 = _cards[index1];
+    final card2 = _cards[index2];
+
+    if (card1.id == card2.id) {
+      setState(() {
+        card1.isMatched = true;
+        card2.isMatched = true;
+        _flippedIndices.clear();
+      });
+
+      if (_cards.every((card) => card.isMatched)) {
+        _timer?.cancel();
+        setState(() {
+          _gameWon = true;
+        });
+        _saveHighScores();
+        _showWinDialog();
+      }
+    } else {
+      Future.delayed(const Duration(milliseconds: 800), () {
+        if (mounted) {
+          setState(() {
+            card1.isFlipped = false;
+            card2.isFlipped = false;
+            _flippedIndices.clear();
+          });
+        }
+      });
+    }
+  }
+
+  void _showWinDialog() {
+    final loc = AppLocalizations.of(context)!;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) {
+        return AlertDialog(
+          title: Row(
+            children: [
+              const Icon(Icons.celebration, color: Colors.amber, size: 32),
+              const SizedBox(width: 8),
+              Text(loc.translate('congratulations')),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                loc.translate('game_completed'),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 16),
+              Text('⏱️ ${loc.translate('time')}: ${_formatTime(_seconds)}'),
+              Text('🎯 ${loc.translate('moves')}: $_moves'),
+              const SizedBox(height: 16),
+              if (_bestTime != null && _seconds == _bestTime!)
+                Text(
+                  loc.translate('new_time_record'),
+                  style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
+                ),
+              if (_bestMoves != null && _moves == _bestMoves!)
+                Text(
+                  loc.translate('new_moves_record'),
+                  style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
+                ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(ctx).pop();
+                _initializeGame();
+              },
+              child: Text(loc.translate('play_again')),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  String _formatTime(int seconds) {
+    final mins = seconds ~/ 60;
+    final secs = seconds % 60;
+    return '${mins}:${secs.toString().padLeft(2, '0')}';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
+
+    return Scaffold(
+      backgroundColor: Colors.indigo.shade50,
+      appBar: AppBar(
+        title: Text(loc.translate('memory_game_title')),
+        centerTitle: true,
+        backgroundColor: Colors.indigo,
+        foregroundColor: Colors.white,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: _initializeGame,
+            tooltip: loc.translate('new_game'),
+          ),
+        ],
+      ),
+      body: SafeArea(
+        child: Column(
+          children: [
+            // Statystyki
+            Container(
+              padding: const EdgeInsets.all(16),
+              color: Colors.white,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _buildStatBox('⏱️ ${loc.translate('time')}', _formatTime(_seconds)),
+                  _buildStatBox('🎯 ${loc.translate('moves')}', _moves.toString()),
+                  if (_bestTime != null)
+                    _buildStatBox('🏆 ${loc.translate('record')}', _formatTime(_bestTime!)),
+                ],
+              ),
+            ),
+
+            // Instrukcja
+            if (!_gameStarted)
+              Container(
+                margin: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.amber.shade100,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.amber.shade700, width: 2),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.info_outline, color: Colors.amber),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        loc.translate('game_instructions'),
+                        style: TextStyle(fontSize: 14),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+            // Plansza z kartami
+            Expanded(
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: GridView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 4,
+                      crossAxisSpacing: 8,
+                      mainAxisSpacing: 8,
+                      childAspectRatio: 0.75,
+                    ),
+                    itemCount: _cards.length,
+                    itemBuilder: (context, index) {
+                      final card = _cards[index];
+                      return _buildCard(card, index);
+                    },
+                  ),
+                ),
+              ),
+            ),
+
+            // High scores
+            if (_bestTime != null || _bestMoves != null)
+              Container(
+                padding: const EdgeInsets.all(16),
+                color: Colors.white,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      loc.translate('your_records'),
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    if (_bestTime != null)
+                      Text('${loc.translate('best_time')} ${_formatTime(_bestTime!)}'),
+                    if (_bestMoves != null)
+                      Text('${loc.translate('fewest_moves')} $_bestMoves'),
+                  ],
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatBox(String label, String value) {
+    return Column(
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            color: Colors.grey[600],
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: const TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Colors.indigo,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCard(MemoryCard card, int index) {
+    final isVisible = card.isFlipped || card.isMatched;
+
+    return GestureDetector(
+      onTap: () => _onCardTap(index),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        decoration: BoxDecoration(
+          color: isVisible
+              ? (card.isMatched ? Colors.green.shade100 : Colors.white)
+              : Colors.indigo,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: card.isMatched ? Colors.green : Colors.indigo.shade700,
+            width: card.isMatched ? 3 : 2,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.2),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Center(
+          child: isVisible
+              ? Text(
+            card.emoji,
+            style: const TextStyle(fontSize: 40),
+          )
+              : const Icon(
+            Icons.question_mark,
+            size: 40,
+            color: Colors.white,
+          ),
+        ),
       ),
     );
   }

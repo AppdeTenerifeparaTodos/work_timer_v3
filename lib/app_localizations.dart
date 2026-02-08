@@ -48,7 +48,6 @@ class AppLocalizations {
           '8. Prywatność\n'
           '• Wszystkie dane są zapisywane tylko lokalnie w pamięci urządzenia.',
 
-
       // TYPY
       'learning': 'Nauka',
       'paid_work': 'Praca płatna',
@@ -141,7 +140,7 @@ class AppLocalizations {
       'icon_color_picker': 'Kolor ikon',
       'slide_to_change_color': 'Przesuń suwak aby zmienić kolor',
 
-      // NOWE - CELE 🎯
+      // CELE 🎯
       'goals_title': 'Moje Cele',
       'add_goal': 'Dodaj cel',
       'no_goals': 'Brak celów. Dodaj pierwszy cel!',
@@ -160,6 +159,29 @@ class AppLocalizations {
       'goal_remaining': 'Jeszcze {hours}h do celu',
       'goal_progress': '{current}h / {target}h',
       'goal_invalid_hours': 'Podaj prawidłową liczbę godzin',
+
+      // 🎮 MEMORY GAME
+      'games_tab': 'Gry',
+      'memory_game_title': 'Memory Game',
+      'new_game': 'Nowa gra',
+      'time': 'Czas',
+      'moves': 'Ruchy',
+      'record': 'Rekord',
+      'congratulations': 'Gratulacje! 🎉',
+      'game_completed': 'Ukończyłeś grę!',
+      'new_time_record': '🏆 NOWY REKORD CZASU!',
+      'new_moves_record': '🏆 NOWY REKORD RUCHÓW!',
+      'play_again': 'Graj ponownie',
+      'game_instructions': 'Znajdź wszystkie pary! Kliknij kartę aby ją odkryć.',
+      'your_records': '🏆 Twoje rekordy:',
+      'best_time': 'Najlepszy czas:',
+      'fewest_moves': 'Najmniej ruchów:',
+
+      // 🎮 GAMES MENU
+      'choose_game': 'Wybierz grę',
+      'games_subtitle': 'Relaksuj się pomiędzy sesjami pracy',
+      'memory_game_desc': 'Znajdź wszystkie pary kart!',
+      'coming_soon': 'Wkrótce dostępne!',
     },
 
     'es': {
@@ -199,7 +221,6 @@ class AppLocalizations {
           '• Utiliza la opción de importar para cargar un archivo JSON guardado anteriormente.\n\n'
           '8. Privacidad\n'
           '• Todos los datos se guardan solo de forma local en tu dispositivo.',
-
 
       // TYPY
       'learning': 'Aprendizaje',
@@ -293,7 +314,7 @@ class AppLocalizations {
       'icon_color_picker': 'Color de iconos',
       'slide_to_change_color': 'Desliza para cambiar el color',
 
-      // NOWE - CELE 🎯 (HISZPAŃSKI)
+      // CELE 🎯
       'goals_title': 'Mis Objetivos',
       'add_goal': 'Añadir objetivo',
       'no_goals': '¡Sin objetivos. Añade el primero!',
@@ -312,6 +333,29 @@ class AppLocalizations {
       'goal_remaining': 'Faltan {hours}h para el objetivo',
       'goal_progress': '{current}h / {target}h',
       'goal_invalid_hours': 'Ingresa un número válido de horas',
+
+      // 🎮 MEMORY GAME
+      'games_tab': 'Juegos',
+      'memory_game_title': 'Juego de Memoria',
+      'new_game': 'Nuevo juego',
+      'time': 'Tiempo',
+      'moves': 'Movimientos',
+      'record': 'Récord',
+      'congratulations': '¡Felicitaciones! 🎉',
+      'game_completed': '¡Has completado el juego!',
+      'new_time_record': '🏆 ¡NUEVO RÉCORD DE TIEMPO!',
+      'new_moves_record': '¡NUEVO RÉCORD DE MOVIMIENTOS!',
+      'play_again': 'Jugar de nuevo',
+      'game_instructions': '¡Encuentra todos los pares! Toca una carta para revelarla.',
+      'your_records': '🏆 Tus récords:',
+      'best_time': 'Mejor tiempo:',
+      'fewest_moves': 'Menos movimientos:',
+
+      // 🎮 GAMES MENU
+      'choose_game': 'Elige un juego',
+      'games_subtitle': 'Relájate entre sesiones de trabajo',
+      'memory_game_desc': '¡Encuentra todos los pares de cartas!',
+      'coming_soon': '¡Próximamente!',
     },
   };
 
@@ -322,7 +366,6 @@ class AppLocalizations {
   }
 }
 
-// Delegate – bez zmian dla Ciebie, po prostu skopiuj
 class _AppLocalizationsDelegate
     extends LocalizationsDelegate<AppLocalizations> {
   const _AppLocalizationsDelegate();

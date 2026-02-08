@@ -182,6 +182,16 @@ class AppLocalizations {
       'games_subtitle': 'Relaksuj się pomiędzy sesjami pracy',
       'memory_game_desc': 'Znajdź wszystkie pary kart!',
       'coming_soon': 'Wkrótce dostępne!',
+
+      // 🎮 MEMORY LEVELS
+      'memory_level_easy': 'Łatwy (4x3, 6 par)',
+      'memory_level_medium': 'Średni (4x4, 8 par)',
+      'memory_level_hard': 'Trudny (4x5, 10 par)',
+      'memory_level_advanced': 'Zaawansowany (4x6, 12 par)',
+      'memory_level_expert': 'Ekspert (5x6, 15 par)',
+      'memory_choose_level': 'Wybierz poziom',
+      'memory_locked': 'Poziom zablokowany. Najpierw ukończ poprzedni.',
+
     },
 
     'es': {
@@ -356,6 +366,16 @@ class AppLocalizations {
       'games_subtitle': 'Relájate entre sesiones de trabajo',
       'memory_game_desc': '¡Encuentra todos los pares de cartas!',
       'coming_soon': '¡Próximamente!',
+
+      // 🎮 MEMORY LEVELS
+      'memory_level_easy': 'Fácil (4x3, 6 pares)',
+      'memory_level_medium': 'Medio (4x4, 8 pares)',
+      'memory_level_hard': 'Difícil (4x5, 10 pares)',
+      'memory_level_advanced': 'Avanzado (4x6, 12 pares)',
+      'memory_level_expert': 'Experto (5x6, 15 pares)',
+      'memory_choose_level': 'Elige la dificultad',
+      'memory_locked': 'Nivel bloqueado. Primero completa el anterior.',
+
     },
   };
 

@@ -177,6 +177,32 @@ class _MainTabScreenState extends State<MainTabScreen> {
   }
 }
 
+// Poziomy trudności dla gry memory
+enum MemoryDifficulty {
+  easy,       // poziom 1
+  medium,     // poziom 2
+  hard,       // poziom 3
+  advanced,   // poziom 4
+  expert,     // poziom 5
+}
+
+// Zamiana trudności na numer poziomu (1–5)
+int difficultyToLevel(MemoryDifficulty d) {
+  switch (d) {
+    case MemoryDifficulty.easy:
+      return 1;
+    case MemoryDifficulty.medium:
+      return 2;
+    case MemoryDifficulty.hard:
+      return 3;
+    case MemoryDifficulty.advanced:
+      return 4;
+    case MemoryDifficulty.expert:
+      return 5;
+  }
+}
+
+
 // ========================================
 // 🎮 MEMORY GAME - NOWA GRA!
 // ========================================
@@ -238,10 +264,11 @@ class GamesMenuPage extends StatelessWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => const MemoryGamePage(),
+                            builder: (_) => const MemoryLevelsPage(),
                           ),
                         );
                       },
+
                     ),
 
                     const SizedBox(height: 16),
@@ -381,6 +408,158 @@ class GamesMenuPage extends StatelessWidget {
   }
 }
 
+// Ekran wyboru poziomu Memory
+class MemoryLevelsPage extends StatefulWidget {
+  const MemoryLevelsPage({super.key});
+
+  @override
+  State<MemoryLevelsPage> createState() => _MemoryLevelsPageState();
+}
+
+class _MemoryLevelsPageState extends State<MemoryLevelsPage> {
+  int _maxUnlockedLevel = 1; // na początku tylko łatwy
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProgress();
+  }
+
+  Future<void> _loadProgress() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _maxUnlockedLevel = prefs.getInt('memory_max_level') ?? 1;
+    });
+  }
+
+  Future<void> _saveProgress(int newLevel) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('memory_max_level', newLevel);
+  }
+
+  void _openLevel(MemoryDifficulty difficulty) {
+    final loc = AppLocalizations.of(context)!;
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => MemoryGamePage(
+          difficulty: difficulty,
+          onLevelCompleted: () {
+            final level = difficultyToLevel(difficulty);
+            if (level >= _maxUnlockedLevel && level < 5) {
+              final nextLevel = level + 1;
+              setState(() {
+                _maxUnlockedLevel = nextLevel;
+              });
+              _saveProgress(nextLevel);
+
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(loc.translate('congratulations')),
+                  duration: const Duration(seconds: 2),
+                ),
+              );
+            }
+          },
+        ),
+      ),
+    );
+  }
+
+  bool _isLocked(MemoryDifficulty difficulty) {
+    final level = difficultyToLevel(difficulty);
+    return level > _maxUnlockedLevel;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
+
+    return Scaffold(
+      backgroundColor: Colors.indigo.shade50,
+      appBar: AppBar(
+        title: Text(loc.translate('memory_choose_level')),
+        centerTitle: true,
+        backgroundColor: Colors.indigo,
+        foregroundColor: Colors.white,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            tooltip: 'Reset poziomów',
+            onPressed: () async {
+              final prefs = await SharedPreferences.getInstance();
+              await prefs.remove('memory_max_level_v2'); // ten sam klucz co w _loadProgress/_saveProgress
+              setState(() {
+                _maxUnlockedLevel = 1;
+              });
+
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Postęp poziomów zresetowany'),
+                  duration: Duration(seconds: 2),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          _buildLevelTile(
+            title: loc.translate('memory_level_easy'),
+            difficulty: MemoryDifficulty.easy,
+          ),
+          _buildLevelTile(
+            title: loc.translate('memory_level_medium'),
+            difficulty: MemoryDifficulty.medium,
+          ),
+          _buildLevelTile(
+            title: loc.translate('memory_level_hard'),
+            difficulty: MemoryDifficulty.hard,
+          ),
+          _buildLevelTile(
+            title: loc.translate('memory_level_advanced'),
+            difficulty: MemoryDifficulty.advanced,
+          ),
+          _buildLevelTile(
+            title: loc.translate('memory_level_expert'),
+            difficulty: MemoryDifficulty.expert,
+          ),
+        ],
+      ),
+    );
+  }
+
+
+  Widget _buildLevelTile({
+    required String title,
+    required MemoryDifficulty difficulty,
+  }) {
+    final loc = AppLocalizations.of(context)!;
+    final isLocked = _isLocked(difficulty);
+
+    return Card(
+      child: ListTile(
+        leading: Icon(
+          isLocked ? Icons.lock : Icons.lock_open,
+          color: isLocked ? Colors.grey : Colors.indigo,
+        ),
+        title: Text(title),
+        subtitle: isLocked
+            ? Text(
+          loc.translate('memory_locked'),
+          style: const TextStyle(fontSize: 12),
+        )
+            : null,
+        onTap: isLocked ? null : () => _openLevel(difficulty),
+      ),
+    );
+  }
+}
+
+
 class MemoryCard {
   final String emoji;
   final int id;
@@ -396,11 +575,19 @@ class MemoryCard {
 }
 
 class MemoryGamePage extends StatefulWidget {
-  const MemoryGamePage({super.key});
+  final MemoryDifficulty difficulty;     // NOWE
+  final VoidCallback? onLevelCompleted;  // NOWE
+
+  const MemoryGamePage({
+    super.key,
+    this.difficulty = MemoryDifficulty.easy, // domyślnie łatwy
+    this.onLevelCompleted,
+  });
 
   @override
   State<MemoryGamePage> createState() => _MemoryGamePageState();
 }
+
 
 // 🎮 ZAMIEŃ CAŁĄ KLASĘ _MemoryGamePageState NA TEN KOD:
 
@@ -421,6 +608,23 @@ class _MemoryGamePageState extends State<MemoryGamePage> {
     '🍎', '🍊', '🍋', '🍌',
     '🍉', '🍇', '🍓', '🍒',
   ];
+
+  // Ile par kart ma być dla danego poziomu trudności
+  int _pairsForDifficulty() {
+    switch (widget.difficulty) {
+      case MemoryDifficulty.easy:
+        return 6;  // 6 par → 12 kart
+      case MemoryDifficulty.medium:
+        return 8;
+      case MemoryDifficulty.hard:
+        return 10;
+      case MemoryDifficulty.advanced:
+        return 12;
+      case MemoryDifficulty.expert:
+        return 15;
+    }
+  }
+
 
   @override
   void initState() {
@@ -467,9 +671,16 @@ class _MemoryGamePageState extends State<MemoryGamePage> {
     _timer?.cancel();
 
     final cards = <MemoryCard>[];
-    for (int i = 0; i < _emojis.length; i++) {
-      cards.add(MemoryCard(emoji: _emojis[i], id: i));
-      cards.add(MemoryCard(emoji: _emojis[i], id: i));
+
+    // ile par ma być na tym poziomie
+    final pairsCount = _pairsForDifficulty();
+
+    // bierzemy tylko pierwsze N emoji z listy
+    final availableEmojis = _emojis.take(pairsCount).toList();
+
+    for (int i = 0; i < availableEmojis.length; i++) {
+      cards.add(MemoryCard(emoji: availableEmojis[i], id: i));
+      cards.add(MemoryCard(emoji: availableEmojis[i], id: i));
     }
 
     cards.shuffle(Random());
@@ -483,6 +694,7 @@ class _MemoryGamePageState extends State<MemoryGamePage> {
       _gameWon = false;
     });
   }
+
 
   void _startTimer() {
     if (_gameStarted) return;
@@ -535,8 +747,13 @@ class _MemoryGamePageState extends State<MemoryGamePage> {
           _gameWon = true;
         });
         _saveHighScores();
+
+        // powiadomienie menu poziomów, że level ukończony
+        widget.onLevelCompleted?.call();
+
         _showWinDialog();
       }
+
     } else {
       Future.delayed(const Duration(milliseconds: 800), () {
         if (mounted) {

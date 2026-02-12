@@ -34,12 +34,12 @@ class AppLocalizations {
           '2. Sesje ręczne\n'
           '• Użyj przycisku dodawania sesji, aby wpisać czas ręcznie (np. gdy zapomniałeś włączyć timer).\n\n'
           '3. Kategorie\n'
-          '• Wybierz typ aktywności (nauka, praca płatna, praca niepłatna, sport, czas wolny).\n'
-          '• Możesz tworzyć własne kategorie w ustawieniach.\n\n'
+          '• Masz 3 podstawowe kategorie: Praca, Sport, Czas wolny.\n'
+          '• Możesz tworzyć własne kategorie bezpośrednio z listy wyboru.\n\n'
           '4. Statystyki\n'
           '• Zakładka Statystyki pokazuje wykres słupkowy z ostatnich 7 dni i wykres kołowy podziału czasu.\n\n'
           '5. Cele\n'
-          '• Dodaj cele tygodniowe lub miesięczne (np. 10h nauki).\n'
+          '• Dodaj cele tygodniowe lub miesięczne (np. 10h pracy).\n'
           '• Obserwuj pasek postępu dla każdego celu.\n\n'
           '6. Eksport danych\n'
           '• W zakładce Historia użyj opcji eksportu, aby zapisać dane do pliku JSON w pamięci telefonu.\n\n'
@@ -48,13 +48,24 @@ class AppLocalizations {
           '8. Prywatność\n'
           '• Wszystkie dane są zapisywane tylko lokalnie w pamięci urządzenia.',
 
-      // TYPY
-      'learning': 'Nauka',
-      'paid_work': 'Praca płatna',
-      'unpaid_work': 'Praca niepłatna',
+      // TYPY - NOWE (tylko 3 podstawowe)
+      'work': 'Praca',
       'sport': 'Sport',
       'free_time': 'Czas wolny',
       'type': 'Typ',
+
+      // ZARZĄDZANIE TYPAMI
+      'add_new_type': 'Dodaj nowy typ',
+      'add_custom_type_title': 'Dodaj nowy typ aktywności',
+      'custom_type_hint': 'Nazwa nowej aktywności (np. Nauka, Gitara)',
+      'manage_custom_types': 'Zarządzaj typami',
+      'no_custom_types': 'Brak własnych typów.',
+      'type_name_label': 'Nazwa typu',
+      'type_exists': 'Ten typ już istnieje',
+      'type_added': 'Typ dodany',
+      'type_deleted': 'Typ usunięty',
+      'delete_type': 'Usuń typ',
+      'cannot_delete_default': 'Nie można usunąć domyślnego typu',
 
       // SZYBKI TIMER
       'quick_timer': 'Szybki timer',
@@ -62,10 +73,6 @@ class AppLocalizations {
       'start_btn': 'Start',
       'stop_btn': 'Stop',
       'no_active': 'Brak aktywnej sesji.',
-      'add_custom_type_title': 'Dodaj nowy typ aktywności',
-      'custom_type_hint': 'Nazwa nowej aktywności (np. Gitara)',
-      'manage_custom_types': 'Zarządzaj typami',
-      'no_custom_types': 'Brak własnych typów.',
       'close': 'Zamknij',
       'close_btn': 'Zamknij',
 
@@ -116,12 +123,6 @@ class AppLocalizations {
       'field_mode': 'Tryb: ',
       'session_deleted': 'Sesja usunięta',
       'session_updated': 'Sesja zaktualizowana',
-
-      // TYPY WŁASNE
-      'type_name_label': 'Nazwa typu',
-      'type_exists': 'Ten typ już istnieje',
-      'type_added': 'Typ dodany',
-      'type_deleted': 'Typ usunięty',
 
       // BACKUP/IMPORT/EXPORT
       'export_ok': 'Eksport OK: ',
@@ -191,7 +192,6 @@ class AppLocalizations {
       'memory_level_expert': 'Ekspert (5x6, 15 par)',
       'memory_choose_level': 'Wybierz poziom',
       'memory_locked': 'Poziom zablokowany. Najpierw ukończ poprzedni.',
-
     },
 
     'es': {
@@ -216,13 +216,13 @@ class AppLocalizations {
           '• Usa el botón de añadir sesión para introducir el tiempo manualmente '
           '(por ejemplo, si olvidaste iniciar el temporizador).\n\n'
           '3. Categorías\n'
-          '• Elige el tipo de actividad (aprendizaje, trabajo remunerado, trabajo no remunerado, deporte, tiempo libre).\n'
-          '• Puedes crear tus propias categorías en los ajustes.\n\n'
+          '• Tienes 3 categorías básicas: Trabajo, Deporte, Tiempo libre.\n'
+          '• Puedes crear tus propias categorías directamente desde la lista de selección.\n\n'
           '4. Estadísticas\n'
           '• La pestaña de Estadísticas muestra un gráfico de barras con los últimos 7 días '
           'y un gráfico circular con la distribución del tiempo.\n\n'
           '5. Objetivos\n'
-          '• Añade objetivos semanales o mensuales (por ejemplo, 10 h de estudio).\n'
+          '• Añade objetivos semanales o mensuales (por ejemplo, 10 h de trabajo).\n'
           '• Sigue la barra de progreso para cada objetivo.\n\n'
           '6. Exportar datos\n'
           '• En la pestaña de Historial utiliza la opción de exportar para guardar los datos '
@@ -232,13 +232,24 @@ class AppLocalizations {
           '8. Privacidad\n'
           '• Todos los datos se guardan solo de forma local en tu dispositivo.',
 
-      // TYPY
-      'learning': 'Aprendizaje',
-      'paid_work': 'Trabajo pagado',
-      'unpaid_work': 'Trabajo no pagado',
+      // TYPY - NOWE (tylko 3 podstawowe)
+      'work': 'Trabajo',
       'sport': 'Deporte',
       'free_time': 'Tiempo libre',
       'type': 'Tipo',
+
+      // ZARZĄDZANIE TYPAMI
+      'add_new_type': 'Añadir nuevo tipo',
+      'add_custom_type_title': 'Añadir nuevo tipo de actividad',
+      'custom_type_hint': 'Nombre de la nueva actividad (p. ej. Estudio, Guitarra)',
+      'manage_custom_types': 'Gestionar tipos',
+      'no_custom_types': 'Sin tipos personalizados.',
+      'type_name_label': 'Nombre del tipo',
+      'type_exists': 'Este tipo ya existe',
+      'type_added': 'Tipo añadido',
+      'type_deleted': 'Tipo eliminado',
+      'delete_type': 'Eliminar tipo',
+      'cannot_delete_default': 'No se puede eliminar el tipo predeterminado',
 
       // SZYBKI TIMER
       'quick_timer': 'Temporizador rápido',
@@ -246,10 +257,6 @@ class AppLocalizations {
       'start_btn': 'Iniciar',
       'stop_btn': 'Detener',
       'no_active': 'Sin sesión activa.',
-      'add_custom_type_title': 'Añadir nuevo tipo de actividad',
-      'custom_type_hint': 'Nombre de la nueva actividad (p. ej. Guitarra)',
-      'manage_custom_types': 'Gestionar tipos',
-      'no_custom_types': 'Sin tipos personalizados.',
       'close': 'Cerrar',
       'close_btn': 'Cerrar',
 
@@ -301,12 +308,6 @@ class AppLocalizations {
       'session_deleted': 'Sesión eliminada',
       'session_updated': 'Sesión actualizada',
 
-      // TYPY WŁASNE
-      'type_name_label': 'Nombre del tipo',
-      'type_exists': 'Este tipo ya existe',
-      'type_added': 'Tipo añadido',
-      'type_deleted': 'Tipo eliminado',
-
       // BACKUP/IMPORT/EXPORT
       'export_ok': 'Exportado OK: ',
       'export_error': 'Error de exportación: ',
@@ -353,7 +354,7 @@ class AppLocalizations {
       'record': 'Récord',
       'congratulations': '¡Felicitaciones! 🎉',
       'game_completed': '¡Has completado el juego!',
-      'new_time_record': '🏆 ¡NUEVO RÉCORD DE TIEMPO!',
+      'new_time_record': '¡NUEVO RÉCORD DE TIEMPO!',
       'new_moves_record': '¡NUEVO RÉCORD DE MOVIMIENTOS!',
       'play_again': 'Jugar de nuevo',
       'game_instructions': '¡Encuentra todos los pares! Toca una carta para revelarla.',
@@ -375,7 +376,6 @@ class AppLocalizations {
       'memory_level_expert': 'Experto (5x6, 15 pares)',
       'memory_choose_level': 'Elige la dificultad',
       'memory_locked': 'Nivel bloqueado. Primero completa el anterior.',
-
     },
   };
 

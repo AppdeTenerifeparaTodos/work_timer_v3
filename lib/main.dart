@@ -1208,18 +1208,17 @@ class _StatisticsPageContentState extends State<StatisticsPageContent> {
 
   Color _getColorForType(String type) {
     switch (type) {
-      case 'nauka':
-        return Colors.blue;
-      case 'praca_platna':
-        return Colors.green;
-      case 'praca_nieplatna':
-        return Colors.orange;
+      case 'praca':
+        return Colors.indigo;
       case 'sport':
         return Colors.red;
       case 'czas_wolny':
         return Colors.purple;
       default:
-        return Colors.grey;
+      // Własne typy - generuj kolor z nazwy
+        final hash = type.hashCode;
+        final hue = (hash % 360).toDouble();
+        return HSVColor.fromAHSV(1.0, hue, 0.7, 0.8).toColor();
     }
   }
 
@@ -1730,14 +1729,14 @@ class _HomePageState extends State<HomePage> {
 
   DateTime? _activeStartTime;
   String _activeDescription = '';
-  String _activeType = 'nauka';
+  String _activeType = 'praca';
 
   final List<SessionEntry> _history = [];
 
   final TextEditingController _manualDescriptionController = TextEditingController();
   final TextEditingController _manualStartController = TextEditingController();
   final TextEditingController _manualEndController = TextEditingController();
-  String _manualType = 'nauka';
+  String _manualType = 'praca';
 
   DateTime _manualDate = DateTime.now();
 
@@ -1898,12 +1897,10 @@ class _HomePageState extends State<HomePage> {
                             value: selectedType,
                             isExpanded: true,
                             items: [
-                              const DropdownMenuItem(value: null, child: Text('Wszystkie')),
-                              const DropdownMenuItem(value: 'nauka', child: Text('Nauka')),
-                              const DropdownMenuItem(value: 'praca_platna', child: Text('Praca płatna')),
-                              const DropdownMenuItem(value: 'praca_nieplatna', child: Text('Praca niepłatna')),
-                              const DropdownMenuItem(value: 'sport', child: Text('Sport')),
-                              const DropdownMenuItem(value: 'czas_wolny', child: Text('Czas wolny')),
+                              DropdownMenuItem(value: null, child: Text(loc.translate('goal_all_types'))),
+                              DropdownMenuItem(value: 'praca', child: Text(loc.translate('work'))),
+                              DropdownMenuItem(value: 'sport', child: Text(loc.translate('sport'))),
+                              DropdownMenuItem(value: 'czas_wolny', child: Text(loc.translate('free_time'))),
                               ..._customTypes.map((type) => DropdownMenuItem(value: type, child: Text(type))),
                             ],
                             onChanged: (value) {
@@ -2197,7 +2194,7 @@ class _HomePageState extends State<HomePage> {
       try {
         final start = DateTime.parse(startString);
         final description = prefs.getString('active_session_description') ?? '';
-        final type = prefs.getString('active_session_type') ?? 'nauka';
+        final type = prefs.getString('active_session_type') ?? 'praca';
 
         setState(() {
           _activeStartTime = start;
@@ -2546,152 +2543,176 @@ class _HomePageState extends State<HomePage> {
   }) {
     final loc = AppLocalizations.of(context)!;
 
-    final defaultTypes = [
-      'nauka',
-      'praca_platna',
-      'praca_nieplatna',
-      'sport',
-      'czas_wolny',
-    ];
+    return InkWell(
+      onTap: () async {
+        // Pokaż dialog wyboru typu z zarządzaniem
+        final selected = await showDialog<String>(
+          context: context,
+          builder: (ctx) {
+            return StatefulBuilder(
+              builder: (ctx, setStateDialog) {
+                return AlertDialog(
+                  title: Text(loc.translate('type')),
+                  content: SizedBox(
+                    width: double.maxFinite,
+                    child: ListView(
+                      shrinkWrap: true,
+                      children: [
+                        // 3 domyślne typy
+                        _buildTypeOption(ctx, 'praca', loc.translate('work'), false),
+                        _buildTypeOption(ctx, 'sport', loc.translate('sport'), false),
+                        _buildTypeOption(ctx, 'czas_wolny', loc.translate('free_time'), false),
 
-    final items = <DropdownMenuItem<String>>[];
+                        const Divider(height: 32),
 
-    for (final t in defaultTypes) {
-      items.add(DropdownMenuItem(
-        value: t,
-        child: Text(_typeLabel(t, context)),
-      ));
-    }
+                        // Własne typy z przyciskiem usuń
+                        ..._customTypes.map((customType) {
+                          return ListTile(
+                            title: Text(customType),
+                            trailing: IconButton(
+                              icon: const Icon(Icons.delete, color: Colors.red),
+                              onPressed: () {
+                                setStateDialog(() {
+                                  _customTypes.remove(customType);
+                                });
+                                setState(() {});
+                                _saveCustomTypes();
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text(loc.translate('type_deleted'))),
+                                );
+                              },
+                            ),
+                            onTap: () => Navigator.of(ctx).pop(customType),
+                          );
+                        }),
 
-    for (final customType in _customTypes) {
-      items.add(DropdownMenuItem(
-        value: customType,
-        child: Text(customType),
-      ));
-    }
+                        const Divider(height: 32),
 
-    return DropdownButton<String>(
-      value: items.any((item) => item.value == value) ? value : 'nauka',
-      items: items,
-      onChanged: onChanged,
-    );
-  }
+                        // Dodaj nowy typ
+                        ListTile(
+                          leading: null,  // ← USUŃ IKONĘ
+                          title: Text(
+                            loc.translate('add_new_type'),
+                            style: const TextStyle(
+                              color: Colors.green,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          onTap: () async {
+                            final controller = TextEditingController();
+                            final newType = await showDialog<String>(
+                              context: ctx,
+                              builder: (dialogCtx) {
+                                return AlertDialog(
+                                  title: Text(loc.translate('add_custom_type_title')),
+                                  content: TextField(
+                                    controller: controller,
+                                    decoration: InputDecoration(
+                                      labelText: loc.translate('type_name_label'),
+                                      hintText: loc.translate('custom_type_hint'),
+                                    ),
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Navigator.of(dialogCtx).pop(),
+                                      child: Text(loc.translate('cancel_btn')),
+                                    ),
+                                    ElevatedButton(
+                                      onPressed: () {
+                                        final name = controller.text.trim();
+                                        if (name.isNotEmpty) {
+                                          Navigator.of(dialogCtx).pop(name);
+                                        }
+                                      },
+                                      child: Text(loc.translate('add_btn')),
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
 
-  void _addCustomTypeDialog(BuildContext context) async {
-    final loc = AppLocalizations.of(context)!;
-    final controller = TextEditingController();
+                            if (newType != null && newType.isNotEmpty) {
+                              if (_customTypes.contains(newType) ||
+                                  newType == 'praca' ||
+                                  newType == 'sport' ||
+                                  newType == 'czas_wolny') {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text(loc.translate('type_exists'))),
+                                );
+                              } else {
+                                setStateDialog(() {
+                                  _customTypes.add(newType);
+                                });
+                                setState(() {});
+                                _saveCustomTypes();
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text(loc.translate('type_added'))),
+                                );
+                              }
+                            }
 
-    await showDialog(
-      context: context,
-      builder: (ctx) {
-        return AlertDialog(
-          title: Text(loc.translate('add_custom_type_title')),
-          content: TextField(
-            controller: controller,
-            decoration: InputDecoration(
-              labelText: loc.translate('type_name_label'),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(ctx).pop(),
-              child: Text(loc.translate('cancel_btn')),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                final newType = controller.text.trim();
-                if (newType.isEmpty) return;
-                if (_customTypes.contains(newType)) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(loc.translate('type_exists'))),
-                  );
-                  return;
-                }
-                setState(() {
-                  _customTypes.add(newType);
-                });
-                _saveCustomTypes();
-                Navigator.of(ctx).pop();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(loc.translate('type_added'))),
+                            controller.dispose();
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.of(ctx).pop(),
+                      child: Text(loc.translate('cancel_btn')),
+                    ),
+                  ],
                 );
               },
-              child: Text(loc.translate('add_btn')),
-            ),
-          ],
-        );
-      },
-    );
-
-    controller.dispose();
-  }
-
-  void _manageCustomTypesDialog(BuildContext context) async {
-    final loc = AppLocalizations.of(context)!;
-
-    await showDialog(
-      context: context,
-      builder: (ctx) {
-        return StatefulBuilder(
-          builder: (ctx, setStateDialog) {
-            return AlertDialog(
-              title: Text(loc.translate('manage_custom_types')),
-              content: _customTypes.isEmpty
-                  ? Text(loc.translate('no_custom_types'))
-                  : SizedBox(
-                width: double.maxFinite,
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: _customTypes.length,
-                  itemBuilder: (context, index) {
-                    final typeName = _customTypes[index];
-                    return ListTile(
-                      title: Text(typeName),
-                      trailing: IconButton(
-                        icon: const Icon(Icons.delete),
-                        onPressed: () {
-                          setStateDialog(() {
-                            _customTypes.removeAt(index);
-                          });
-                          setState(() {});
-                          _saveCustomTypes();
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text(loc.translate('type_deleted'))),
-                          );
-                        },
-                      ),
-                    );
-                  },
-                ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(ctx).pop(),
-                  child: Text(loc.translate('close_btn')),
-                ),
-              ],
             );
           },
         );
+
+        if (selected != null) {
+          onChanged(selected);
+        }
       },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.grey),
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(_typeLabel(value, context)),
+            const SizedBox(width: 8),
+            const Icon(Icons.arrow_drop_down),
+          ],
+        ),
+      ),
     );
   }
+
+  Widget _buildTypeOption(BuildContext ctx, String typeValue, String label, bool showDelete) {
+    return ListTile(
+      title: Text(label),
+      onTap: () => Navigator.of(ctx).pop(typeValue),
+    );
+  }
+
+
+
+
 
   String _typeLabel(String type, BuildContext context) {
     final loc = AppLocalizations.of(context)!;
     switch (type) {
-      case 'nauka':
-        return loc.translate('learning');
-      case 'praca_platna':
-        return loc.translate('paid_work');
-      case 'praca_nieplatna':
-        return loc.translate('unpaid_work');
+      case 'praca':
+        return loc.translate('work');
       case 'sport':
         return loc.translate('sport');
       case 'czas_wolny':
         return loc.translate('free_time');
       default:
-        return type;
+        return type; // Własne typy wyświetlają swoją nazwę
     }
   }
 
@@ -3051,13 +3072,8 @@ class _HomePageState extends State<HomePage> {
                 });
               } else if (value == 'icon_color') {
                 _showIconColorPicker();
-              } else if (value == 'manage_types') {
-                _loadCustomTypes().then((_) {
-                  _manageCustomTypesDialog(context);
-                });
-              }
+              }  // ← DODAJ TEN NAWIAS!
             },
-
             itemBuilder: (context) => [
               PopupMenuItem(
                 value: 'change_bg',
@@ -3099,19 +3115,7 @@ class _HomePageState extends State<HomePage> {
                   ],
                 ),
               ),
-              PopupMenuItem(
-                value: 'manage_types',
-                child: Row(
-                  children: [
-                    const Icon(Icons.category, color: Colors.green),
-                    const SizedBox(width: 12),
-                    Text(
-                      loc.translate('manage_custom_types'),
-                      style: const TextStyle(fontSize: 16),
-                    ),
-                  ],
-                ),
-              ),
+
               // ⬇️ OSTATNIA POZYCJA – Instrukcja obsługi
               PopupMenuItem(
                 value: 'instructions',
@@ -3600,17 +3604,6 @@ class _HomePageState extends State<HomePage> {
                             _manualType = newValue;
                           });
                         },
-                      ),
-                      const SizedBox(width: 8),
-                      IconButton(
-                        icon: const Icon(Icons.add),
-                        tooltip: loc.translate('add_custom_type_title'),
-                        onPressed: () => _addCustomTypeDialog(context),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.settings),
-                        tooltip: loc.translate('manage_custom_types'),
-                        onPressed: () => _manageCustomTypesDialog(context),
                       ),
                     ],
                   ),

@@ -604,10 +604,30 @@ class _MemoryGamePageState extends State<MemoryGamePage> {
   int? _bestTime;
   int? _bestMoves;
 
-  final List<String> _emojis = [
-    '🍎', '🍊', '🍋', '🍌',
-    '🍉', '🍇', '🍓', '🍒',
-  ];
+// 🎨 Różne emotki dla każdego poziomu
+  List<String> _getEmojisForLevel() {
+    switch (widget.difficulty) {
+      case MemoryDifficulty.easy:
+      // 🍎 Poziom 1: OWOCE (6 par)
+        return ['🍎', '🍊', '🍋', '🍌', '🍉', '🍇'];
+
+      case MemoryDifficulty.medium:
+      // 🐶 Poziom 2: ZWIERZĘTA (8 par)
+        return ['🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼'];
+
+      case MemoryDifficulty.hard:
+      // 🍕 Poziom 3: JEDZENIE (10 par)
+        return ['🍕', '🍔', '🍟', '🌭', '🍿', '🥤', '🍩', '🍪', '🎂', '🍰'];
+
+      case MemoryDifficulty.advanced:
+      // ⚽ Poziom 4: SPORT (12 par)
+        return ['⚽', '🏀', '🏈', '⚾', '🎾', '🏐', '🏉', '🎱', '🏓', '🏸', '🏒', '🥊'];
+
+      case MemoryDifficulty.expert:
+      // 🌟 Poziom 5: MIX WSZYSTKIEGO (15 par)
+        return ['🌍', '🌈', '⭐', '🌙', '☀️', '🌊', '🔥', '❄️', '💎', '🎯', '🎨', '🎭', '🎪', '🎮', '🎸'];
+    }
+  }
 
   // Ile par kart ma być dla danego poziomu trudności
   int _pairsForDifficulty() {
@@ -657,6 +677,10 @@ class _MemoryGamePageState extends State<MemoryGamePage> {
       setState(() {
         _bestTime = _seconds;
       });
+      // ⭐ Zapisz gwiazdki dla tego poziomu
+      final stars = _calculateStars();
+      final level = difficultyToLevel(widget.difficulty);
+      await prefs.setInt('memory_stars_level_$level', stars);
     }
 
     if (_bestMoves == null || _moves < _bestMoves!) {
@@ -676,7 +700,7 @@ class _MemoryGamePageState extends State<MemoryGamePage> {
     final pairsCount = _pairsForDifficulty();
 
     // bierzemy tylko pierwsze N emoji z listy
-    final availableEmojis = _emojis.take(pairsCount).toList();
+    final availableEmojis = _getEmojisForLevel();
 
     for (int i = 0; i < availableEmojis.length; i++) {
       cards.add(MemoryCard(emoji: availableEmojis[i], id: i));
@@ -791,6 +815,19 @@ class _MemoryGamePageState extends State<MemoryGamePage> {
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
+              // ⭐ GWIAZDKI
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(3, (index) {
+                  final stars = _calculateStars();
+                  return Icon(
+                    index < stars ? Icons.star : Icons.star_border,
+                    color: Colors.amber,
+                    size: 40,
+                  );
+                }),
+              ),
+              const SizedBox(height: 16),
               Text('⏱️ ${loc.translate('time')}: ${_formatTime(_seconds)}'),
               Text('🎯 ${loc.translate('moves')}: $_moves'),
               const SizedBox(height: 16),
@@ -828,6 +865,39 @@ class _MemoryGamePageState extends State<MemoryGamePage> {
     final mins = seconds ~/ 60;
     final secs = seconds % 60;
     return '${mins}:${secs.toString().padLeft(2, '0')}';
+  }
+
+  // ⭐ Oblicz ile gwiazdek za czas
+  int _calculateStars() {
+    // Progi czasowe zależne od poziomu
+    int gold, silver;
+
+    switch (widget.difficulty) {
+      case MemoryDifficulty.easy:
+        gold = 30;   // ⭐⭐⭐
+        silver = 60; // ⭐⭐
+        break;
+      case MemoryDifficulty.medium:
+        gold = 40;
+        silver = 80;
+        break;
+      case MemoryDifficulty.hard:
+        gold = 50;
+        silver = 100;
+        break;
+      case MemoryDifficulty.advanced:
+        gold = 60;
+        silver = 120;
+        break;
+      case MemoryDifficulty.expert:
+        gold = 75;
+        silver = 150;
+        break;
+    }
+
+    if (_seconds <= gold) return 3;
+    if (_seconds <= silver) return 2;
+    return 1;
   }
 
   @override

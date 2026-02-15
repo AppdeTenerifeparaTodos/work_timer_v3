@@ -968,7 +968,7 @@ class _MemoryGamePageState extends State<MemoryGamePage> {
                   padding: const EdgeInsets.all(16),
                   child: GridView.builder(
                     shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
+                    physics: const AlwaysScrollableScrollPhysics(),
                     gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 4,
                       crossAxisSpacing: 8,

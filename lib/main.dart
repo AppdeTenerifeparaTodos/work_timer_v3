@@ -3504,8 +3504,47 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 16),
+
+// 🟢 WIELKI PRZYCISK START
+                  if (_activeStartTime == null)
+                    Container(
+                      width: double.infinity,
+                      height: 80,
+                      margin: const EdgeInsets.only(bottom: 16),
+                      child: ElevatedButton(
+                        onPressed: () {
+                          setState(() {
+                            _activeStartTime = DateTime.now();
+                          });
+                          _saveActiveSession();
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.play_circle_filled, size: 40),
+                            const SizedBox(width: 12),
+                            Text(
+                              loc.translate('start_btn').toUpperCase(),
+                              style: const TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+
                   if (_activeStartTime != null)
+
                     Text(
                       '${loc.translate('running_since')}: '
                           '${_activeStartTime!.hour.toString().padLeft(2, '0')}:'

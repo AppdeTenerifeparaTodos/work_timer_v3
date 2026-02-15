@@ -3041,7 +3041,61 @@ class _HomePageState extends State<HomePage> {
     }
 
     return Scaffold(
-      appBar: AppBar(
+      appBar: _activeStartTime != null
+          ? AppBar(
+        backgroundColor: Colors.green,
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.timer, size: 20),
+                const SizedBox(width: 8),
+                StreamBuilder(
+                  stream: Stream.periodic(const Duration(seconds: 1)),
+                  builder: (context, snapshot) {
+                    if (_activeStartTime == null) return const SizedBox();
+                    final duration = DateTime.now().difference(_activeStartTime!);
+                    final hours = duration.inHours;
+                    final minutes = duration.inMinutes.remainder(60);
+                    final seconds = duration.inSeconds.remainder(60);
+                    return Text(
+                      '$hours:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}',
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
+            if (_activeDescController.text.isNotEmpty)
+              Text(
+                _activeDescController.text,
+                style: const TextStyle(fontSize: 12),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: _stopActiveSession,
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.white,
+            ),
+            child: Text(
+              loc.translate('stop_btn').toUpperCase(),
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      )
+          : AppBar(
         title: Text(loc.translate('app_title')),
         actions: [
           // Flaga polska

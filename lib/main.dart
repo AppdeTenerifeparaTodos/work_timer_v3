@@ -1812,6 +1812,7 @@ class _HomePageState extends State<HomePage> {
 
   String _selectedRange = 'dzisiaj';
   String _searchText = '';
+  bool _showManualFields = false;
 
   // NOWE - Kontrolery dla autocomplete
   final TextEditingController _activeDescController = TextEditingController();
@@ -3422,7 +3423,7 @@ class _HomePageState extends State<HomePage> {
 
                   // SEKCJA 1: START / STOP z AUTOCOMPLETE
                   Text(
-                    loc.translate('start_stop_section'),
+                    loc.translate('new_activity_section'),
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),
@@ -3543,6 +3544,45 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ),
 
+                  // 📅 PRZYCISK "DODAJ ZA ZAKRES CZASU"
+                  if (_activeStartTime == null)
+                    Container(
+                      width: double.infinity,
+                      height: 60,
+                      margin: const EdgeInsets.only(bottom: 16),
+                      child: OutlinedButton(
+                        onPressed: () {
+                          setState(() {
+                            _showManualFields = !_showManualFields;
+                          });
+                        },
+                        style: OutlinedButton.styleFrom(
+                          side: BorderSide(color: Colors.indigo, width: 2),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.edit_calendar, size: 28, color: Colors.indigo),
+                            const SizedBox(width: 12),
+                            Flexible(
+                              child: Text(
+                                loc.translate('add_time_range_btn'),
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.indigo,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+
                   if (_activeStartTime != null)
 
                     Text(
@@ -3555,151 +3595,101 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ),
 
+                  // 📅 POLA MANUALNE - pokazują się po kliknięciu "DODAJ ZA ZAKRES"
+                  if (_showManualFields && _activeStartTime == null)
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 16),
+                        const Divider(),
+                        const SizedBox(height: 16),
 
-                  const Divider(height: 32),
-
-                  // SEKCJA 2: DODAWANIE MANUALNE z AUTOCOMPLETE
-                  Text(
-                    loc.translate('add_manual'),
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 8),
-
-                  // POLE Z AUTOCOMPLETE
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      TextField(
-                        controller: _manualDescriptionController,
-                        focusNode: _manualFocusNode,
-                        decoration: InputDecoration(
-                          labelText: loc.translate('description_label'),
-                          border: const OutlineInputBorder(),
-                          filled: true,
-                          fillColor: Colors.white,
-                        ),
-                        onChanged: (value) {
-                          setState(() {});
-                        },
-                      ),
-                      if (_showManualSuggestions && _manualFilteredSuggestions.isNotEmpty)
-                        Container(
-                          margin: const EdgeInsets.only(top: 4),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            border: Border.all(color: Colors.grey.shade300),
-                            borderRadius: BorderRadius.circular(8),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.1),
-                                blurRadius: 4,
-                                offset: const Offset(0, 2),
+                        // Data
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                '${loc.translate('date_label')}'
+                                    '${_manualDate.year.toString().padLeft(4, '0')}-'
+                                    '${_manualDate.month.toString().padLeft(2, '0')}-'
+                                    '${_manualDate.day.toString().padLeft(2, '0')}',
                               ),
-                            ],
-                          ),
-                          child: ListView.builder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemCount: _manualFilteredSuggestions.length,
-                            itemBuilder: (context, index) {
-                              final suggestion = _manualFilteredSuggestions[index];
-                              return ListTile(
-                                dense: true,
-                                title: Text(suggestion),
-                                onTap: () {
-                                  _manualDescriptionController.text = suggestion;
-                                  _manualFocusNode.unfocus();
+                            ),
+                            TextButton(
+                              onPressed: () async {
+                                final picked = await _pickDate(_manualDate);
+                                if (picked != null) {
                                   setState(() {
-                                    _showManualSuggestions = false;
+                                    _manualDate = picked;
                                   });
-                                },
-                              );
+                                }
+                              },
+                              child: Text(loc.translate('choose_date')),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+
+                        // Godziny
+                        Row(
+                          children: [
+                            Expanded(
+                              child: TextField(
+                                controller: _manualStartController,
+                                keyboardType: TextInputType.datetime,
+                                decoration: InputDecoration(
+                                  labelText: loc.translate('start_time_label'),
+                                  hintText: loc.translate('start_time_hint'),
+                                  border: const OutlineInputBorder(),
+                                  filled: true,
+                                  fillColor: Colors.white,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: TextField(
+                                controller: _manualEndController,
+                                keyboardType: TextInputType.datetime,
+                                decoration: InputDecoration(
+                                  labelText: loc.translate('end_time_label'),
+                                  hintText: loc.translate('end_time_hint'),
+                                  border: const OutlineInputBorder(),
+                                  filled: true,
+                                  fillColor: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+
+                        // Przycisk DODAJ
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              _addManualSession();
+                              setState(() {
+                                _showManualFields = false;
+                              });
                             },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.indigo,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                            ),
+                            child: Text(
+                              loc.translate('add_session_btn'),
+                              style: const TextStyle(fontSize: 16),
+                            ),
                           ),
                         ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          '${loc.translate('date_label')}'
-                              '${_manualDate.year.toString().padLeft(4, '0')}-'
-                              '${_manualDate.month.toString().padLeft(2, '0')}-'
-                              '${_manualDate.day.toString().padLeft(2, '0')}',
-                        ),
-                      ),
-                      TextButton(
-                        onPressed: () async {
-                          final picked = await _pickDate(_manualDate);
-                          if (picked != null) {
-                            setState(() {
-                              _manualDate = picked;
-                            });
-                          }
-                        },
-                        child: Text(loc.translate('choose_date')),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          controller: _manualStartController,
-                          keyboardType: TextInputType.datetime,
-                          decoration: InputDecoration(
-                            labelText: loc.translate('start_time_label'),
-                            hintText: loc.translate('start_time_hint'),
-                            border: const OutlineInputBorder(),
-                            filled: true,
-                            fillColor: Colors.white,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: TextField(
-                          controller: _manualEndController,
-                          keyboardType: TextInputType.datetime,
-                          decoration: InputDecoration(
-                            labelText: loc.translate('end_time_label'),
-                            hintText: loc.translate('end_time_hint'),
-                            border: const OutlineInputBorder(),
-                            filled: true,
-                            fillColor: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Text(loc.translate('type')),
-                      const SizedBox(width: 8),
-                      _buildTypeDropdown(
-                        context: context,
-                        value: _manualType,
-                        onChanged: (newValue) {
-                          if (newValue == null) return;
-                          setState(() {
-                            _manualType = newValue;
-                          });
-                        },
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: _addManualSession,
-                      child: Text(loc.translate('add_session_btn')),
+                      ],
                     ),
-                  ),
+
+
+
 
                   const Divider(height: 32),
 

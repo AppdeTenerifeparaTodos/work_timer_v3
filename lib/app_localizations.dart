@@ -52,7 +52,8 @@ class AppLocalizations {
       'work': 'Praca',
       'sport': 'Sport',
       'free_time': 'Czas wolny',
-      'type': 'Typ',
+      'type': 'Kategoria',
+      'type_instruction': 'Wybierz kategorię swojej aktywności',
 
       // ZARZĄDZANIE TYPAMI
       'add_new_type': 'Dodaj nowy typ',
@@ -89,7 +90,7 @@ class AppLocalizations {
 
       // MANUALNE DODAWANIE
       'add_manual': 'Dodaj sesję manualnie',
-      'description_label': 'Opis',
+      'description_label': 'Co będziesz robić? (np. Bieganie, Nauka)',
       'start_time_label': 'Start (HH:MM)',
       'end_time_label': 'Koniec (HH:MM)',
       'start_time_hint': 'np. 08:30',
@@ -236,7 +237,8 @@ class AppLocalizations {
       'work': 'Trabajo',
       'sport': 'Deporte',
       'free_time': 'Tiempo libre',
-      'type': 'Tipo',
+      'type': 'Categoría',
+      'type_instruction': 'Elige la categoría de tu actividad',
 
       // ZARZĄDZANIE TYPAMI
       'add_new_type': 'Añadir nuevo tipo',
@@ -273,7 +275,7 @@ class AppLocalizations {
 
       // MANUALNE DODAWANIE
       'add_manual': 'Añadir sesión manualmente',
-      'description_label': 'Descripción',
+      'description_label': '¿Qué vas a hacer? (ej. Correr, Estudiar)',
       'start_time_label': 'Inicio (HH:MM)',
       'end_time_label': 'Fin (HH:MM)',
       'start_time_hint': 'ej. 08:30',

@@ -3554,31 +3554,7 @@ class _HomePageState extends State<HomePage> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: _activeStartTime == null
-                              ? () {
-                            setState(() {
-                              _activeStartTime = DateTime.now();
-                            });
-                            _saveActiveSession(); // NOWE - Zapisz
-                          }
-                              : null,
-                          child: Text(loc.translate('start_btn')),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: _activeStartTime != null ? _stopActiveSession : null,
-                          child: Text(loc.translate('stop_btn')),
-                        ),
-                      ),
-                    ],
-                  ),
+
 
                   const Divider(height: 32),
 

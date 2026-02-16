@@ -660,16 +660,19 @@ class _MemoryGamePageState extends State<MemoryGamePage> {
 
 // 📏 Proporcje karty dla danego poziomu
   double _getAspectRatio() {
+    // Wykryj czy jesteśmy na telefonie czy w przeglądarce
+    final isWeb = MediaQuery.of(context).size.width > 600;
+
     switch (widget.difficulty) {
       case MemoryDifficulty.easy:
       case MemoryDifficulty.medium:
-        return 0.75; // Poziomy 1-2: normalne karty
+        return isWeb ? 0.60 : 0.75; // Przeglądarka: niższe | Telefon: normalne
       case MemoryDifficulty.hard:
-        return 0.80; // Poziom 3: trochę mniejsze
+        return isWeb ? 0.65 : 0.80;
       case MemoryDifficulty.advanced:
-        return 0.85; // Poziom 4: jeszcze mniejsze
+        return isWeb ? 0.70 : 0.85;
       case MemoryDifficulty.expert:
-        return 0.90; // Poziom 5: najmniejsze + 5 kolumn
+        return isWeb ? 0.75 : 0.90; // Poziom 5: mniejsze w obu
     }
   }
 
@@ -1022,7 +1025,7 @@ class _MemoryGamePageState extends State<MemoryGamePage> {
                   padding: const EdgeInsets.all(16),
                   child: GridView.builder(
                     shrinkWrap: true,
-                    physics: const AlwaysScrollableScrollPhysics(),
+                    physics: null, // domyślne scrollowanie
                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: _getCrossAxisCount(),
                       crossAxisSpacing: 8,

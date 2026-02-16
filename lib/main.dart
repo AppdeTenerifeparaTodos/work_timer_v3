@@ -601,8 +601,8 @@ class _MemoryGamePageState extends State<MemoryGamePage> {
   bool _gameStarted = false;
   bool _gameWon = false;
 
-  int? _bestTime;
-  int? _bestMoves;
+  Map<int, int> _bestTimesByLevel = {}; // level → best time in seconds
+  Map<int, int> _bestMovesByLevel = {}; // level → best moves
 
 // 🎨 Różne emotki dla każdego poziomu
   List<String> _getEmojisForLevel() {
@@ -644,7 +644,34 @@ class _MemoryGamePageState extends State<MemoryGamePage> {
         return 15;
     }
   }
+// 📐 Ile kolumn w siatce dla danego poziomu
+  int _getCrossAxisCount() {
+    switch (widget.difficulty) {
+      case MemoryDifficulty.easy:
+      case MemoryDifficulty.medium:
+      case MemoryDifficulty.hard:
+        return 4; // Poziomy 1-3: 4 kolumny
+      case MemoryDifficulty.advanced:
+        return 4; // Poziom 4: 4 kolumny
+      case MemoryDifficulty.expert:
+        return 5; // Poziom 5: 5 kolumn (mniej scrollu!)
+    }
+  }
 
+// 📏 Proporcje karty dla danego poziomu
+  double _getAspectRatio() {
+    switch (widget.difficulty) {
+      case MemoryDifficulty.easy:
+      case MemoryDifficulty.medium:
+        return 0.75; // Poziomy 1-2: normalne karty
+      case MemoryDifficulty.hard:
+        return 0.80; // Poziom 3: trochę mniejsze
+      case MemoryDifficulty.advanced:
+        return 0.85; // Poziom 4: jeszcze mniejsze
+      case MemoryDifficulty.expert:
+        return 0.90; // Poziom 5: najmniejsze + 5 kolumn
+    }
+  }
 
   @override
   void initState() {
@@ -661,9 +688,11 @@ class _MemoryGamePageState extends State<MemoryGamePage> {
 
   Future<void> _loadHighScores() async {
     final prefs = await SharedPreferences.getInstance();
+    final level = difficultyToLevel(widget.difficulty);
+
     setState(() {
-      _bestTime = prefs.getInt('memory_game_best_time');
-      _bestMoves = prefs.getInt('memory_game_best_moves');
+      _bestTimesByLevel[level] = prefs.getInt('memory_best_time_level_$level') ?? 0;
+      _bestMovesByLevel[level] = prefs.getInt('memory_best_moves_level_$level') ?? 0;
     });
   }
 
@@ -671,22 +700,29 @@ class _MemoryGamePageState extends State<MemoryGamePage> {
     if (!_gameWon) return;
 
     final prefs = await SharedPreferences.getInstance();
+    final level = difficultyToLevel(widget.difficulty);
 
-    if (_bestTime == null || _seconds < _bestTime!) {
-      await prefs.setInt('memory_game_best_time', _seconds);
+    // Pobierz obecny rekord dla tego poziomu
+    final currentBestTime = _bestTimesByLevel[level] ?? 0;
+    final currentBestMoves = _bestMovesByLevel[level] ?? 0;
+
+    // Zapisz nowy rekord czasu jeśli lepszy (lub pierwszy)
+    if (currentBestTime == 0 || _seconds < currentBestTime) {
+      await prefs.setInt('memory_best_time_level_$level', _seconds);
       setState(() {
-        _bestTime = _seconds;
+        _bestTimesByLevel[level] = _seconds;
       });
-      // ⭐ Zapisz gwiazdki dla tego poziomu
+
+      // Zapisz gwiazdki
       final stars = _calculateStars();
-      final level = difficultyToLevel(widget.difficulty);
       await prefs.setInt('memory_stars_level_$level', stars);
     }
 
-    if (_bestMoves == null || _moves < _bestMoves!) {
-      await prefs.setInt('memory_game_best_moves', _moves);
+    // Zapisz nowy rekord ruchów jeśli lepszy (lub pierwszy)
+    if (currentBestMoves == 0 || _moves < currentBestMoves) {
+      await prefs.setInt('memory_best_moves_level_$level', _moves);
       setState(() {
-        _bestMoves = _moves;
+        _bestMovesByLevel[level] = _moves;
       });
     }
   }
@@ -831,16 +867,28 @@ class _MemoryGamePageState extends State<MemoryGamePage> {
               Text('⏱️ ${loc.translate('time')}: ${_formatTime(_seconds)}'),
               Text('🎯 ${loc.translate('moves')}: $_moves'),
               const SizedBox(height: 16),
-              if (_bestTime != null && _seconds == _bestTime!)
-                Text(
-                  loc.translate('new_time_record'),
-                  style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
-                ),
-              if (_bestMoves != null && _moves == _bestMoves!)
-                Text(
-                  loc.translate('new_moves_record'),
-                  style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
-                ),
+                  () {
+                final level = difficultyToLevel(widget.difficulty);
+                final bestTime = _bestTimesByLevel[level] ?? 0;
+                if (bestTime > 0 && _seconds == bestTime) {
+                  return Text(
+                    loc.translate('new_time_record'),
+                    style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
+                  );
+                }
+                return const SizedBox();
+              }(),
+                  () {
+                final level = difficultyToLevel(widget.difficulty);
+                final bestMoves = _bestMovesByLevel[level] ?? 0;
+                if (bestMoves > 0 && _moves == bestMoves) {
+                  return Text(
+                    loc.translate('new_moves_record'),
+                    style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
+                  );
+                }
+                return const SizedBox();
+              }(),
             ],
           ),
           actions: [
@@ -931,8 +979,14 @@ class _MemoryGamePageState extends State<MemoryGamePage> {
                 children: [
                   _buildStatBox('⏱️ ${loc.translate('time')}', _formatTime(_seconds)),
                   _buildStatBox('🎯 ${loc.translate('moves')}', _moves.toString()),
-                  if (_bestTime != null)
-                    _buildStatBox('🏆 ${loc.translate('record')}', _formatTime(_bestTime!)),
+                      () {
+                    final level = difficultyToLevel(widget.difficulty);
+                    final bestTime = _bestTimesByLevel[level] ?? 0;
+                    if (bestTime > 0) {
+                      return _buildStatBox('🏆 ${loc.translate('record')}', _formatTime(bestTime));
+                    }
+                    return const SizedBox();
+                  }(),
                 ],
               ),
             ),
@@ -969,11 +1023,11 @@ class _MemoryGamePageState extends State<MemoryGamePage> {
                   child: GridView.builder(
                     shrinkWrap: true,
                     physics: const AlwaysScrollableScrollPhysics(),
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 4,
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: _getCrossAxisCount(),
                       crossAxisSpacing: 8,
                       mainAxisSpacing: 8,
-                      childAspectRatio: 0.75,
+                      childAspectRatio: _getAspectRatio(),
                     ),
                     itemCount: _cards.length,
                     itemBuilder: (context, index) {
@@ -986,28 +1040,36 @@ class _MemoryGamePageState extends State<MemoryGamePage> {
             ),
 
             // High scores
-            if (_bestTime != null || _bestMoves != null)
-              Container(
-                padding: const EdgeInsets.all(16),
-                color: Colors.white,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      loc.translate('your_records'),
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
+                () {
+              final level = difficultyToLevel(widget.difficulty);
+              final bestTime = _bestTimesByLevel[level] ?? 0;
+              final bestMoves = _bestMovesByLevel[level] ?? 0;
+
+              if (bestTime > 0 || bestMoves > 0) {
+                return Container(
+                  padding: const EdgeInsets.all(16),
+                  color: Colors.white,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        loc.translate('your_records'),
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 8),
-                    if (_bestTime != null)
-                      Text('${loc.translate('best_time')} ${_formatTime(_bestTime!)}'),
-                    if (_bestMoves != null)
-                      Text('${loc.translate('fewest_moves')} $_bestMoves'),
-                  ],
-                ),
-              ),
+                      const SizedBox(height: 8),
+                      if (bestTime > 0)
+                        Text('${loc.translate('best_time')} ${_formatTime(bestTime)}'),
+                      if (bestMoves > 0)
+                        Text('${loc.translate('fewest_moves')} $bestMoves'),
+                    ],
+                  ),
+                );
+              }
+              return const SizedBox();
+            }(),
           ],
         ),
       ),
@@ -2306,7 +2368,7 @@ class _HomePageState extends State<HomePage> {
 
     final startText = _manualStartController.text.trim();
     final endText = _manualEndController.text.trim();
-    final description = _manualDescriptionController.text.trim();
+    final description = _activeDescController.text.trim(); // ✅ POPRAWIONE!
 
     if (description.isEmpty || startText.isEmpty || endText.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -2371,12 +2433,12 @@ class _HomePageState extends State<HomePage> {
       end: end,
       description: description,
       isManual: true,
-      type: _manualType,
+      type: _activeType, // ✅ POPRAWIONE!
     );
 
     setState(() {
       _history.add(newEntry);
-      _manualDescriptionController.clear();
+      _activeDescController.clear(); // ✅ POPRAWIONE!
       _manualStartController.clear();
       _manualEndController.clear();
     });
@@ -3475,12 +3537,52 @@ class _HomePageState extends State<HomePage> {
 
                   const Divider(height: 32),
 
-                  // SEKCJA 1: START / STOP z AUTOCOMPLETE
+// 🟢 WIELKI PRZYCISK START - NA SAMEJ GÓRZE!
+                  if (_activeStartTime == null)
+                    Container(
+                      width: double.infinity,
+                      height: 80,
+                      margin: const EdgeInsets.only(bottom: 24),
+                      child: ElevatedButton(
+                        onPressed: () {
+                          setState(() {
+                            _activeStartTime = DateTime.now();
+                          });
+                          _saveActiveSession();
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.play_circle_filled, size: 40),
+                            const SizedBox(width: 12),
+                            Text(
+                              loc.translate('start_btn').toUpperCase(),
+                              style: const TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                  const SizedBox(height: 16),
+
+// Nagłówek sekcji
                   Text(
                     loc.translate('new_activity_section'),
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),
+
 
                   // POLE Z AUTOCOMPLETE
                   Column(
@@ -3561,42 +3663,6 @@ class _HomePageState extends State<HomePage> {
                   ),
                   const SizedBox(height: 16),
 
-// 🟢 WIELKI PRZYCISK START
-                  if (_activeStartTime == null)
-                    Container(
-                      width: double.infinity,
-                      height: 80,
-                      margin: const EdgeInsets.only(bottom: 16),
-                      child: ElevatedButton(
-                        onPressed: () {
-                          setState(() {
-                            _activeStartTime = DateTime.now();
-                          });
-                          _saveActiveSession();
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green,
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(Icons.play_circle_filled, size: 40),
-                            const SizedBox(width: 12),
-                            Text(
-                              loc.translate('start_btn').toUpperCase(),
-                              style: const TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
 
                   // 📅 PRZYCISK "DODAJ ZA ZAKRES CZASU"
                   if (_activeStartTime == null)

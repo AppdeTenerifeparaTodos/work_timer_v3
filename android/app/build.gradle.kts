@@ -33,8 +33,8 @@ android {
         applicationId = "com.appdetenerife.worktimer"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
-        versionCode = 8
-        versionName = "1.0.8"
+        versionCode = 9
+        versionName = "1.0.9"
 
     }
 

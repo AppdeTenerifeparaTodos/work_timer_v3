@@ -118,6 +118,51 @@ class Goal {
   }
 }
 
+// 📅 MODEL WYDARZENIA
+class CalendarEvent {
+  final String id;
+  final String title;
+  final DateTime dateTime;
+  final String category;
+  final String? notes;
+  final bool hasReminder;
+  final DateTime createdAt;
+
+  CalendarEvent({
+    required this.id,
+    required this.title,
+    required this.dateTime,
+    required this.category,
+    this.notes,
+    required this.hasReminder,
+    required this.createdAt,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'title': title,
+      'dateTime': dateTime.toIso8601String(),
+      'category': category,
+      'notes': notes,
+      'hasReminder': hasReminder,
+      'createdAt': createdAt.toIso8601String(),
+    };
+  }
+
+  factory CalendarEvent.fromJson(Map<String, dynamic> json) {
+    return CalendarEvent(
+      id: json['id'] as String,
+      title: json['title'] as String,
+      dateTime: DateTime.parse(json['dateTime'] as String),
+      category: json['category'] as String,
+      notes: json['notes'] as String?,
+      hasReminder: json['hasReminder'] as bool,
+      createdAt: DateTime.parse(json['createdAt'] as String),
+    );
+  }
+}
+
 // Główny ekran z zakładkami
 class MainTabScreen extends StatefulWidget {
   final Function(String) onLanguageChange;
@@ -148,6 +193,7 @@ class _MainTabScreenState extends State<MainTabScreen> {
           ),
           StatisticsPageWrapper(),
           GamesMenuPage(), // ← ZMIENIONE!
+          EventsPage(),
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
@@ -158,6 +204,7 @@ class _MainTabScreenState extends State<MainTabScreen> {
           });
         },
         selectedItemColor: Colors.indigo,
+        type: BottomNavigationBarType.fixed, // ← WAŻNE! Dla 4+ zakładek
         items: [
           BottomNavigationBarItem(
             icon: Icon(Icons.timer),
@@ -170,6 +217,10 @@ class _MainTabScreenState extends State<MainTabScreen> {
           BottomNavigationBarItem(
             icon: Icon(Icons.gamepad),
             label: AppLocalizations.of(context)!.translate('games_tab'),
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.event),
+            label: AppLocalizations.of(context)!.translate('events_tab'),
           ),
         ],
       ),
@@ -208,6 +259,427 @@ int difficultyToLevel(MemoryDifficulty d) {
 // ========================================
 // 🎮 NOWA STRONA: MENU GIER
 // Wklej to PRZED klasą MemoryCard w main.dart
+
+// ========================================
+// 📅 KALENDARZ WYDARZEŃ
+// ========================================
+
+class EventsPage extends StatefulWidget {
+  const EventsPage({Key? key}) : super(key: key);
+
+  @override
+  State<EventsPage> createState() => _EventsPageState();
+}
+
+class _EventsPageState extends State<EventsPage> {
+  List<CalendarEvent> _events = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadEvents();
+  }
+
+  Future<void> _loadEvents() async {
+    final prefs = await SharedPreferences.getInstance();
+    final encoded = prefs.getString('calendar_events');
+    if (encoded == null || encoded.isEmpty) return;
+
+    try {
+      final List<dynamic> decoded = jsonDecode(encoded);
+      setState(() {
+        _events.clear();
+        for (var item in decoded) {
+          _events.add(CalendarEvent.fromJson(item as Map<String, dynamic>));
+        }
+        // Sortuj po dacie
+        _events.sort((a, b) => a.dateTime.compareTo(b.dateTime));
+      });
+    } catch (e) {
+      debugPrint('Błąd ładowania wydarzeń: $e');
+    }
+  }
+
+  Future<void> _saveEvents() async {
+    final prefs = await SharedPreferences.getInstance();
+    final jsonList = _events.map((e) => e.toJson()).toList();
+    final encoded = jsonEncode(jsonList);
+    await prefs.setString('calendar_events', encoded);
+  }
+
+  void _deleteEvent(String eventId) {
+    setState(() {
+      _events.removeWhere((e) => e.id == eventId);
+    });
+    _saveEvents();
+
+    final loc = AppLocalizations.of(context)!;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(loc.translate('event_deleted'))),
+    );
+  }
+
+  void _addEventDialog() async {
+    final loc = AppLocalizations.of(context)!;
+    final titleController = TextEditingController();
+    final notesController = TextEditingController();
+
+    DateTime selectedDate = DateTime.now();
+    TimeOfDay selectedTime = TimeOfDay.now();
+    String selectedCategory = 'praca';
+    String? customCategory; // NOWA ZMIENNA!
+    bool hasReminder = true;
+
+    await showDialog(
+      context: context,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (ctx, setStateDialog) {
+            return AlertDialog(
+              title: Text(loc.translate('add_event')),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Tytuł
+                    TextField(
+                      controller: titleController,
+                      decoration: InputDecoration(
+                        labelText: loc.translate('event_title'),
+                        hintText: loc.translate('event_title_hint'),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Data
+                    ListTile(
+                      title: Text(loc.translate('event_date')),
+                      subtitle: Text(
+                        '${selectedDate.day}.${selectedDate.month}.${selectedDate.year} '
+                            '${selectedTime.hour.toString().padLeft(2, '0')}:${selectedTime.minute.toString().padLeft(2, '0')}',
+                      ),
+                      trailing: Icon(Icons.calendar_today),
+                      onTap: () async {
+                        final date = await showDatePicker(
+                          context: ctx,
+                          initialDate: selectedDate,
+                          firstDate: DateTime.now(),
+                          lastDate: DateTime.now().add(Duration(days: 365)),
+                        );
+                        if (date != null) {
+                          final time = await showTimePicker(
+                            context: ctx,
+                            initialTime: selectedTime,
+                          );
+                          if (time != null) {
+                            setStateDialog(() {
+                              selectedDate = date;
+                              selectedTime = time;
+                            });
+                          }
+                        }
+                      },
+                    ),
+
+                    // Kategoria
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Text('${loc.translate('event_category')}: '),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: DropdownButton<String>(
+                            value: selectedCategory,
+                            isExpanded: true,
+                            items: [
+                              DropdownMenuItem(value: 'praca', child: Text(loc.translate('work'))),
+                              DropdownMenuItem(value: 'sport', child: Text(loc.translate('sport'))),
+                              DropdownMenuItem(value: 'czas_wolny', child: Text(loc.translate('free_time'))),
+                              DropdownMenuItem(value: 'inne', child: Text(loc.translate('event_category_other'))),
+                            ],
+                            onChanged: (value) {
+                              if (value != null) {
+                                setStateDialog(() {
+                                  selectedCategory = value;
+                                });
+                              }
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+
+// Pole na własną kategorię (gdy wybrano "Inne")
+                    if (selectedCategory == 'inne') ...[
+                      const SizedBox(height: 8),
+                      TextField(
+                        decoration: InputDecoration(
+                          labelText: loc.translate('event_category_custom'),
+                          hintText: loc.translate('event_category_custom_hint'),
+                          border: OutlineInputBorder(),
+                        ),
+                        onChanged: (value) {
+                          setStateDialog(() {
+                            customCategory = value.trim().isEmpty ? null : value.trim();
+                          });
+                        },
+                      ),
+                    ],
+
+                    // Notatki
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: notesController,
+                      decoration: InputDecoration(
+                        labelText: loc.translate('event_notes'),
+                        hintText: loc.translate('event_notes_hint'),
+                      ),
+                      maxLines: 2,
+                    ),
+
+                    // Przypomnienie
+                    const SizedBox(height: 8),
+                    SwitchListTile(
+                      title: Text(loc.translate('event_reminder')),
+                      value: hasReminder,
+                      onChanged: (value) {
+                        setStateDialog(() {
+                          hasReminder = value;
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(ctx).pop(),
+                  child: Text(loc.translate('cancel_btn')),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    final title = titleController.text.trim();
+                    if (title.isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(loc.translate('fill_all_fields'))),
+                      );
+                      return;
+                    }
+
+                    final eventDateTime = DateTime(
+                      selectedDate.year,
+                      selectedDate.month,
+                      selectedDate.day,
+                      selectedTime.hour,
+                      selectedTime.minute,
+                    );
+
+                    final newEvent = CalendarEvent(
+                      id: DateTime.now().millisecondsSinceEpoch.toString(),
+                      title: title,
+                      dateTime: eventDateTime,
+                      category: selectedCategory == 'inne' && customCategory != null
+                          ? customCategory!
+                          : selectedCategory,
+                      notes: notesController.text.trim().isEmpty
+                          ? null
+                          : notesController.text.trim(),
+                      hasReminder: hasReminder,
+                      createdAt: DateTime.now(),
+                    );
+
+                    setState(() {
+                      _events.add(newEvent);
+                      _events.sort((a, b) => a.dateTime.compareTo(b.dateTime));
+                    });
+                    _saveEvents();
+
+                    Navigator.of(ctx).pop();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(loc.translate('event_added'))),
+                    );
+                  },
+                  child: Text(loc.translate('add_btn')),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+
+    titleController.dispose();
+    notesController.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
+    final now = DateTime.now();
+
+    final todayEvents = _events.where((e) {
+      final eventDay = DateTime(e.dateTime.year, e.dateTime.month, e.dateTime.day);
+      final today = DateTime(now.year, now.month, now.day);
+      return eventDay == today;
+    }).toList();
+
+    final upcomingEvents = _events.where((e) => e.dateTime.isAfter(now)).toList();
+
+    return Scaffold(
+      backgroundColor: Colors.indigo.shade50,
+      appBar: AppBar(
+        title: Text(loc.translate('events_title')),
+        centerTitle: true,
+        backgroundColor: Colors.indigo,
+        foregroundColor: Colors.white,
+      ),
+      body: _events.isEmpty
+          ? Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.event_busy, size: 80, color: Colors.grey),
+            const SizedBox(height: 16),
+            Text(
+              loc.translate('no_events'),
+              style: TextStyle(fontSize: 18, color: Colors.grey[600]),
+            ),
+          ],
+        ),
+      )
+          : ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          // Dziś
+          if (todayEvents.isNotEmpty) ...[
+            Text(
+              '📅 ${loc.translate('today_events')}',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.indigo.shade900,
+              ),
+            ),
+            const SizedBox(height: 12),
+            ...todayEvents.map((event) => _buildEventCard(event)),
+            const SizedBox(height: 24),
+          ],
+
+          // Nadchodzące
+          if (upcomingEvents.isNotEmpty) ...[
+            Text(
+              '🔜 ${loc.translate('upcoming_events')}',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.indigo.shade900,
+              ),
+            ),
+            const SizedBox(height: 12),
+            ...upcomingEvents.map((event) => _buildEventCard(event)),
+          ],
+        ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _addEventDialog,
+        backgroundColor: Colors.indigo,
+        child: const Icon(Icons.add, color: Colors.white),
+      ),
+    );
+  }
+
+  Widget _buildEventCard(CalendarEvent event) {
+    final loc = AppLocalizations.of(context)!;
+
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      elevation: 3,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    event.title,
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.indigo.shade900,
+                    ),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.delete, color: Colors.red),
+                  onPressed: () => _deleteEvent(event.id),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Icon(Icons.access_time, size: 16, color: Colors.grey[600]),
+                const SizedBox(width: 4),
+                Text(
+                  '${event.dateTime.day}.${event.dateTime.month}.${event.dateTime.year} '
+                      '${event.dateTime.hour.toString().padLeft(2, '0')}:${event.dateTime.minute.toString().padLeft(2, '0')}',
+                  style: TextStyle(color: Colors.grey[600]),
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            Row(
+              children: [
+                Icon(Icons.category, size: 16, color: Colors.grey[600]),
+                const SizedBox(width: 4),
+                Text(
+                  _getCategoryLabel(event.category),
+                  style: TextStyle(color: Colors.grey[600]),
+                ),
+              ],
+            ),
+            if (event.notes != null) ...[
+              const SizedBox(height: 8),
+              Text(
+                event.notes!,
+                style: TextStyle(color: Colors.grey[700]),
+              ),
+            ],
+            if (event.hasReminder) ...[
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Icon(Icons.notifications_active, size: 16, color: Colors.orange),
+                  const SizedBox(width: 4),
+                  Text(
+                    loc.translate('event_reminder'),
+                    style: TextStyle(color: Colors.orange),
+                  ),
+                ],
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _getCategoryLabel(String category) {
+    final loc = AppLocalizations.of(context)!;
+    switch (category) {
+      case 'praca':
+        return loc.translate('work');
+      case 'sport':
+        return loc.translate('sport');
+      case 'czas_wolny':
+        return loc.translate('free_time');
+      default:
+        return category;
+    }
+  }
+}
 
 class GamesMenuPage extends StatelessWidget {
   const GamesMenuPage({Key? key}) : super(key: key);

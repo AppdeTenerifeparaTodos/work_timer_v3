@@ -22,25 +22,34 @@ class NotificationService {
     required DateTime eventDateTime,
     required int reminderMinutes,
   }) async {
-    final reminderTime = eventDateTime.subtract(Duration(minutes: reminderMinutes));
+    final reminderTime =
+    eventDateTime.subtract(Duration(minutes: reminderMinutes));
+
     if (reminderTime.isBefore(DateTime.now())) return;
+
+    final tzTime = tz.TZDateTime.from(reminderTime, tz.local);
 
     const androidDetails = AndroidNotificationDetails(
       'event_reminders',
       'Przypomnienia',
       channelDescription: 'Powiadomienia o wydarzeniach',
       importance: Importance.max,
-      priority: Priority.high,
+      priority: Priority.max,
+      playSound: true,
+      enableVibration: true,
+      category: AndroidNotificationCategory.alarm,
+      audioAttributesUsage: AudioAttributesUsage.alarm,
     );
 
     await _plugin.zonedSchedule(
       eventId.hashCode,
       'Przypomnienie',
       title,
-      tz.TZDateTime.from(reminderTime, tz.local),
+      tzTime,
       const NotificationDetails(android: androidDetails),
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
+      androidScheduleMode: AndroidScheduleMode.alarmClock,
+      uiLocalNotificationDateInterpretation:
+      UILocalNotificationDateInterpretation.absoluteTime,
     );
   }
 

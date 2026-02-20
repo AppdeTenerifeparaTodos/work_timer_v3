@@ -662,7 +662,7 @@ class _EventsPageState extends State<EventsPage> {
                 Icon(Icons.access_time, size: 16, color: Colors.grey[600]),
                 const SizedBox(width: 4),
                 Text(
-                  '${event.dateTime.day}.${event.dateTime.month}.${event.dateTime.year} '
+                  '${_getDayName(event.dateTime.weekday)} ${event.dateTime.day}.${event.dateTime.month}.${event.dateTime.year} '
                       '${event.dateTime.hour.toString().padLeft(2, '0')}:${event.dateTime.minute.toString().padLeft(2, '0')}',
                   style: TextStyle(color: Colors.grey[600]),
                 ),
@@ -703,6 +703,21 @@ class _EventsPageState extends State<EventsPage> {
         ),
       ),
     );
+  }
+
+  String _getDayName(int weekday) {
+    final loc = AppLocalizations.of(context)!;
+    final isSpanish = loc.locale.languageCode == 'es';
+    switch (weekday) {
+      case 1: return isSpanish ? 'Lu' : 'Pn';
+      case 2: return isSpanish ? 'Ma' : 'Wt';
+      case 3: return isSpanish ? 'Mi' : 'Śr';
+      case 4: return isSpanish ? 'Ju' : 'Cz';
+      case 5: return isSpanish ? 'Vi' : 'Pt';
+      case 6: return isSpanish ? 'Sá' : 'So';
+      case 7: return isSpanish ? 'Do' : 'Nd';
+      default: return '';
+    }
   }
 
   String _getCategoryLabel(String category) {
@@ -3358,7 +3373,20 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-
+  String _getDayNameHome(int weekday) {
+    final languageCode = Localizations.localeOf(context).languageCode;
+    final isSpanish = languageCode == 'es';
+    switch (weekday) {
+      case 1: return isSpanish ? 'Lu' : 'Pn';
+      case 2: return isSpanish ? 'Ma' : 'Wt';
+      case 3: return isSpanish ? 'Mi' : 'Śr';
+      case 4: return isSpanish ? 'Ju' : 'Cz';
+      case 5: return isSpanish ? 'Vi' : 'Pt';
+      case 6: return isSpanish ? 'Sá' : 'So';
+      case 7: return isSpanish ? 'Do' : 'Nd';
+      default: return '';
+    }
+  }
 
 
 
@@ -4455,8 +4483,9 @@ class _HomePageState extends State<HomePage> {
                             '${entry.end.hour.toString().padLeft(2, '0')}:${entry.end.minute.toString().padLeft(2, '0')}';
                         final typeText = _typeLabel(entry.type, context);
                         final modeText = entry.isManual ? 'Manualnie' : 'Start/Stop';
+                        final dayName = _getDayNameHome(entry.start.weekday);
                         final dateLabel =
-                            '${entry.start.year}-${entry.start.month.toString().padLeft(2, '0')}-${entry.start.day.toString().padLeft(2, '0')}';
+                            '$dayName ${entry.start.year}-${entry.start.month.toString().padLeft(2, '0')}-${entry.start.day.toString().padLeft(2, '0')}';
 
                         return Card(
                           child: ListTile(

@@ -11,7 +11,6 @@ if (keystorePropertiesFile.exists()) {
 plugins {
     id("com.android.application")
     id("kotlin-android")
-    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
 }
 
@@ -21,12 +20,13 @@ android {
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
+        isCoreLibraryDesugaringEnabled = true  // ← DODANE!
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_17.toString()
+        jvmTarget = "17"  // ← POPRAWIONE (bez .toString())
     }
 
     defaultConfig {
@@ -35,11 +35,7 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = 10
         versionName = "1.1.0"
-
     }
-
-
-
 
     signingConfigs {
         create("release") {
@@ -61,4 +57,8 @@ android {
 
 flutter {
     source = "../.."
+}
+
+dependencies {
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")  // ← DODANE!
 }

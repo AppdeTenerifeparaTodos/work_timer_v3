@@ -1823,20 +1823,24 @@ class _StatisticsPageContentState extends State<StatisticsPageContent> {
     final totalMinutes = totalByType.values
         .fold<int>(0, (sum, duration) => sum + duration.inMinutes);
 
-    final colors = {
-      'nauka': Colors.blue,
-      'praca_platna': Colors.green,
-      'praca_nieplatna': Colors.orange,
-      'sport': Colors.red,
-      'czas_wolny': Colors.purple,
-    };
+    // Stała lista kolorów
+    final colorList = [
+      Colors.indigo,
+      Colors.red,
+      Colors.purple,
+      Colors.green,
+      Colors.orange,
+      Colors.teal,
+      Colors.pink,
+      Colors.amber,
+    ];
 
     final sections = <PieChartSectionData>[];
     int colorIndex = 0;
 
     totalByType.forEach((type, duration) {
       final percentage = (duration.inMinutes / totalMinutes * 100);
-      final color = colors[type] ?? Colors.primaries[colorIndex % Colors.primaries.length];
+      final color = colorList[colorIndex % colorList.length];
       colorIndex++;
 
       sections.add(
@@ -1881,19 +1885,21 @@ class _StatisticsPageContentState extends State<StatisticsPageContent> {
   }
 
   Color _getColorForType(String type) {
-    switch (type) {
-      case 'praca':
-        return Colors.indigo;
-      case 'sport':
-        return Colors.red;
-      case 'czas_wolny':
-        return Colors.purple;
-      default:
-      // Własne typy - generuj kolor z nazwy
-        final hash = type.hashCode;
-        final hue = (hash % 360).toDouble();
-        return HSVColor.fromAHSV(1.0, hue, 0.7, 0.8).toColor();
-    }
+    final colorList = [
+      Colors.indigo,
+      Colors.red,
+      Colors.purple,
+      Colors.green,
+      Colors.orange,
+      Colors.teal,
+      Colors.pink,
+      Colors.amber,
+    ];
+
+    final keys = _getTotalByType().keys.toList();
+    final index = keys.indexOf(type);
+    if (index == -1) return Colors.grey;
+    return colorList[index % colorList.length];
   }
 
   double _getMaxY(List<BarChartGroupData> data) {

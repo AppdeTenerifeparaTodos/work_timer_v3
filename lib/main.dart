@@ -2392,6 +2392,8 @@ class _HomePageState extends State<HomePage> {
   final List<String> _customTypes = [];
   // NOWE - Lista celów
   final List<Goal> _goals = [];
+  // NOWE - lista wydarzeń do backupu
+  List<CalendarEvent> _events = [];
 
 
   final List<String> _savedDescriptions = [];
@@ -2832,6 +2834,163 @@ class _HomePageState extends State<HomePage> {
     });
     _saveSavedDescriptions();
   }
+
+  // NOWE: eksport całej bazy (historia + cele + wydarzenia) do jednego pliku JSON
+  Future<File?> _exportAllData() async {
+    try {
+      final loc = AppLocalizations.of(context)!;
+
+      // 1. Katalog na backup (tak jak w starym exportHistory)
+      final directory = await getApplicationDocumentsDirectory();
+      final backupDir = Directory('${directory.path}/WorkStudyTimer');
+      if (!await backupDir.exists()) {
+        await backupDir.create(recursive: true);
+      }
+
+      // 2. Budujemy strukturę JSON
+      final backupData = {
+        'history': _history.map((e) => e.toJson()).toList(),
+        'goals': _goals.map((g) => g.toJson()).toList(),
+        'events': _events.map((ev) => ev.toJson()).toList(),
+      };
+
+      final jsonString =
+      const JsonEncoder.withIndent('  ').convert(backupData);
+
+      // 3. Zapis do pliku
+      final file = File('${backupDir.path}/backup.json');
+      await file.writeAsString(jsonString);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(loc.translate('backup_saved'))),
+        );
+      }
+
+      return file;
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Błąd eksportu: $e')),
+        );
+      }
+      return null;
+    }
+  }
+
+  // NOWE: import całej bazy (historia + cele + wydarzenia) z jednego pliku JSON
+  Future<void> _importAllData() async {
+    final loc = AppLocalizations.of(context)!;
+
+    try {
+      final directory = await getApplicationDocumentsDirectory();
+      final backupDir = Directory('${directory.path}/WorkStudyTimer');
+
+      if (!await backupDir.exists()) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Brak folderu z backupem')),
+        );
+        return;
+      }
+
+      // Szukamy plików .json
+      final files = backupDir
+          .listSync()
+          .whereType<File>()
+          .where((f) => f.path.toLowerCase().endsWith('.json'))
+          .toList();
+
+      if (files.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Brak plików backupu (.json)')),
+        );
+        return;
+      }
+
+      // Na razie bierzemy pierwszy znaleziony plik
+      File selectedFile = files.first;
+
+      final content = await selectedFile.readAsString();
+      final decoded = jsonDecode(content);
+
+      // STARY FORMAT: lista historii (List)
+      if (decoded is List) {
+        final List<dynamic> list = decoded;
+        setState(() {
+          for (var item in list) {
+            _history
+                .add(SessionEntry.fromJson(item as Map<String, dynamic>));
+          }
+        });
+        await _saveHistory();
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Zaimportowano historię (stary format pliku)'),
+            ),
+          );
+        }
+        return;
+      }
+
+      // NOWY FORMAT: mapa z history/goals/events
+      if (decoded is Map<String, dynamic>) {
+        final List<dynamic> historyList = decoded['history'] ?? [];
+        final List<dynamic> goalsList = decoded['goals'] ?? [];
+        final List<dynamic> eventsList = decoded['events'] ?? [];
+
+        setState(() {
+          // Historia – DOKLEJAMY
+          for (var item in historyList) {
+            _history
+                .add(SessionEntry.fromJson(item as Map<String, dynamic>));
+          }
+
+          // Cele – NADPISUJEMY
+          _goals.clear();
+          for (var item in goalsList) {
+            _goals.add(Goal.fromJson(item as Map<String, dynamic>));
+          }
+
+          // Wydarzenia – NADPISUJEMY
+          _events.clear();
+          for (var item in eventsList) {
+            _events
+                .add(CalendarEvent.fromJson(item as Map<String, dynamic>));
+          }
+        });
+
+        await _saveHistory();
+        await _saveGoals();
+
+        // Zapisz wydarzenia tak samo jak w EventsPage
+        final prefs = await SharedPreferences.getInstance();
+        final jsonList = _events.map((e) => e.toJson()).toList();
+        final encoded = jsonEncode(jsonList);
+        await prefs.setString('calendar_events', encoded);
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Zaimportowano historię, cele i wydarzenia'),
+            ),
+          );
+        }
+        return;
+
+      }
+
+      // Format nieznany
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Nieznany format pliku backupu')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Błąd importu: $e')),
+      );
+    }
+  }
+
 
   Future<void> _saveCustomTypes() async {
     final prefs = await SharedPreferences.getInstance();
@@ -4371,29 +4530,41 @@ class _HomePageState extends State<HomePage> {
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      // 1. Zapisz na telefonie
+                      // 1. Zapisz na telefonie (pełny backup)
                       IconButton(
-                        tooltip: loc.translate('export'), // np. „Eksport (telefon)”
+                        tooltip: loc.translate('export'),
                         icon: const Icon(Icons.upload_file),
-                        onPressed: _exportHistory,
+                        onPressed: () {
+                          _exportAllData(); // eksport: historia + cele + wydarzenia
+                        },
                       ),
-                      // 2. Udostępnij (e‑mail, WhatsApp itd.)
+                      // 2. Udostępnij backup (np. e‑mail, WhatsApp)
                       IconButton(
-                        tooltip: 'Udostępnij backup', // później możesz dodać do lokalizacji
+                        tooltip: 'Udostępnij backup',
                         icon: const Icon(Icons.share),
-                        onPressed: _shareHistoryBackup,
+                        onPressed: () async {
+                          final file = await _exportAllData(); // najpierw zapisz plik
+                          if (file != null) {
+                            await Share.shareXFiles(
+                              [XFile(file.path)],
+                              text: 'Backup WorkStudyTimer',
+                            );
+                          }
+                        },
                       ),
-                      // 3. Import
+                      // 3. Import z pliku backupu
                       IconButton(
                         tooltip: loc.translate('import'),
                         icon: const Icon(Icons.download),
-                        onPressed: _importHistory,
+                        onPressed: () {
+                          _importAllData(); // import: historia + cele + wydarzenia
+                        },
                       ),
                     ],
                   ),
 
-
                   const SizedBox(height: 12),
+
                   // Filtry przeniesione tutaj
                   Wrap(
                     spacing: 8,

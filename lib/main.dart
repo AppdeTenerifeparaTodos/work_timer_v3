@@ -238,21 +238,26 @@ enum MemoryDifficulty {
   hard,       // poziom 3
   advanced,   // poziom 4
   expert,     // poziom 5
+  master,     // poziom 6
+  legend,     // poziom 7
+  epic,       // poziom 8
+  nightmare,  // poziom 9
+  impossible, // poziom 10
 }
 
 // Zamiana trudności na numer poziomu (1–5)
 int difficultyToLevel(MemoryDifficulty d) {
   switch (d) {
-    case MemoryDifficulty.easy:
-      return 1;
-    case MemoryDifficulty.medium:
-      return 2;
-    case MemoryDifficulty.hard:
-      return 3;
-    case MemoryDifficulty.advanced:
-      return 4;
-    case MemoryDifficulty.expert:
-      return 5;
+    case MemoryDifficulty.easy:       return 1;
+    case MemoryDifficulty.medium:     return 2;
+    case MemoryDifficulty.hard:       return 3;
+    case MemoryDifficulty.advanced:   return 4;
+    case MemoryDifficulty.expert:     return 5;
+    case MemoryDifficulty.master:     return 6;
+    case MemoryDifficulty.legend:     return 7;
+    case MemoryDifficulty.epic:       return 8;
+    case MemoryDifficulty.nightmare:  return 9;
+    case MemoryDifficulty.impossible: return 10;
   }
 }
 
@@ -1047,8 +1052,28 @@ class _MemoryLevelsPageState extends State<MemoryLevelsPage> {
         padding: const EdgeInsets.all(16),
         children: [
           _buildLevelTile(
-            title: loc.translate('memory_level_easy'),
-            difficulty: MemoryDifficulty.easy,
+            title: loc.translate('memory_level_expert'),
+            difficulty: MemoryDifficulty.expert,
+          ),
+          _buildLevelTile(
+            title: loc.translate('memory_level_master'),
+            difficulty: MemoryDifficulty.master,
+          ),
+          _buildLevelTile(
+            title: loc.translate('memory_level_legend'),
+            difficulty: MemoryDifficulty.legend,
+          ),
+          _buildLevelTile(
+            title: loc.translate('memory_level_epic'),
+            difficulty: MemoryDifficulty.epic,
+          ),
+          _buildLevelTile(
+            title: loc.translate('memory_level_nightmare'),
+            difficulty: MemoryDifficulty.nightmare,
+          ),
+          _buildLevelTile(
+            title: loc.translate('memory_level_impossible'),
+            difficulty: MemoryDifficulty.impossible,
           ),
           _buildLevelTile(
             title: loc.translate('memory_level_medium'),
@@ -1147,40 +1172,41 @@ class _MemoryGamePageState extends State<MemoryGamePage> {
   List<String> _getEmojisForLevel() {
     switch (widget.difficulty) {
       case MemoryDifficulty.easy:
-      // 🍎 Poziom 1: OWOCE (6 par)
         return ['🍎', '🍊', '🍋', '🍌', '🍉', '🍇'];
-
       case MemoryDifficulty.medium:
-      // 🐶 Poziom 2: ZWIERZĘTA (8 par)
         return ['🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼'];
-
       case MemoryDifficulty.hard:
-      // 🍕 Poziom 3: JEDZENIE (10 par)
         return ['🍕', '🍔', '🍟', '🌭', '🍿', '🥤', '🍩', '🍪', '🎂', '🍰'];
-
       case MemoryDifficulty.advanced:
-      // ⚽ Poziom 4: SPORT (12 par)
         return ['⚽', '🏀', '🏈', '⚾', '🎾', '🏐', '🏉', '🎱', '🏓', '🏸', '🏒', '🥊'];
-
       case MemoryDifficulty.expert:
-      // 🌟 Poziom 5: MIX WSZYSTKIEGO (15 par)
         return ['🌍', '🌈', '⭐', '🌙', '☀️', '🌊', '🔥', '❄️', '💎', '🎯', '🎨', '🎭', '🎪', '🎮', '🎸'];
+      case MemoryDifficulty.master:
+        return ['🚀', '🛸', '🌠', '🪐', '🌌', '🛰️', '☄️', '🌙', '🔭', '🪨', '💫', '🌟', '🛺', '🚁', '✈️', '🚂', '🚢', '🏎️'];
+      case MemoryDifficulty.legend:
+        return ['🦁', '🐯', '🐻‍❄️', '🦊', '🐺', '🦝', '🐗', '🦌', '🦘', '🦬', '🐪', '🦒', '🦓', '🐘', '🦏', '🐊', '🦈', '🦅', '🦜', '🦩'];
+      case MemoryDifficulty.epic:
+        return ['🎸', '🎹', '🥁', '🎺', '🎻', '🪕', '🎷', '🪗', '🎵', '🎶', '🎤', '🎧', '🎼', '🪘', '🎙️', '🔔', '🪈', '🎚️', '🎛️', '🔊', '🎬', '🎞️'];
+      case MemoryDifficulty.nightmare:
+        return ['🏔️', '🌋', '🗻', '🏕️', '🏖️', '🏜️', '🏝️', '🌊', '🌿', '🍄', '🌺', '🌸', '🍀', '🌴', '🎋', '🌵', '🪸', '🐚', '🪨', '💧', '❄️', '🌪️', '🌈', '⛈️'];
+      case MemoryDifficulty.impossible:
+        return ['🧠', '👁️', '🫀', '🦷', '🦴', '👃', '👂', '🫁', '🧬', '🔬', '⚗️', '🧪', '💊', '🩺', '🩻', '🔭', '💡', '⚡', '🌡️', '🧲', '🔋', '💻', '📡', '🛸', '🤖'];
     }
   }
 
   // Ile par kart ma być dla danego poziomu trudności
   int _pairsForDifficulty() {
     switch (widget.difficulty) {
-      case MemoryDifficulty.easy:
-        return 6;  // 6 par → 12 kart
-      case MemoryDifficulty.medium:
-        return 8;
-      case MemoryDifficulty.hard:
-        return 10;
-      case MemoryDifficulty.advanced:
-        return 12;
-      case MemoryDifficulty.expert:
-        return 15;
+      case MemoryDifficulty.easy:       return 6;
+      case MemoryDifficulty.medium:     return 8;
+      case MemoryDifficulty.hard:       return 10;
+      case MemoryDifficulty.advanced:   return 12;
+      case MemoryDifficulty.expert:     return 15;
+      case MemoryDifficulty.master:     return 18;
+      case MemoryDifficulty.legend:     return 20;
+      case MemoryDifficulty.epic:       return 22;
+      case MemoryDifficulty.nightmare:  return 24;
+      case MemoryDifficulty.impossible: return 25;
     }
   }
 // 📐 Ile kolumn w siatce dla danego poziomu
@@ -1189,11 +1215,13 @@ class _MemoryGamePageState extends State<MemoryGamePage> {
       case MemoryDifficulty.easy:
       case MemoryDifficulty.medium:
       case MemoryDifficulty.hard:
-        return 4; // Poziomy 1-3: 4 kolumny
-      case MemoryDifficulty.advanced:
-        return 4; // Poziom 4: 4 kolumny
+      case MemoryDifficulty.advanced:   return 4;
       case MemoryDifficulty.expert:
-        return 5; // Poziom 5: 5 kolumn (mniej scrollu!)
+      case MemoryDifficulty.master:     return 5;
+      case MemoryDifficulty.legend:
+      case MemoryDifficulty.epic:
+      case MemoryDifficulty.nightmare:
+      case MemoryDifficulty.impossible: return 5;
     }
   }
 
@@ -1205,13 +1233,20 @@ class _MemoryGamePageState extends State<MemoryGamePage> {
     switch (widget.difficulty) {
       case MemoryDifficulty.easy:
       case MemoryDifficulty.medium:
-        return isWeb ? 0.60 : 0.75; // Przeglądarka: niższe | Telefon: normalne
+        return isWeb ? 0.60 : 0.75;
       case MemoryDifficulty.hard:
         return isWeb ? 0.65 : 0.80;
       case MemoryDifficulty.advanced:
         return isWeb ? 0.70 : 0.85;
       case MemoryDifficulty.expert:
-        return isWeb ? 0.75 : 0.90; // Poziom 5: mniejsze w obu
+      case MemoryDifficulty.master:
+        return isWeb ? 0.75 : 0.90;
+      case MemoryDifficulty.legend:
+      case MemoryDifficulty.epic:
+        return isWeb ? 0.80 : 0.85;
+      case MemoryDifficulty.nightmare:
+      case MemoryDifficulty.impossible:
+        return isWeb ? 0.85 : 0.80;
     }
   }
 
@@ -1457,7 +1492,7 @@ class _MemoryGamePageState extends State<MemoryGamePage> {
     return '${mins}:${secs.toString().padLeft(2, '0')}';
   }
 
-  // ⭐ Oblicz ile gwiazdek za czas
+// ⭐ Oblicz ile gwiazdek za czas
   int _calculateStars() {
     // Progi czasowe zależne od poziomu
     int gold, silver;
@@ -1482,6 +1517,26 @@ class _MemoryGamePageState extends State<MemoryGamePage> {
       case MemoryDifficulty.expert:
         gold = 75;
         silver = 150;
+        break;
+      case MemoryDifficulty.master:
+        gold = 90;
+        silver = 180;
+        break;
+      case MemoryDifficulty.legend:
+        gold = 110;
+        silver = 220;
+        break;
+      case MemoryDifficulty.epic:
+        gold = 130;
+        silver = 260;
+        break;
+      case MemoryDifficulty.nightmare:
+        gold = 150;
+        silver = 300;
+        break;
+      case MemoryDifficulty.impossible:
+        gold = 180;
+        silver = 360;
         break;
     }
 

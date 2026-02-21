@@ -188,8 +188,14 @@ class AppLocalizations {
       'memory_level_hard': 'Trudny (4x5, 10 par)',
       'memory_level_advanced': 'Zaawansowany (4x6, 12 par)',
       'memory_level_expert': 'Ekspert (5x6, 15 par)',
+      'memory_level_master': 'Mistrz (5x8, 18 par)',
+      'memory_level_legend': 'Legenda (5x8, 20 par)',
+      'memory_level_epic': 'Epicki (5x9, 22 pary)',
+      'memory_level_nightmare': 'Koszmar (5x10, 24 pary)',
+      'memory_level_impossible': 'Niemożliwy (5x10, 25 par)',
       'memory_choose_level': 'Wybierz poziom',
       'memory_locked': 'Poziom zablokowany. Najpierw ukończ poprzedni.',
+
       // 📅 KALENDARZ WYDARZEŃ
       'events_tab': 'Wydarzenia',
       'events_title': 'Kalendarz Wydarzeń',
@@ -387,8 +393,14 @@ class AppLocalizations {
       'memory_level_hard': 'Difícil (4x5, 10 pares)',
       'memory_level_advanced': 'Avanzado (4x6, 12 pares)',
       'memory_level_expert': 'Experto (5x6, 15 pares)',
+      'memory_level_master': 'Maestro (5x8, 18 pares)',
+      'memory_level_legend': 'Leyenda (5x8, 20 pares)',
+      'memory_level_epic': 'Épico (5x9, 22 pares)',
+      'memory_level_nightmare': 'Pesadilla (5x10, 24 pares)',
+      'memory_level_impossible': 'Imposible (5x10, 25 pares)',
       'memory_choose_level': 'Elige la dificultad',
       'memory_locked': 'Nivel bloqueado. Primero completa el anterior.',
+
       // 📅 CALENDARIO DE EVENTOS
       'events_tab': 'Eventos',
       'events_title': 'Calendario de Eventos',

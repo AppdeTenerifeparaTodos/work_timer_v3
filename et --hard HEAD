@@ -1,0 +1,24 @@
+[33maa764df[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmaster[m[33m)[m Dni tygodnia w powiadomieniach i w historii
+[33m98aa010[m Działający alarm z kalendarza na telefonie
+[33m66e1d5d[m Stan przed uruchomieniem alarmów na telefonie
+[33m31ceacd[m[33m ([m[1;31morigin/master[m[33m)[m V4: Kalendarz z przypomnieniami - wybór czasu (5 min do 1 tygodnia)
+[33m2072ad1[m V4: Kalendarz wydarzeń - dodawanie, lista, własne kategorie
+[33m5ff5ff8[m V4 (1.1.1): Wydanie na Google Play - wielkie ulepszenia
+[33me8fa7a2[m V4: START na górze + Memory osobne rekordy + mniejsze karty + reset czyści rekordy
+[33m14bf19e[m V4: Sticky Timer Header - timer zawsze widoczny na górze
+[33m080d2a2[m V4: Połączono Manual + Automat w jedną sekcję
+[33m6d42942[m V4: Lepsze podpowiedzi dla użytkownika
+[33ma343d61[m V4: Wielki przycisk START - pierwsze ulepszenie
+[33m6113159[m[33m ([m[1;33mtag: [m[1;33mv3.0-stable[m[33m)[m V3 STABLE - Memory Game + Typy uproszczone - OSTATNIA WERSJA PRZED V4
+[33m5963e36[m Memory Game: Różne emotki + system gwiazdek
+[33mc3ab54c[m Typy uprószczone - 3 podstawowe + własne
+[33mfb87922[m System poziomów i reset postępu w Memory Game
+[33m01647fd[m Dodane menu gier i tłumaczenia
+[33m8b64af3[m Dodaj ekran instrukcji obslugi (PL/ES)
+[33m3bdfce6[m 2026-02-02: release 1.0.6 z udostępnianiem i hiszpańskim opisem
+[33m983bfc6[m Backup: stały plik WorkStudyTimer/backup.json + przycisk udostępniania (share_plus)
+[33ma2e7391[m Backup: zapis historii do stałego pliku WorkStudyTimer/backup.json
+[33m75b068d[m Ostatnia dzialajaca wersja przed zmiana ID pod Play Console
+[33m9ff0983[m v1.0.0-beta: Przygotowanie do publikacji w Google Play
+[33m7cea23a[m Added Goals feature and Spanish translations
+[33m8d67b56[m Podpowiedzi w opisie + praca timera w tle

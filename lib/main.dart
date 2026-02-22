@@ -340,6 +340,130 @@ class _EventsPageState extends State<EventsPage> {
     );
   }
 
+  void _editEventDialog(CalendarEvent event) {
+    final loc = AppLocalizations.of(context)!;
+    final titleController = TextEditingController(text: event.title);
+    final notesController = TextEditingController(text: event.notes ?? '');
+    DateTime selectedDate = event.dateTime;
+    String selectedCategory = event.category;
+    int? selectedReminder = event.reminderMinutes;
+
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setStateDialog) => AlertDialog(
+          title: Text('✏️ ${loc.translate('edit_session')}'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Tytuł
+                TextField(
+                  controller: titleController,
+                  decoration: InputDecoration(
+                    labelText: loc.translate('event_title'),
+                    border: const OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                // Data i godzina
+                ListTile(
+                  leading: const Icon(Icons.calendar_today, color: Colors.indigo),
+                  title: Text(
+                    '${selectedDate.day}.${selectedDate.month}.${selectedDate.year} '
+                        '${selectedDate.hour.toString().padLeft(2, '0')}:${selectedDate.minute.toString().padLeft(2, '0')}',
+                  ),
+                  onTap: () async {
+                    final date = await showDatePicker(
+                      context: context,
+                      initialDate: selectedDate,
+                      firstDate: DateTime.now().subtract(const Duration(days: 365)),
+                      lastDate: DateTime.now().add(const Duration(days: 365 * 2)),
+                    );
+                    if (date != null) {
+                      final time = await showTimePicker(
+                        context: context,
+                        initialTime: TimeOfDay.fromDateTime(selectedDate),
+                      );
+                      if (time != null) {
+                        setStateDialog(() {
+                          selectedDate = DateTime(
+                            date.year, date.month, date.day,
+                            time.hour, time.minute,
+                          );
+                        });
+                      }
+                    }
+                  },
+                ),
+                const SizedBox(height: 12),
+                // Przypomnienie
+                DropdownButtonFormField<int?>(
+                  value: selectedReminder,
+                  decoration: InputDecoration(
+                    labelText: loc.translate('event_reminder'),
+                    border: const OutlineInputBorder(),
+                  ),
+                  items: [
+                    DropdownMenuItem(value: null, child: Text(loc.translate('cancel'))),
+                    DropdownMenuItem(value: 5, child: Text('5 min ${loc.translate('reminder_before')}')),
+                    DropdownMenuItem(value: 15, child: Text('15 min ${loc.translate('reminder_before')}')),
+                    DropdownMenuItem(value: 30, child: Text('30 min ${loc.translate('reminder_before')}')),
+                    DropdownMenuItem(value: 60, child: Text('1h ${loc.translate('reminder_before')}')),
+                    DropdownMenuItem(value: 1440, child: Text('1 ${loc.translate('reminder_day')}')),
+                  ],
+                  onChanged: (val) => setStateDialog(() => selectedReminder = val),
+                ),
+                const SizedBox(height: 12),
+                // Notatki
+                TextField(
+                  controller: notesController,
+                  decoration: InputDecoration(
+                    labelText: loc.translate('event_notes'),
+                    border: const OutlineInputBorder(),
+                  ),
+                  maxLines: 2,
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: Text(loc.translate('cancel')),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                if (titleController.text.trim().isEmpty) return;
+                final updated = CalendarEvent(
+                  id: event.id,
+                  title: titleController.text.trim(),
+                  dateTime: selectedDate,
+                  category: selectedCategory,
+                  notes: notesController.text.trim().isEmpty
+                      ? null
+                      : notesController.text.trim(),
+                  reminderMinutes: selectedReminder,
+                  createdAt: event.createdAt,
+                );
+                setState(() {
+                  final index = _events.indexWhere((e) => e.id == event.id);
+                  if (index != -1) _events[index] = updated;
+                });
+                _saveEvents();
+                Navigator.of(ctx).pop();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(loc.translate('session_updated'))),
+                );
+              },
+              child: Text(loc.translate('save')),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   void _addEventDialog() async {
     final loc = AppLocalizations.of(context)!;
     final titleController = TextEditingController();
@@ -464,19 +588,19 @@ class _EventsPageState extends State<EventsPage> {
                             return SimpleDialog(
                               title: Text(loc.translate('event_reminder')),
                               children: [
-                                SimpleDialogOption(child: Text('🔕 Bez przypomnienia'), onPressed: () => Navigator.pop(dialogCtx, -1)),
-                                SimpleDialogOption(child: Text('⏰ 5 minut przed'), onPressed: () => Navigator.pop(dialogCtx, 5)),
-                                SimpleDialogOption(child: Text('⏰ 10 minut przed'), onPressed: () => Navigator.pop(dialogCtx, 10)),
-                                SimpleDialogOption(child: Text('⏰ 15 minut przed'), onPressed: () => Navigator.pop(dialogCtx, 15)),
-                                SimpleDialogOption(child: Text('⏰ 30 minut przed'), onPressed: () => Navigator.pop(dialogCtx, 30)),
-                                SimpleDialogOption(child: Text('⏰ 1 godzinę przed'), onPressed: () => Navigator.pop(dialogCtx, 60)),
-                                SimpleDialogOption(child: Text('⏰ 2 godziny przed'), onPressed: () => Navigator.pop(dialogCtx, 120)),
-                                SimpleDialogOption(child: Text('⏰ 3 godziny przed'), onPressed: () => Navigator.pop(dialogCtx, 180)),
-                                SimpleDialogOption(child: Text('⏰ 6 godzin przed'), onPressed: () => Navigator.pop(dialogCtx, 360)),
-                                SimpleDialogOption(child: Text('⏰ 12 godzin przed'), onPressed: () => Navigator.pop(dialogCtx, 720)),
-                                SimpleDialogOption(child: Text('⏰ 1 dzień przed'), onPressed: () => Navigator.pop(dialogCtx, 1440)),
-                                SimpleDialogOption(child: Text('⏰ 2 dni przed'), onPressed: () => Navigator.pop(dialogCtx, 2880)),
-                                SimpleDialogOption(child: Text('⏰ 1 tydzień przed'), onPressed: () => Navigator.pop(dialogCtx, 10080)),
+                                SimpleDialogOption(child: Text('🔕 ${loc.translate('cancel')}'), onPressed: () => Navigator.pop(dialogCtx, -1)),
+                                SimpleDialogOption(child: Text('⏰ 5 min ${loc.translate('reminder_before')}'), onPressed: () => Navigator.pop(dialogCtx, 5)),
+                                SimpleDialogOption(child: Text('⏰ 10 min ${loc.translate('reminder_before')}'), onPressed: () => Navigator.pop(dialogCtx, 10)),
+                                SimpleDialogOption(child: Text('⏰ 15 min ${loc.translate('reminder_before')}'), onPressed: () => Navigator.pop(dialogCtx, 15)),
+                                SimpleDialogOption(child: Text('⏰ 30 min ${loc.translate('reminder_before')}'), onPressed: () => Navigator.pop(dialogCtx, 30)),
+                                SimpleDialogOption(child: Text('⏰ 1h ${loc.translate('reminder_before')}'), onPressed: () => Navigator.pop(dialogCtx, 60)),
+                                SimpleDialogOption(child: Text('⏰ 2h ${loc.translate('reminder_before')}'), onPressed: () => Navigator.pop(dialogCtx, 120)),
+                                SimpleDialogOption(child: Text('⏰ 3h ${loc.translate('reminder_before')}'), onPressed: () => Navigator.pop(dialogCtx, 180)),
+                                SimpleDialogOption(child: Text('⏰ 6h ${loc.translate('reminder_before')}'), onPressed: () => Navigator.pop(dialogCtx, 360)),
+                                SimpleDialogOption(child: Text('⏰ 12h ${loc.translate('reminder_before')}'), onPressed: () => Navigator.pop(dialogCtx, 720)),
+                                SimpleDialogOption(child: Text('⏰ ${loc.translate('reminder_day')}'), onPressed: () => Navigator.pop(dialogCtx, 1440)),
+                                SimpleDialogOption(child: Text('⏰ ${loc.translate('reminder_2days')}'), onPressed: () => Navigator.pop(dialogCtx, 2880)),
+                                SimpleDialogOption(child: Text('⏰ ${loc.translate('reminder_week')}'), onPressed: () => Navigator.pop(dialogCtx, 10080)),
                               ],
                             );
                           },
@@ -657,6 +781,10 @@ class _EventsPageState extends State<EventsPage> {
                   ),
                 ),
                 IconButton(
+                  icon: const Icon(Icons.edit, color: Colors.indigo),
+                  onPressed: () => _editEventDialog(event),
+                ),
+                IconButton(
                   icon: const Icon(Icons.delete, color: Colors.red),
                   onPressed: () => _deleteEvent(event.id),
                 ),
@@ -741,16 +869,19 @@ class _EventsPageState extends State<EventsPage> {
   }
 
   String _getReminderLabel(int minutes) {
+    final loc = AppLocalizations.of(context)!;
     if (minutes < 60) {
-      return '$minutes min przed';
+      return '$minutes min ${loc.translate('reminder_before')}';
     } else if (minutes < 1440) {
       final hours = minutes ~/ 60;
-      return '$hours h przed';
+      return '${hours}h ${loc.translate('reminder_before')}';
     } else if (minutes < 10080) {
+      if (minutes == 1440) return loc.translate('reminder_day');
+      if (minutes == 2880) return loc.translate('reminder_2days');
       final days = minutes ~/ 1440;
-      return '$days dni przed';
+      return '$days ${loc.translate('reminder_day')}';
     } else {
-      return '1 tydzień przed';
+      return loc.translate('reminder_week');
     }
   }
 } // ← KONIEC klasy _EventsPageState

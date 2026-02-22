@@ -12,6 +12,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:share_plus/share_plus.dart';
 import 'instructions_screen.dart';
 import 'notification_service.dart';
+import 'sudoku_game.dart';
 
 
 
@@ -816,6 +817,23 @@ class GamesMenuPage extends StatelessWidget {
                     ),
 
                     const SizedBox(height: 16),
+
+// Sudoku
+                    _buildGameCard(
+                      context,
+                      icon: Icons.grid_3x3,
+                      color: Colors.teal,
+                      title: loc.translate('sudoku_game_title'),
+                      description: loc.translate('sudoku_game_desc'),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const SudokuLevelsPage(),
+                          ),
+                        );
+                      },
+                    ),
 
                     // Snake - Coming Soon
                     _buildGameCard(

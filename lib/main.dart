@@ -991,7 +991,7 @@ class _MemoryLevelsPageState extends State<MemoryLevelsPage> {
           difficulty: difficulty,
           onLevelCompleted: () {
             final level = difficultyToLevel(difficulty);
-            if (level >= _maxUnlockedLevel && level < 5) {
+            if (level >= _maxUnlockedLevel && level < 10) {
               final nextLevel = level + 1;
               setState(() {
                 _maxUnlockedLevel = nextLevel;
@@ -1051,46 +1051,16 @@ class _MemoryLevelsPageState extends State<MemoryLevelsPage> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          _buildLevelTile(
-            title: loc.translate('memory_level_expert'),
-            difficulty: MemoryDifficulty.expert,
-          ),
-          _buildLevelTile(
-            title: loc.translate('memory_level_master'),
-            difficulty: MemoryDifficulty.master,
-          ),
-          _buildLevelTile(
-            title: loc.translate('memory_level_legend'),
-            difficulty: MemoryDifficulty.legend,
-          ),
-          _buildLevelTile(
-            title: loc.translate('memory_level_epic'),
-            difficulty: MemoryDifficulty.epic,
-          ),
-          _buildLevelTile(
-            title: loc.translate('memory_level_nightmare'),
-            difficulty: MemoryDifficulty.nightmare,
-          ),
-          _buildLevelTile(
-            title: loc.translate('memory_level_impossible'),
-            difficulty: MemoryDifficulty.impossible,
-          ),
-          _buildLevelTile(
-            title: loc.translate('memory_level_medium'),
-            difficulty: MemoryDifficulty.medium,
-          ),
-          _buildLevelTile(
-            title: loc.translate('memory_level_hard'),
-            difficulty: MemoryDifficulty.hard,
-          ),
-          _buildLevelTile(
-            title: loc.translate('memory_level_advanced'),
-            difficulty: MemoryDifficulty.advanced,
-          ),
-          _buildLevelTile(
-            title: loc.translate('memory_level_expert'),
-            difficulty: MemoryDifficulty.expert,
-          ),
+          _buildLevelTile(title: loc.translate('memory_level_easy'), difficulty: MemoryDifficulty.easy),
+          _buildLevelTile(title: loc.translate('memory_level_medium'), difficulty: MemoryDifficulty.medium),
+          _buildLevelTile(title: loc.translate('memory_level_hard'), difficulty: MemoryDifficulty.hard),
+          _buildLevelTile(title: loc.translate('memory_level_advanced'), difficulty: MemoryDifficulty.advanced),
+          _buildLevelTile(title: loc.translate('memory_level_expert'), difficulty: MemoryDifficulty.expert),
+          _buildLevelTile(title: loc.translate('memory_level_master'), difficulty: MemoryDifficulty.master),
+          _buildLevelTile(title: loc.translate('memory_level_legend'), difficulty: MemoryDifficulty.legend),
+          _buildLevelTile(title: loc.translate('memory_level_epic'), difficulty: MemoryDifficulty.epic),
+          _buildLevelTile(title: loc.translate('memory_level_nightmare'), difficulty: MemoryDifficulty.nightmare),
+          _buildLevelTile(title: loc.translate('memory_level_impossible'), difficulty: MemoryDifficulty.impossible),
         ],
       ),
     );

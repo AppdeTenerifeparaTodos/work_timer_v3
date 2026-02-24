@@ -13,7 +13,7 @@ import 'package:share_plus/share_plus.dart';
 import 'instructions_screen.dart';
 import 'notification_service.dart';
 import 'sudoku_game.dart';
-
+import 'pomodoro_page.dart';
 
 
 void main() async {
@@ -198,6 +198,8 @@ class _MainTabScreenState extends State<MainTabScreen> {
           StatisticsPageWrapper(),
           GamesMenuPage(), // ← ZMIENIONE!
           EventsPage(),
+          PomodoroPage()
+
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
@@ -225,6 +227,10 @@ class _MainTabScreenState extends State<MainTabScreen> {
           BottomNavigationBarItem(
             icon: Icon(Icons.event),
             label: AppLocalizations.of(context)!.translate('events_tab'),
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.timer_outlined),
+            label: AppLocalizations.of(context)!.translate('pomodoro_tab'),
           ),
         ],
       ),
@@ -1684,109 +1690,107 @@ class _MemoryGamePageState extends State<MemoryGamePage> {
         ],
       ),
       body: SafeArea(
-        child: Column(
-          children: [
-            // Statystyki
-            Container(
-              padding: const EdgeInsets.all(16),
-              color: Colors.white,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  _buildStatBox('⏱️ ${loc.translate('time')}', _formatTime(_seconds)),
-                  _buildStatBox('🎯 ${loc.translate('moves')}', _moves.toString()),
-                      () {
-                    final level = difficultyToLevel(widget.difficulty);
-                    final bestTime = _bestTimesByLevel[level] ?? 0;
-                    if (bestTime > 0) {
-                      return _buildStatBox('🏆 ${loc.translate('record')}', _formatTime(bestTime));
-                    }
-                    return const SizedBox();
-                  }(),
-                ],
-              ),
-            ),
-
-            // Instrukcja
-            if (!_gameStarted)
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              // Statystyki
               Container(
-                margin: const EdgeInsets.all(16),
                 padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.amber.shade100,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.amber.shade700, width: 2),
-                ),
+                color: Colors.white,
                 child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    const Icon(Icons.info_outline, color: Colors.amber),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        loc.translate('game_instructions'),
-                        style: TextStyle(fontSize: 14),
-                      ),
-                    ),
+                    _buildStatBox('⏱️ ${loc.translate('time')}', _formatTime(_seconds)),
+                    _buildStatBox('🎯 ${loc.translate('moves')}', _moves.toString()),
+                        () {
+                      final level = difficultyToLevel(widget.difficulty);
+                      final bestTime = _bestTimesByLevel[level] ?? 0;
+                      if (bestTime > 0) {
+                        return _buildStatBox('🏆 ${loc.translate('record')}', _formatTime(bestTime));
+                      }
+                      return const SizedBox();
+                    }(),
                   ],
                 ),
               ),
 
-            // Plansza z kartami
-            Expanded(
-              child: Center(
-                child: Padding(
+              // Instrukcja
+              if (!_gameStarted)
+                Container(
+                  margin: const EdgeInsets.all(16),
                   padding: const EdgeInsets.all(16),
-                  child: GridView.builder(
-                    shrinkWrap: true,
-                    physics: null, // domyślne scrollowanie
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: _getCrossAxisCount(),
-                      crossAxisSpacing: 8,
-                      mainAxisSpacing: 8,
-                      childAspectRatio: _getAspectRatio(),
-                    ),
-                    itemCount: _cards.length,
-                    itemBuilder: (context, index) {
-                      final card = _cards[index];
-                      return _buildCard(card, index);
-                    },
+                  decoration: BoxDecoration(
+                    color: Colors.amber.shade100,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.amber.shade700, width: 2),
                   ),
-                ),
-              ),
-            ),
-
-            // High scores
-                () {
-              final level = difficultyToLevel(widget.difficulty);
-              final bestTime = _bestTimesByLevel[level] ?? 0;
-              final bestMoves = _bestMovesByLevel[level] ?? 0;
-
-              if (bestTime > 0 || bestMoves > 0) {
-                return Container(
-                  padding: const EdgeInsets.all(16),
-                  color: Colors.white,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  child: Row(
                     children: [
-                      Text(
-                        loc.translate('your_records'),
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
+                      const Icon(Icons.info_outline, color: Colors.amber),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          loc.translate('game_instructions'),
+                          style: TextStyle(fontSize: 14),
                         ),
                       ),
-                      const SizedBox(height: 8),
-                      if (bestTime > 0)
-                        Text('${loc.translate('best_time')} ${_formatTime(bestTime)}'),
-                      if (bestMoves > 0)
-                        Text('${loc.translate('fewest_moves')} $bestMoves'),
                     ],
                   ),
-                );
-              }
-              return const SizedBox();
-            }(),
-          ],
+                ),
+
+              // Plansza z kartami
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: _getCrossAxisCount(),
+                    crossAxisSpacing: 8,
+                    mainAxisSpacing: 8,
+                    childAspectRatio: _getAspectRatio(),
+                  ),
+                  itemCount: _cards.length,
+                  itemBuilder: (context, index) {
+                    final card = _cards[index];
+                    return _buildCard(card, index);
+                  },
+                ),
+              ),
+
+              // High scores
+                  () {
+                final level = difficultyToLevel(widget.difficulty);
+                final bestTime = _bestTimesByLevel[level] ?? 0;
+                final bestMoves = _bestMovesByLevel[level] ?? 0;
+
+                if (bestTime > 0 || bestMoves > 0) {
+                  return Container(
+                    padding: const EdgeInsets.all(16),
+                    color: Colors.white,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          loc.translate('your_records'),
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        if (bestTime > 0)
+                          Text('${loc.translate('best_time')} ${_formatTime(bestTime)}'),
+                        if (bestMoves > 0)
+                          Text('${loc.translate('fewest_moves')} $bestMoves'),
+                      ],
+                    ),
+                  );
+                }
+                return const SizedBox();
+              }(),
+            ],
+          ),
         ),
       ),
     );
@@ -1930,7 +1934,7 @@ class _StatisticsPageContentState extends State<StatisticsPageContent> {
     final map = <String, Duration>{};
 
     for (final entry in _filteredHistory) {
-      final key = entry.type;
+      final key = entry.type.toLowerCase();
       map[key] = (map[key] ?? Duration.zero) + entry.duration;
     }
 

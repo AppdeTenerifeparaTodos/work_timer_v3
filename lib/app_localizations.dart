@@ -246,6 +246,22 @@ class AppLocalizations {
       'today_events': 'Dziś',
       'upcoming_events': 'Nadchodzące',
       'past_events': 'Przeszłe',
+
+      // 🍅 POMODORO
+      'pomodoro_tab': 'Pomodoro',
+      'pomodoro_title': 'Timer Pomodoro',
+      'pomodoro_work': 'Praca',
+      'pomodoro_break': 'Przerwa',
+      'pomodoro_long_break': 'Długa przerwa',
+      'pomodoro_start': 'Start',
+      'pomodoro_pause': 'Pauza',
+      'pomodoro_reset': 'Reset',
+      'pomodoro_sessions': 'Sesje',
+      'pomodoro_settings': 'Ustawienia',
+      'pomodoro_work_time': 'Czas pracy (min)',
+      'pomodoro_break_time': 'Czas przerwy (min)',
+      'pomodoro_long_break_time': 'Długa przerwa (min)',
+      'pomodoro_sessions_until_long': 'Sesji do długiej przerwy',
     },
 
     'es': {
@@ -480,6 +496,22 @@ class AppLocalizations {
       'today_events': 'Hoy',
       'upcoming_events': 'Próximos',
       'past_events': 'Pasados',
+
+// 🍅 POMODORO
+      'pomodoro_tab': 'Pomodoro',
+      'pomodoro_title': 'Temporizador Pomodoro',
+      'pomodoro_work': 'Trabajo',
+      'pomodoro_break': 'Descanso',
+      'pomodoro_long_break': 'Descanso largo',
+      'pomodoro_start': 'Iniciar',
+      'pomodoro_pause': 'Pausar',
+      'pomodoro_reset': 'Reiniciar',
+      'pomodoro_sessions': 'Sesiones',
+      'pomodoro_settings': 'Ajustes',
+      'pomodoro_work_time': 'Tiempo de trabajo (min)',
+      'pomodoro_break_time': 'Tiempo de descanso (min)',
+      'pomodoro_long_break_time': 'Descanso largo (min)',
+      'pomodoro_sessions_until_long': 'Sesiones hasta descanso largo',
     },
   };
 

@@ -37,6 +37,20 @@ class _WorkStudyTimerAppState extends State<WorkStudyTimerApp> {
     setState(() {
       _locale = Locale(languageCode, '');
     });
+    SharedPreferences.getInstance().then((prefs) {
+      prefs.setString('selected_language', languageCode);
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    SharedPreferences.getInstance().then((prefs) {
+      final lang = prefs.getString('selected_language') ?? 'pl';
+      setState(() {
+        _locale = Locale(lang, '');
+      });
+    });
   }
 
   @override
@@ -53,23 +67,139 @@ class _WorkStudyTimerAppState extends State<WorkStudyTimerApp> {
       supportedLocales: const [
         Locale('pl', ''),
         Locale('es', ''),
+        Locale('en', ''),
       ],
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.indigo),
+        brightness: Brightness.dark,
+        scaffoldBackgroundColor: const Color(0xFF0A0A0F),
+        colorScheme: const ColorScheme.dark(
+          primary:   Color(0xFF6366F1),   // neonowy indigo
+          secondary: Color(0xFF00D084),   // neonowy zielony
+          surface:   Color(0xFF111118),
+          onSurface: Colors.white,
+        ),
         useMaterial3: true,
+
+        // AppBar
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Color(0xFF0D0D14),
+          foregroundColor: Colors.white,
+          elevation: 0,
+          centerTitle: true,
+        ),
+
+        // BottomNavigationBar
+        bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+          backgroundColor: Color(0xFF0D0D14),
+          selectedItemColor: Color(0xFF6366F1),
+          unselectedItemColor: Color(0xFF555566),
+          type: BottomNavigationBarType.fixed,
+          elevation: 0,
+        ),
+
+        // Karty
+        cardTheme: CardThemeData(
+          color: const Color(0xFF111118),
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side: BorderSide(color: Colors.white.withOpacity(0.08)),
+          ),
+        ),
+
+        // Przyciski ElevatedButton
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFF6366F1),
+            foregroundColor: Colors.white,
             padding: const EdgeInsets.symmetric(vertical: 14),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),
           ),
         ),
-        cardTheme: const CardThemeData(
-          elevation: 3,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(12)),
+
+        // OutlinedButton
+        outlinedButtonTheme: OutlinedButtonThemeData(
+          style: OutlinedButton.styleFrom(
+            foregroundColor: const Color(0xFF6366F1),
+            side: const BorderSide(color: Color(0xFF6366F1), width: 2),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
           ),
+        ),
+
+        // TextField
+        inputDecorationTheme: InputDecorationTheme(
+          filled: true,
+          fillColor: const Color(0xFF1A1A24),
+          labelStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
+          hintStyle: TextStyle(color: Colors.white.withOpacity(0.25)),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.white.withOpacity(0.1)),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.white.withOpacity(0.1)),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: Color(0xFF6366F1), width: 2),
+          ),
+        ),
+
+        // Divider
+        dividerTheme: DividerThemeData(
+          color: Colors.white.withOpacity(0.08),
+        ),
+
+        // Chip (ChoiceChip filtry)
+        chipTheme: ChipThemeData(
+          backgroundColor: const Color(0xFF1A1A24),
+          selectedColor: const Color(0xFF6366F1),
+          labelStyle: const TextStyle(color: Colors.white),
+          side: BorderSide(color: Colors.white.withOpacity(0.1)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
+
+        // Dialog
+        dialogTheme: DialogThemeData(
+          backgroundColor: const Color(0xFF111118),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+            side: BorderSide(color: Colors.white.withOpacity(0.1)),
+          ),
+        ),
+
+        // ListTile
+        listTileTheme: const ListTileThemeData(
+          textColor: Colors.white,
+          iconColor: Color(0xFF6366F1),
+        ),
+
+        // PopupMenu
+        popupMenuTheme: PopupMenuThemeData(
+          color: const Color(0xFF1A1A24),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side: BorderSide(color: Colors.white.withOpacity(0.1)),
+          ),
+          textStyle: const TextStyle(color: Colors.white),
+        ),
+
+        // Switch & Slider
+        switchTheme: SwitchThemeData(
+          thumbColor: WidgetStateProperty.all(const Color(0xFF6366F1)),
+          trackColor: WidgetStateProperty.all(const Color(0xFF6366F1).withOpacity(0.3)),
+        ),
+        sliderTheme: const SliderThemeData(
+          activeTrackColor: Color(0xFF6366F1),
+          thumbColor: Color(0xFF6366F1),
+          overlayColor: Color(0x336366F1),
         ),
       ),
       home: MainTabScreen(
@@ -202,38 +332,72 @@ class _MainTabScreenState extends State<MainTabScreen> {
 
         ],
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
-        selectedItemColor: Colors.indigo,
-        type: BottomNavigationBarType.fixed, // ← WAŻNE! Dla 4+ zakładek
-        items: [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.timer),
-            label: 'Timer',
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          color: const Color(0xFF0D0D14),
+          border: Border(
+            top: BorderSide(color: Colors.white.withOpacity(0.08)),
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.bar_chart),
-            label: AppLocalizations.of(context)!.translate('summary_title'),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.4),
+              blurRadius: 20,
+              offset: const Offset(0, -4),
+            ),
+          ],
+        ),
+        child: BottomNavigationBar(
+          currentIndex: _currentIndex,
+          onTap: (index) => setState(() => _currentIndex = index),
+          selectedItemColor: const Color(0xFF6366F1),
+          unselectedItemColor: const Color(0xFF444455),
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          type: BottomNavigationBarType.fixed,
+          selectedLabelStyle: const TextStyle(
+            fontWeight: FontWeight.w700,
+            fontSize: 11,
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.gamepad),
-            label: AppLocalizations.of(context)!.translate('games_tab'),
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.event),
-            label: AppLocalizations.of(context)!.translate('events_tab'),
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.timer_outlined),
-            label: AppLocalizations.of(context)!.translate('pomodoro_tab'),
-          ),
-        ],
+          items: [
+            BottomNavigationBarItem(
+              icon: const Icon(Icons.timer_outlined),
+              activeIcon: _navIcon(Icons.timer, const Color(0xFF6366F1)),
+              label: 'Timer',
+            ),
+            BottomNavigationBarItem(
+              icon: const Icon(Icons.bar_chart_outlined),
+              activeIcon: _navIcon(Icons.bar_chart, const Color(0xFF00D084)),
+              label: AppLocalizations.of(context)!.translate('summary_title'),
+            ),
+            BottomNavigationBarItem(
+              icon: const Icon(Icons.gamepad_outlined),
+              activeIcon: _navIcon(Icons.gamepad, const Color(0xFFFF6B35)),
+              label: AppLocalizations.of(context)!.translate('games_tab'),
+            ),
+            BottomNavigationBarItem(
+              icon: const Icon(Icons.event_outlined),
+              activeIcon: _navIcon(Icons.event, const Color(0xFF00B4D8)),
+              label: AppLocalizations.of(context)!.translate('events_tab'),
+            ),
+            BottomNavigationBarItem(
+              icon: const Icon(Icons.timer_outlined),
+              activeIcon: _navIcon(Icons.timer, const Color(0xFFFF3D3D)),
+              label: AppLocalizations.of(context)!.translate('pomodoro_tab'),
+            ),
+          ],
+        ),
       ),
+    );
+  }
+
+  Widget _navIcon(IconData icon, Color color) {
+    return Container(
+      padding: const EdgeInsets.all(6),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.15),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Icon(icon, color: color, size: 20),
     );
   }
 }
@@ -2120,7 +2284,7 @@ class _StatisticsPageContentState extends State<StatisticsPageContent> {
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
-        title: const Text('Statystyki'),
+        title: Text(AppLocalizations.of(context)!.translate('summary_title')),
         centerTitle: true,
         actions: [
           IconButton(
@@ -2151,13 +2315,25 @@ class _StatisticsPageContentState extends State<StatisticsPageContent> {
                 scrollDirection: Axis.horizontal,
                 child: Row(
                   children: [
-                    _buildPeriodChip('Ten tydzień', 'week'),
+                    _buildPeriodChip(
+                      AppLocalizations.of(context)!.translate('this_week'),
+                      'week',
+                    ),
                     const SizedBox(width: 8),
-                    _buildPeriodChip('Ten miesiąc', 'month'),
+                    _buildPeriodChip(
+                      AppLocalizations.of(context)!.translate('this_month'),
+                      'month',
+                    ),
                     const SizedBox(width: 8),
-                    _buildPeriodChip('Ostatnie 30 dni', '30days'),
+                    _buildPeriodChip(
+                      AppLocalizations.of(context)!.translate('range'),
+                      '30days',
+                    ),
                     const SizedBox(width: 8),
-                    _buildPeriodChip('Wszystko', 'all'),
+                    _buildPeriodChip(
+                      AppLocalizations.of(context)!.translate('all'),
+                      'all',
+                    ),
                   ],
                 ),
               ),
@@ -2168,7 +2344,8 @@ class _StatisticsPageContentState extends State<StatisticsPageContent> {
                 children: [
                   Expanded(
                     child: _buildStatCard(
-                      'Suma czasu',
+                      AppLocalizations.of(context)!
+                          .translate('summary_total'),
                       _formatDuration(totalTime),
                       Icons.timer,
                       Colors.indigo,
@@ -2177,7 +2354,8 @@ class _StatisticsPageContentState extends State<StatisticsPageContent> {
                   const SizedBox(width: 12),
                   Expanded(
                     child: _buildStatCard(
-                      'Sesji',
+                      AppLocalizations.of(context)!
+                          .translate('pomodoro_sessions'),
                       '${_filteredHistory.length}',
                       Icons.list_alt,
                       Colors.green,
@@ -2190,7 +2368,8 @@ class _StatisticsPageContentState extends State<StatisticsPageContent> {
                 children: [
                   Expanded(
                     child: _buildStatCard(
-                      'Średnio/dzień',
+                      AppLocalizations.of(context)!
+                          .translate('avg_per_day'),
                       _formatDuration(avgPerDay),
                       Icons.calendar_today,
                       Colors.orange,
@@ -2199,7 +2378,8 @@ class _StatisticsPageContentState extends State<StatisticsPageContent> {
                   const SizedBox(width: 12),
                   Expanded(
                     child: _buildStatCard(
-                      'Najlepszy dzień',
+                      AppLocalizations.of(context)!
+                          .translate('best_day'),
                       mostProductiveDay,
                       Icons.star,
                       Colors.amber,
@@ -2218,9 +2398,10 @@ class _StatisticsPageContentState extends State<StatisticsPageContent> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Ostatnie 7 dni',
-                        style: TextStyle(
+                      Text(
+                        AppLocalizations.of(context)!
+                            .translate('last_7_days'),
+                        style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),
@@ -2229,7 +2410,12 @@ class _StatisticsPageContentState extends State<StatisticsPageContent> {
                       SizedBox(
                         height: 200,
                         child: barData.isEmpty
-                            ? const Center(child: Text('Brak danych'))
+                            ? Center(
+                                child: Text(
+                                  AppLocalizations.of(context)!
+                                      .translate('no_data'),
+                                ),
+                              )
                             : BarChart(
                           BarChartData(
                             alignment: BarChartAlignment.spaceAround,
@@ -2254,7 +2440,22 @@ class _StatisticsPageContentState extends State<StatisticsPageContent> {
                                   getTitlesWidget: (value, meta) {
                                     final now = DateTime.now();
                                     final day = now.subtract(Duration(days: 6 - value.toInt()));
-                                    final weekdays = ['Pn', 'Wt', 'Śr', 'Cz', 'Pt', 'So', 'Nd'];
+                                    final weekdays = [
+                                      AppLocalizations.of(context)!
+                                          .translate('day_mon'),
+                                      AppLocalizations.of(context)!
+                                          .translate('day_tue'),
+                                      AppLocalizations.of(context)!
+                                          .translate('day_wed'),
+                                      AppLocalizations.of(context)!
+                                          .translate('day_thu'),
+                                      AppLocalizations.of(context)!
+                                          .translate('day_fri'),
+                                      AppLocalizations.of(context)!
+                                          .translate('day_sat'),
+                                      AppLocalizations.of(context)!
+                                          .translate('day_sun'),
+                                    ];
                                     return Text(
                                       weekdays[(day.weekday - 1) % 7],
                                       style: TextStyle(fontSize: 10),
@@ -2287,24 +2488,29 @@ class _StatisticsPageContentState extends State<StatisticsPageContent> {
               // Wykres kołowy
               Card(
                 elevation: 2,
+                color: Theme.of(context).cardColor,
                 child: Padding(
                   padding: const EdgeInsets.all(16),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Podział czasu',
-                        style: TextStyle(
+                      Text(
+                        AppLocalizations.of(context)!
+                            .translate('time_distribution'),
+                        style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       const SizedBox(height: 20),
                       if (pieData.isEmpty)
-                        const Center(
+                        Center(
                           child: Padding(
-                            padding: EdgeInsets.all(32),
-                            child: Text('Brak danych'),
+                            padding: const EdgeInsets.all(32),
+                            child: Text(
+                              AppLocalizations.of(context)!
+                                  .translate('no_data'),
+                            ),
                           ),
                         )
                       else
@@ -2368,21 +2574,26 @@ class _StatisticsPageContentState extends State<StatisticsPageContent> {
               // Szczegółowe podsumowanie
               Card(
                 elevation: 2,
+                color: Theme.of(context).cardColor,
                 child: Padding(
                   padding: const EdgeInsets.all(16),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Szczegółowe podsumowanie',
-                        style: TextStyle(
+                      Text(
+                        AppLocalizations.of(context)!
+                            .translate('detailed_summary'),
+                        style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       const SizedBox(height: 12),
                       if (totalByType.isEmpty)
-                        const Text('Brak danych')
+                        Text(
+                          AppLocalizations.of(context)!
+                              .translate('no_data'),
+                        )
                       else
                         ...totalByType.entries.map((entry) {
                           final percentage = totalTime.inMinutes > 0
@@ -2457,7 +2668,7 @@ class _StatisticsPageContentState extends State<StatisticsPageContent> {
       },
       selectedColor: Colors.indigo,
       labelStyle: TextStyle(
-        color: isSelected ? Colors.white : Colors.black,
+        color: isSelected ? Colors.white : Colors.white70,
         fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
       ),
     );
@@ -2713,18 +2924,28 @@ class _HomePageState extends State<HomePage> {
                   children: [
                     TextField(
                       controller: nameController,
+                      style: const TextStyle(color: Colors.black87),
                       decoration: InputDecoration(
                         labelText: loc.translate('goal_name'),
                         hintText: loc.translate('goal_name_hint'),
+                        labelStyle: const TextStyle(color: Colors.black54),
+                        hintStyle: const TextStyle(color: Colors.black38),
+                        filled: true,
+                        fillColor: Colors.white,
                       ),
                     ),
                     const SizedBox(height: 16),
                     TextField(
                       controller: hoursController,
                       keyboardType: TextInputType.number,
+                      style: const TextStyle(color: Colors.black87),
                       decoration: InputDecoration(
                         labelText: loc.translate('goal_hours'),
                         hintText: loc.translate('goal_hours_hint'),
+                        labelStyle: const TextStyle(color: Colors.black54),
+                        hintStyle: const TextStyle(color: Colors.black38),
+                        filled: true,
+                        fillColor: Colors.white,
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -3385,8 +3606,13 @@ class _HomePageState extends State<HomePage> {
                 children: [
                   TextField(
                     controller: descController,
+                    style: const TextStyle(color: Colors.black87),
                     decoration: InputDecoration(
                       labelText: loc.translate('description_label'),
+                      labelStyle: const TextStyle(color: Colors.black54),
+                      hintStyle: const TextStyle(color: Colors.black38),
+                      filled: true,
+                      fillColor: Colors.white,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -3398,6 +3624,7 @@ class _HomePageState extends State<HomePage> {
                               '${editDate.year.toString().padLeft(4, '0')}-'
                               '${editDate.month.toString().padLeft(2, '0')}-'
                               '${editDate.day.toString().padLeft(2, '0')}',
+                          style: const TextStyle(color: Colors.black87),
                         ),
                       ),
                       TextButton(
@@ -3416,23 +3643,36 @@ class _HomePageState extends State<HomePage> {
                   const SizedBox(height: 8),
                   TextField(
                     controller: startController,
+                    style: const TextStyle(color: Colors.black87),
                     decoration: InputDecoration(
                       labelText: loc.translate('start_time_label'),
                       hintText: loc.translate('start_time_hint'),
+                      labelStyle: const TextStyle(color: Colors.black54),
+                      hintStyle: const TextStyle(color: Colors.black38),
+                      filled: true,
+                      fillColor: Colors.white,
                     ),
                   ),
                   const SizedBox(height: 8),
                   TextField(
                     controller: endController,
+                    style: const TextStyle(color: Colors.black87),
                     decoration: InputDecoration(
                       labelText: loc.translate('end_time_label'),
                       hintText: loc.translate('end_time_hint'),
+                      labelStyle: const TextStyle(color: Colors.black54),
+                      hintStyle: const TextStyle(color: Colors.black38),
+                      filled: true,
+                      fillColor: Colors.white,
                     ),
                   ),
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      Text('${loc.translate('type')}:'),
+                      Text(
+                        '${loc.translate('type')}:',
+                        style: const TextStyle(color: Colors.black87),
+                      ),
                       const SizedBox(width: 8),
                       _buildTypeDropdown(
                         context: context,
@@ -3625,9 +3865,14 @@ class _HomePageState extends State<HomePage> {
                                   title: Text(loc.translate('add_custom_type_title')),
                                   content: TextField(
                                     controller: controller,
+                                    style: const TextStyle(color: Colors.black87),
                                     decoration: InputDecoration(
                                       labelText: loc.translate('type_name_label'),
                                       hintText: loc.translate('custom_type_hint'),
+                                      labelStyle: const TextStyle(color: Colors.black54),
+                                      hintStyle: const TextStyle(color: Colors.black38),
+                                      filled: true,
+                                      fillColor: Colors.white,
                                     ),
                                   ),
                                   actions: [
@@ -3700,9 +3945,12 @@ class _HomePageState extends State<HomePage> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(_typeLabel(value, context)),
+            Text(
+              _typeLabel(value, context),
+              style: const TextStyle(color: Colors.black87),
+            ),
             const SizedBox(width: 8),
-            const Icon(Icons.arrow_drop_down),
+            const Icon(Icons.arrow_drop_down, color: Colors.black54),
           ],
         ),
       ),
@@ -4110,6 +4358,26 @@ class _HomePageState extends State<HomePage> {
             },
             tooltip: 'Español',
           ),
+          IconButton(
+            icon: Container(
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: widget.currentLocale.languageCode == 'en'
+                      ? Colors.blue
+                      : Colors.grey.shade400,
+                  width: widget.currentLocale.languageCode == 'en' ? 3 : 1,
+                ),
+              ),
+              child: const Center(
+                child: Text('🇬🇧', style: TextStyle(fontSize: 20)),
+              ),
+            ),
+            onPressed: () => widget.onLanguageChange('en'),
+            tooltip: 'English',
+          ),
           const SizedBox(width: 8),
           // Menu z ustawieniami - bardziej widoczne
           PopupMenuButton<String>(
@@ -4168,7 +4436,7 @@ class _HomePageState extends State<HomePage> {
                     const SizedBox(width: 12),
                     Text(
                       loc.translate('change_background'),
-                      style: const TextStyle(fontSize: 16),
+                      style: const TextStyle(fontSize: 16, color: Colors.black87),
                     ),
                   ],
                 ),
@@ -4181,7 +4449,7 @@ class _HomePageState extends State<HomePage> {
                     const SizedBox(width: 12),
                     Text(
                       loc.translate('remove_background'),
-                      style: const TextStyle(fontSize: 16),
+                      style: const TextStyle(fontSize: 16, color: Colors.black87),
                     ),
                   ],
                 ),
@@ -4195,7 +4463,7 @@ class _HomePageState extends State<HomePage> {
                     const SizedBox(width: 12),
                     Text(
                       loc.translate('icon_color_picker'),
-                      style: const TextStyle(fontSize: 16),
+                      style: const TextStyle(fontSize: 16, color: Colors.black87),
                     ),
                   ],
                 ),
@@ -4210,7 +4478,7 @@ class _HomePageState extends State<HomePage> {
                     const SizedBox(width: 12),
                     Text(
                       AppLocalizations.of(context).translate('instructions_title'),
-                      style: const TextStyle(fontSize: 16),
+                      style: const TextStyle(fontSize: 16, color: Colors.black87),
                     ),
                   ],
                 ),
@@ -4477,7 +4745,11 @@ class _HomePageState extends State<HomePage> {
 // Nagłówek sekcji
                   Text(
                     loc.translate('new_activity_section'),
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
                   ),
                   const SizedBox(height: 8),
 
@@ -4489,9 +4761,12 @@ class _HomePageState extends State<HomePage> {
                       TextField(
                         controller: _activeDescController,
                         focusNode: _activeFocusNode,
+                        style: const TextStyle(color: Colors.black87),
                         decoration: InputDecoration(
                           labelText: loc.translate('description_label'),
                           border: const OutlineInputBorder(),
+                          labelStyle: const TextStyle(color: Colors.black54),
+                          hintStyle: const TextStyle(color: Colors.black38),
                           filled: true,
                           fillColor: Colors.white,
                         ),
@@ -4542,7 +4817,10 @@ class _HomePageState extends State<HomePage> {
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      Text(loc.translate('type')),
+                      Text(
+                        loc.translate('type'),
+                        style: const TextStyle(color: Colors.black87),
+                      ),
                       const SizedBox(width: 8),
                       _buildTypeDropdown(
                         context: context,
@@ -4631,6 +4909,7 @@ class _HomePageState extends State<HomePage> {
                                     '${_manualDate.year.toString().padLeft(4, '0')}-'
                                     '${_manualDate.month.toString().padLeft(2, '0')}-'
                                     '${_manualDate.day.toString().padLeft(2, '0')}',
+                                style: const TextStyle(color: Colors.black87),
                               ),
                             ),
                             TextButton(
@@ -4655,10 +4934,13 @@ class _HomePageState extends State<HomePage> {
                               child: TextField(
                                 controller: _manualStartController,
                                 keyboardType: TextInputType.datetime,
+                                style: const TextStyle(color: Colors.black87),
                                 decoration: InputDecoration(
                                   labelText: loc.translate('start_time_label'),
                                   hintText: loc.translate('start_time_hint'),
                                   border: const OutlineInputBorder(),
+                                  labelStyle: const TextStyle(color: Colors.black54),
+                                  hintStyle: const TextStyle(color: Colors.black38),
                                   filled: true,
                                   fillColor: Colors.white,
                                 ),
@@ -4669,10 +4951,13 @@ class _HomePageState extends State<HomePage> {
                               child: TextField(
                                 controller: _manualEndController,
                                 keyboardType: TextInputType.datetime,
+                                style: const TextStyle(color: Colors.black87),
                                 decoration: InputDecoration(
                                   labelText: loc.translate('end_time_label'),
                                   hintText: loc.translate('end_time_hint'),
                                   border: const OutlineInputBorder(),
+                                  labelStyle: const TextStyle(color: Colors.black54),
+                                  hintStyle: const TextStyle(color: Colors.black38),
                                   filled: true,
                                   fillColor: Colors.white,
                                 ),
@@ -4715,18 +5000,24 @@ class _HomePageState extends State<HomePage> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       // 1. Zapisz na telefonie (pełny backup)
-                      IconButton(
-                        tooltip: loc.translate('export'),
-                        icon: const Icon(Icons.upload_file),
-                        onPressed: () {
-                          _exportAllData(); // eksport: historia + cele + wydarzenia
-                        },
-                      ),
+                        IconButton(
+                          tooltip: loc.translate('export'),
+                          icon: Icon(
+                            Icons.upload_file,
+                            color: Colors.grey[700],
+                          ),
+                          onPressed: () {
+                            _exportAllData(); // eksport: historia + cele + wydarzenia
+                          },
+                        ),
                       // 2. Udostępnij backup (np. e‑mail, WhatsApp)
-                      IconButton(
-                        tooltip: 'Udostępnij backup',
-                        icon: const Icon(Icons.share),
-                        onPressed: () async {
+                        IconButton(
+                          tooltip: 'Udostępnij backup',
+                          icon: Icon(
+                            Icons.share,
+                            color: Colors.grey[700],
+                          ),
+                          onPressed: () async {
                           final file = await _exportAllData(); // najpierw zapisz plik
                           if (file != null) {
                             await Share.shareXFiles(
@@ -4737,10 +5028,13 @@ class _HomePageState extends State<HomePage> {
                         },
                       ),
                       // 3. Import z pliku backupu
-                      IconButton(
-                        tooltip: loc.translate('import'),
-                        icon: const Icon(Icons.download),
-                        onPressed: () {
+                        IconButton(
+                          tooltip: loc.translate('import'),
+                          icon: Icon(
+                            Icons.download,
+                            color: Colors.grey[700],
+                          ),
+                          onPressed: () {
                           _importAllData(); // import: historia + cele + wydarzenia
                         },
                       ),
@@ -4808,10 +5102,13 @@ class _HomePageState extends State<HomePage> {
 
                   const SizedBox(height: 8),
                   TextField(
+                    style: const TextStyle(color: Colors.black87),
                     decoration: InputDecoration(
                       labelText: loc.translate('search_hint'),
                       prefixIcon: const Icon(Icons.search),
                       border: const OutlineInputBorder(),
+                      labelStyle: const TextStyle(color: Colors.black54),
+                      hintStyle: const TextStyle(color: Colors.black38),
                       filled: true,
                       fillColor: Colors.white,
                     ),
@@ -4823,7 +5120,10 @@ class _HomePageState extends State<HomePage> {
                   ),
                   const SizedBox(height: 8),
                   if (_filteredHistory.isEmpty)
-                    Text(loc.translate('history_empty'))
+                    Text(
+                      loc.translate('history_empty'),
+                      style: const TextStyle(color: Colors.black54),
+                    )
                   else
                     ListView.builder(
                       shrinkWrap: true,

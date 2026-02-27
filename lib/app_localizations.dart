@@ -14,7 +14,6 @@ class AppLocalizations {
 
   static const Map<String, Map<String, String>> _localizedValues = {
     'pl': {
-      // OGÓLNE
       'app_title': 'Work Study Timer',
       'language': 'Język',
       'range': 'Zakres',
@@ -23,8 +22,6 @@ class AppLocalizations {
       'this_month': 'Ten miesiąc',
       'all': 'Wszystko',
       'search_hint': 'Szukaj po opisie (np. Margarita, Finca)',
-
-      // INSTRUKCJA OBSŁUGI
       'instructions_title': 'Instrukcja obsługi',
       'instructions_content':
       'Work Study Timer pomaga śledzić czas nauki i pracy.\n\n'
@@ -32,30 +29,23 @@ class AppLocalizations {
           '• Na ekranie głównym kliknij przycisk START, aby rozpocząć sesję.\n'
           '• Kliknij STOP, aby zakończyć – sesja zapisze się w historii.\n\n'
           '2. Sesje ręczne\n'
-          '• Użyj przycisku dodawania sesji, aby wpisać czas ręcznie (np. gdy zapomniałeś włączyć timer).\n\n'
+          '• Użyj przycisku dodawania sesji, aby wpisać czas ręcznie.\n\n'
           '3. Kategorie\n'
           '• Masz 3 podstawowe kategorie: Praca, Sport, Czas wolny.\n'
           '• Możesz tworzyć własne kategorie bezpośrednio z listy wyboru.\n\n'
           '4. Statystyki\n'
-          '• Zakładka Statystyki pokazuje wykres słupkowy z ostatnich 7 dni i wykres kołowy podziału czasu.\n\n'
+          '• Zakładka Statystyki pokazuje wykres słupkowy z ostatnich 7 dni.\n\n'
           '5. Cele\n'
-          '• Dodaj cele tygodniowe lub miesięczne (np. 10h pracy).\n'
-          '• Obserwuj pasek postępu dla każdego celu.\n\n'
-          '6. Eksport danych\n'
-          '• W zakładce Historia użyj opcji eksportu, aby zapisać dane do pliku JSON w pamięci telefonu.\n\n'
-          '7. Import danych\n'
-          '• Użyj opcji importu, aby wczytać wcześniej zapisany plik JSON.\n\n'
+          '• Dodaj cele tygodniowe lub miesięczne.\n\n'
+          '6. Eksport/Import danych\n'
+          '• Użyj opcji eksportu/importu aby zapisać i wczytać dane.\n\n'
           '8. Prywatność\n'
-          '• Wszystkie dane są zapisywane tylko lokalnie w pamięci urządzenia.',
-
-      // TYPY
+          '• Wszystkie dane są zapisywane tylko lokalnie.',
       'work': 'Praca',
       'sport': 'Sport',
       'free_time': 'Czas wolny',
       'type': 'Kategoria',
       'type_instruction': 'Wybierz kategorię swojej aktywności',
-
-      // ZARZĄDZANIE TYPAMI
       'add_new_type': 'Dodaj nowy typ',
       'add_custom_type_title': 'Dodaj nowy typ aktywności',
       'custom_type_hint': 'Nazwa nowej aktywności (np. Nauka, Gitara)',
@@ -67,8 +57,6 @@ class AppLocalizations {
       'type_deleted': 'Typ usunięty',
       'delete_type': 'Usuń typ',
       'cannot_delete_default': 'Nie można usunąć domyślnego typu',
-
-      // TIMER
       'quick_timer': 'Szybki timer',
       'description_hint': 'Opis (opcjonalnie)',
       'start_btn': 'Start',
@@ -76,21 +64,28 @@ class AppLocalizations {
       'no_active': 'Brak aktywnej sesji.',
       'close': 'Zamknij',
       'close_btn': 'Zamknij',
-
-      // NOWA SEKCJA - POŁĄCZONA
       'new_activity_section': 'Nowa aktywność',
       'start_now_btn': 'START TERAZ',
       'add_time_range_btn': 'DODAJ ZAKRES CZASU',
       'running_since': 'Trwa od',
-
-      // PODSUMOWANIA
       'summary_title': 'Podsumowanie',
       'summary_total': 'Suma',
+      'last_7_days': 'Ostatnie 7 dni',
+      'time_distribution': 'Podział czasu',
+      'detailed_summary': 'Szczegółowe podsumowanie',
+      'avg_per_day': 'Średnio/dzień',
+      'best_day': 'Najlepszy dzień',
+      'last_30_days': 'Ostatnie 30 dni',
+      'day_mon': 'Pn',
+      'day_tue': 'Wt',
+      'day_wed': 'Śr',
+      'day_thu': 'Cz',
+      'day_fri': 'Pt',
+      'day_sat': 'So',
+      'day_sun': 'Nd',
       'no_data': 'Brak danych',
       'date_label': 'Data: ',
       'choose_date': 'Wybierz datę',
-
-      // POLA FORMULARZA
       'description_label': 'Co będziesz robić? (np. Bieganie, Nauka)',
       'start_time_label': 'Start (HH:MM)',
       'end_time_label': 'Koniec (HH:MM)',
@@ -102,8 +97,6 @@ class AppLocalizations {
       'fill_all_fields': 'Wypełnij wszystkie pola',
       'invalid_time_format': 'Nieprawidłowy format czasu (użyj HH:MM)',
       'session_added': 'Sesja dodana',
-
-      // HISTORIA
       'history_title': 'Historia sesji',
       'history_empty': 'Brak sesji w wybranym zakresie.',
       'mode_manual': 'Manualnie',
@@ -125,8 +118,6 @@ class AppLocalizations {
       'field_mode': 'Tryb: ',
       'session_deleted': 'Sesja usunięta',
       'session_updated': 'Sesja zaktualizowana',
-
-      // BACKUP/IMPORT/EXPORT
       'export_ok': 'Eksport OK: ',
       'export_error': 'Błąd eksportu: ',
       'export_success': 'Wyeksportowano do',
@@ -136,14 +127,11 @@ class AppLocalizations {
       'import_success': 'Import zakończony sukcesem',
       'no_files_to_import': 'Brak plików do importu',
       'choose_file_to_import': 'Wybierz plik do importu',
-
-      // TŁO I USTAWIENIA
+      'backup_saved': 'Backup zapisany',
       'change_background': 'Zmień tło',
       'remove_background': 'Usuń tło',
       'icon_color_picker': 'Kolor ikon',
       'slide_to_change_color': 'Przesuń suwak aby zmienić kolor',
-
-      // CELE
       'goals_title': 'Moje Cele',
       'add_goal': 'Dodaj cel',
       'no_goals': 'Brak celów. Dodaj pierwszy cel!',
@@ -162,8 +150,6 @@ class AppLocalizations {
       'goal_remaining': 'Jeszcze {hours}h do celu',
       'goal_progress': '{current}h / {target}h',
       'goal_invalid_hours': 'Podaj prawidłową liczbę godzin',
-
-      // MEMORY GAME
       'games_tab': 'Gry',
       'memory_game_title': 'Memory Game',
       'new_game': 'Nowa gra',
@@ -195,8 +181,6 @@ class AppLocalizations {
       'memory_level_impossible': 'Niemożliwy (5x10, 25 par)',
       'memory_choose_level': 'Wybierz poziom',
       'memory_locked': 'Poziom zablokowany. Najpierw ukończ poprzedni.',
-
-      // SUDOKU
       'sudoku_game_title': 'Sudoku',
       'sudoku_game_desc': 'Wypełnij siatkę 9x9 cyframi!',
       'sudoku_choose_level': 'Wybierz poziom Sudoku',
@@ -220,8 +204,6 @@ class AppLocalizations {
       'sudoku_solved': 'Rozwiązano!',
       'sudoku_mistake': 'Błąd! Spróbuj ponownie.',
       'sudoku_best_time': 'Najlepszy czas',
-
-      // 📅 KALENDARZ WYDARZEŃ
       'events_tab': 'Wydarzenia',
       'events_title': 'Kalendarz Wydarzeń',
       'add_event': 'Dodaj wydarzenie',
@@ -246,8 +228,6 @@ class AppLocalizations {
       'today_events': 'Dziś',
       'upcoming_events': 'Nadchodzące',
       'past_events': 'Przeszłe',
-
-      // 🍅 POMODORO
       'pomodoro_tab': 'Pomodoro',
       'pomodoro_title': 'Timer Pomodoro',
       'pomodoro_work': 'Praca',
@@ -265,7 +245,6 @@ class AppLocalizations {
     },
 
     'es': {
-      // OGÓLNE
       'app_title': 'Work Study Timer',
       'language': 'Idioma',
       'range': 'Rango',
@@ -274,8 +253,6 @@ class AppLocalizations {
       'this_month': 'Este mes',
       'all': 'Todo',
       'search_hint': 'Buscar por descripción (p. ej. Margarita, Finca)',
-
-      // INSTRUKCJA
       'instructions_title': 'Instrucciones de uso',
       'instructions_content':
       'Work Study Timer te ayuda a seguir tu tiempo de estudio y trabajo.\n\n'
@@ -285,27 +262,20 @@ class AppLocalizations {
           '2. Sesiones manuales\n'
           '• Usa el botón de añadir sesión para introducir el tiempo manualmente.\n\n'
           '3. Categorías\n'
-          '• Tienes 3 categorías básicas: Trabajo, Deporte, Tiempo libre.\n'
-          '• Puedes crear tus propias categorías directamente desde la lista de selección.\n\n'
+          '• Tienes 3 categorías básicas: Trabajo, Deporte, Tiempo libre.\n\n'
           '4. Estadísticas\n'
           '• La pestaña de Estadísticas muestra un gráfico de barras con los últimos 7 días.\n\n'
           '5. Objetivos\n'
           '• Añade objetivos semanales o mensuales.\n\n'
-          '6. Exportar datos\n'
-          '• En la pestaña de Historial utiliza la opción de exportar.\n\n'
-          '7. Importar datos\n'
-          '• Utiliza la opción de importar para cargar un archivo JSON.\n\n'
+          '6. Exportar/Importar datos\n'
+          '• Usa las opciones de exportar/importar para guardar y cargar datos.\n\n'
           '8. Privacidad\n'
-          '• Todos los datos se guardan solo de forma local en tu dispositivo.',
-
-      // TYPY
+          '• Todos los datos se guardan solo de forma local.',
       'work': 'Trabajo',
       'sport': 'Deporte',
       'free_time': 'Tiempo libre',
       'type': 'Categoría',
       'type_instruction': 'Elige la categoría de tu actividad',
-
-      // ZARZĄDZANIE TYPAMI
       'add_new_type': 'Añadir nuevo tipo',
       'add_custom_type_title': 'Añadir nuevo tipo de actividad',
       'custom_type_hint': 'Nombre de la nueva actividad',
@@ -317,8 +287,6 @@ class AppLocalizations {
       'type_deleted': 'Tipo eliminado',
       'delete_type': 'Eliminar tipo',
       'cannot_delete_default': 'No se puede eliminar el tipo predeterminado',
-
-      // TIMER
       'quick_timer': 'Temporizador rápido',
       'description_hint': 'Descripción (opcional)',
       'start_btn': 'Iniciar',
@@ -326,21 +294,28 @@ class AppLocalizations {
       'no_active': 'Sin sesión activa.',
       'close': 'Cerrar',
       'close_btn': 'Cerrar',
-
-      // NOWA SEKCJA - POŁĄCZONA
       'new_activity_section': 'Nueva actividad',
       'start_now_btn': 'INICIAR AHORA',
       'add_time_range_btn': 'AÑADIR RANGO DE TIEMPO',
       'running_since': 'Ejecutando desde',
-
-      // PODSUMOWANIA
       'summary_title': 'Resumen',
       'summary_total': 'Total',
+      'last_7_days': 'Últimos 7 días',
+      'time_distribution': 'Distribución del tiempo',
+      'detailed_summary': 'Resumen detallado',
+      'avg_per_day': 'Media/día',
+      'best_day': 'Mejor día',
+      'last_30_days': 'Últimos 30 días',
+      'day_mon': 'Lun',
+      'day_tue': 'Mar',
+      'day_wed': 'Mié',
+      'day_thu': 'Jue',
+      'day_fri': 'Vie',
+      'day_sat': 'Sáb',
+      'day_sun': 'Dom',
       'no_data': 'Sin datos',
       'date_label': 'Fecha: ',
       'choose_date': 'Elegir fecha',
-
-      // POLA FORMULARZA
       'description_label': '¿Qué vas a hacer? (ej. Correr, Estudiar)',
       'start_time_label': 'Inicio (HH:MM)',
       'end_time_label': 'Fin (HH:MM)',
@@ -348,12 +323,10 @@ class AppLocalizations {
       'end_time_hint': 'ej. 10:15',
       'add_session_btn': 'Añadir sesión',
       'no_description': 'Sin descripción',
-      'error_time_format': 'Revisa las horas (formato HH:MM, fin después del inicio).',
+      'error_time_format': 'Revisa las horas (formato HH:MM).',
       'fill_all_fields': 'Completa todos los campos',
       'invalid_time_format': 'Formato de tiempo inválido (usa HH:MM)',
       'session_added': 'Sesión añadida',
-
-      // HISTORIA
       'history_title': 'Historial de sesiones',
       'history_empty': 'No hay sesiones en el rango seleccionado.',
       'mode_manual': 'Manual',
@@ -375,8 +348,6 @@ class AppLocalizations {
       'field_mode': 'Modo: ',
       'session_deleted': 'Sesión eliminada',
       'session_updated': 'Sesión actualizada',
-
-      // BACKUP
       'export_ok': 'Exportado OK: ',
       'export_error': 'Error de exportación: ',
       'export_success': 'Exportado a',
@@ -386,14 +357,11 @@ class AppLocalizations {
       'import_success': 'Importación exitosa',
       'no_files_to_import': 'No hay archivos para importar',
       'choose_file_to_import': 'Elige archivo para importar',
-
-      // USTAWIENIA
+      'backup_saved': 'Copia de seguridad guardada',
       'change_background': 'Cambiar fondo',
       'remove_background': 'Eliminar fondo',
       'icon_color_picker': 'Color de iconos',
       'slide_to_change_color': 'Desliza para cambiar el color',
-
-      // CELE
       'goals_title': 'Mis Objetivos',
       'add_goal': 'Añadir objetivo',
       'no_goals': '¡Sin objetivos. Añade el primero!',
@@ -412,8 +380,6 @@ class AppLocalizations {
       'goal_remaining': 'Faltan {hours}h para el objetivo',
       'goal_progress': '{current}h / {target}h',
       'goal_invalid_hours': 'Ingresa un número válido de horas',
-
-      // MEMORY GAME
       'games_tab': 'Juegos',
       'memory_game_title': 'Juego de Memoria',
       'new_game': 'Nuevo juego',
@@ -445,8 +411,6 @@ class AppLocalizations {
       'memory_level_impossible': 'Imposible (5x10, 25 pares)',
       'memory_choose_level': 'Elige la dificultad',
       'memory_locked': 'Nivel bloqueado. Primero completa el anterior.',
-
-      // SUDOKU
       'sudoku_game_title': 'Sudoku',
       'sudoku_game_desc': '¡Rellena la cuadrícula 9x9 con números!',
       'sudoku_choose_level': 'Elige nivel de Sudoku',
@@ -470,8 +434,6 @@ class AppLocalizations {
       'sudoku_solved': '¡Resuelto!',
       'sudoku_mistake': '¡Error! Inténtalo de nuevo.',
       'sudoku_best_time': 'Mejor tiempo',
-
-      // 📅 CALENDARIO DE EVENTOS
       'events_tab': 'Eventos',
       'events_title': 'Calendario de Eventos',
       'add_event': 'Añadir evento',
@@ -496,8 +458,6 @@ class AppLocalizations {
       'today_events': 'Hoy',
       'upcoming_events': 'Próximos',
       'past_events': 'Pasados',
-
-// 🍅 POMODORO
       'pomodoro_tab': 'Pomodoro',
       'pomodoro_title': 'Temporizador Pomodoro',
       'pomodoro_work': 'Trabajo',
@@ -513,10 +473,242 @@ class AppLocalizations {
       'pomodoro_long_break_time': 'Descanso largo (min)',
       'pomodoro_sessions_until_long': 'Sesiones hasta descanso largo',
     },
+
+    'en': {
+      'app_title': 'Work Study Timer',
+      'language': 'Language',
+      'range': 'Range',
+      'today': 'Today',
+      'this_week': 'This week',
+      'this_month': 'This month',
+      'all': 'All',
+      'search_hint': 'Search by description (e.g. Meeting, Study)',
+      'instructions_title': 'User Guide',
+      'instructions_content':
+      'Work Study Timer helps you track your study and work time.\n\n'
+          '1. Start the timer\n'
+          '• On the main screen tap START to begin a session.\n'
+          '• Tap STOP to finish – the session will be saved to history.\n\n'
+          '2. Manual sessions\n'
+          '• Use the add session button to enter time manually.\n\n'
+          '3. Categories\n'
+          '• You have 3 basic categories: Work, Sport, Free time.\n'
+          '• You can create custom categories from the selection list.\n\n'
+          '4. Statistics\n'
+          '• The Statistics tab shows a bar chart of the last 7 days.\n\n'
+          '5. Goals\n'
+          '• Add weekly or monthly goals.\n\n'
+          '6. Export/Import data\n'
+          '• Use export/import options to save and load your data.\n\n'
+          '8. Privacy\n'
+          '• All data is stored locally on your device only.',
+      'work': 'Work',
+      'sport': 'Sport',
+      'free_time': 'Free time',
+      'type': 'Category',
+      'type_instruction': 'Choose your activity category',
+      'add_new_type': 'Add new type',
+      'add_custom_type_title': 'Add new activity type',
+      'custom_type_hint': 'New activity name (e.g. Study, Guitar)',
+      'manage_custom_types': 'Manage types',
+      'no_custom_types': 'No custom types.',
+      'type_name_label': 'Type name',
+      'type_exists': 'This type already exists',
+      'type_added': 'Type added',
+      'type_deleted': 'Type deleted',
+      'delete_type': 'Delete type',
+      'cannot_delete_default': 'Cannot delete default type',
+      'quick_timer': 'Quick timer',
+      'description_hint': 'Description (optional)',
+      'start_btn': 'Start',
+      'stop_btn': 'Stop',
+      'no_active': 'No active session.',
+      'close': 'Close',
+      'close_btn': 'Close',
+      'new_activity_section': 'New activity',
+      'start_now_btn': 'START NOW',
+      'add_time_range_btn': 'ADD TIME RANGE',
+      'running_since': 'Running since',
+      'summary_title': 'Summary',
+      'summary_total': 'Total',
+      'last_7_days': 'Last 7 days',
+      'time_distribution': 'Time distribution',
+      'detailed_summary': 'Detailed summary',
+      'avg_per_day': 'Avg/day',
+      'best_day': 'Best day',
+      'last_30_days': 'Last 30 days',
+      'day_mon': 'Mon',
+      'day_tue': 'Tue',
+      'day_wed': 'Wed',
+      'day_thu': 'Thu',
+      'day_fri': 'Fri',
+      'day_sat': 'Sat',
+      'day_sun': 'Sun',
+      'no_data': 'No data',
+      'date_label': 'Date: ',
+      'choose_date': 'Choose date',
+      'description_label': 'What will you do? (e.g. Running, Study)',
+      'start_time_label': 'Start (HH:MM)',
+      'end_time_label': 'End (HH:MM)',
+      'start_time_hint': 'e.g. 08:30',
+      'end_time_hint': 'e.g. 10:15',
+      'add_session_btn': 'Add session',
+      'no_description': 'No description',
+      'error_time_format': 'Check times (HH:MM format, end after start).',
+      'fill_all_fields': 'Fill in all fields',
+      'invalid_time_format': 'Invalid time format (use HH:MM)',
+      'session_added': 'Session added',
+      'history_title': 'Session history',
+      'history_empty': 'No sessions in selected range.',
+      'mode_manual': 'Manual',
+      'mode_auto': 'Start/Stop',
+      'edit': 'Edit',
+      'delete': 'Delete',
+      'export': 'Export',
+      'import': 'Import',
+      'edit_session': 'Edit session',
+      'edit_session_title': 'Edit session',
+      'cancel': 'Cancel',
+      'cancel_btn': 'Cancel',
+      'save': 'Save',
+      'save_btn': 'Save',
+      'add_btn': 'Add',
+      'error_edit_time': 'Wrong times (HH:MM format, end after start).',
+      'session_running_from': 'Session running since: ',
+      'field_type': 'Type: ',
+      'field_mode': 'Mode: ',
+      'session_deleted': 'Session deleted',
+      'session_updated': 'Session updated',
+      'export_ok': 'Export OK: ',
+      'export_error': 'Export error: ',
+      'export_success': 'Exported to',
+      'backup_missing': 'No backup file found!',
+      'import_ok': 'Sessions imported: ',
+      'import_error': 'Import error: ',
+      'import_success': 'Import successful',
+      'no_files_to_import': 'No files to import',
+      'choose_file_to_import': 'Choose file to import',
+      'backup_saved': 'Backup saved',
+      'change_background': 'Change background',
+      'remove_background': 'Remove background',
+      'icon_color_picker': 'Icon color',
+      'slide_to_change_color': 'Slide to change color',
+      'goals_title': 'My Goals',
+      'add_goal': 'Add goal',
+      'no_goals': 'No goals. Add your first goal!',
+      'goal_name': 'Goal name',
+      'goal_name_hint': 'e.g. Learn Spanish',
+      'goal_hours': 'Goal in hours',
+      'goal_hours_hint': 'e.g. 10',
+      'goal_period': 'Period',
+      'goal_week': 'Week',
+      'goal_month': 'Month',
+      'goal_type': 'Type',
+      'goal_all_types': 'All',
+      'goal_added': 'Goal added!',
+      'goal_deleted': 'Goal deleted',
+      'goal_completed': 'Goal achieved! Great job!',
+      'goal_remaining': '{hours}h left to goal',
+      'goal_progress': '{current}h / {target}h',
+      'goal_invalid_hours': 'Enter a valid number of hours',
+      'games_tab': 'Games',
+      'memory_game_title': 'Memory Game',
+      'new_game': 'New game',
+      'time': 'Time',
+      'moves': 'Moves',
+      'record': 'Record',
+      'congratulations': 'Congratulations! 🎉',
+      'game_completed': 'You completed the game!',
+      'new_time_record': '🏆 NEW TIME RECORD!',
+      'new_moves_record': '🏆 NEW MOVES RECORD!',
+      'play_again': 'Play again',
+      'game_instructions': 'Find all pairs! Tap a card to reveal it.',
+      'your_records': '🏆 Your records:',
+      'best_time': 'Best time:',
+      'fewest_moves': 'Fewest moves:',
+      'choose_game': 'Choose a game',
+      'games_subtitle': 'Relax between work sessions',
+      'memory_game_desc': 'Find all matching card pairs!',
+      'coming_soon': 'Coming soon!',
+      'memory_level_easy': 'Easy (4x3, 6 pairs)',
+      'memory_level_medium': 'Medium (4x4, 8 pairs)',
+      'memory_level_hard': 'Hard (4x5, 10 pairs)',
+      'memory_level_advanced': 'Advanced (4x6, 12 pairs)',
+      'memory_level_expert': 'Expert (5x6, 15 pairs)',
+      'memory_level_master': 'Master (5x8, 18 pairs)',
+      'memory_level_legend': 'Legend (5x8, 20 pairs)',
+      'memory_level_epic': 'Epic (5x9, 22 pairs)',
+      'memory_level_nightmare': 'Nightmare (5x10, 24 pairs)',
+      'memory_level_impossible': 'Impossible (5x10, 25 pairs)',
+      'memory_choose_level': 'Choose level',
+      'memory_locked': 'Level locked. Complete the previous one first.',
+      'sudoku_game_title': 'Sudoku',
+      'sudoku_game_desc': 'Fill the 9x9 grid with numbers!',
+      'sudoku_choose_level': 'Choose Sudoku level',
+      'sudoku_level_1': 'Level 1 - Beginner',
+      'sudoku_level_2': 'Level 2 - Easy',
+      'sudoku_level_3': 'Level 3 - Easy medium',
+      'sudoku_level_4': 'Level 4 - Medium',
+      'sudoku_level_5': 'Level 5 - Medium hard',
+      'sudoku_level_6': 'Level 6 - Hard',
+      'sudoku_level_7': 'Level 7 - Very hard',
+      'sudoku_level_8': 'Level 8 - Expert',
+      'sudoku_level_9': 'Level 9 - Master',
+      'sudoku_level_10': 'Level 10 - Impossible',
+      'sudoku_locked': 'Level locked. Complete the previous one first.',
+      'sudoku_congratulations': 'Sudoku completed! 🎉',
+      'sudoku_new_game': 'New game',
+      'sudoku_check': 'Check',
+      'sudoku_errors': 'Errors',
+      'sudoku_hint': 'Hint',
+      'sudoku_hints_left': 'Hints',
+      'sudoku_solved': 'Solved!',
+      'sudoku_mistake': 'Mistake! Try again.',
+      'sudoku_best_time': 'Best time',
+      'events_tab': 'Events',
+      'events_title': 'Events Calendar',
+      'add_event': 'Add event',
+      'no_events': 'No scheduled events',
+      'event_title': 'Event title',
+      'event_title_hint': 'e.g. Meeting, Training',
+      'event_date': 'Date and time',
+      'event_category': 'Category',
+      'event_notes': 'Notes',
+      'event_notes_hint': 'Additional information (optional)',
+      'event_reminder': 'Reminder',
+      'event_category_other': 'Other',
+      'event_category_custom': 'Enter category name',
+      'event_category_custom_hint': 'e.g. Meeting, Study, Shopping',
+      'event_added': 'Event added!',
+      'event_deleted': 'Event deleted',
+      'reminder_before': 'before',
+      'reminder_day': 'day before',
+      'reminder_2days': '2 days before',
+      'reminder_week': 'week before',
+      'start_from_event': 'START from event',
+      'today_events': 'Today',
+      'upcoming_events': 'Upcoming',
+      'past_events': 'Past',
+      'pomodoro_tab': 'Pomodoro',
+      'pomodoro_title': 'Pomodoro Timer',
+      'pomodoro_work': 'Work',
+      'pomodoro_break': 'Break',
+      'pomodoro_long_break': 'Long break',
+      'pomodoro_start': 'Start',
+      'pomodoro_pause': 'Pause',
+      'pomodoro_reset': 'Reset',
+      'pomodoro_sessions': 'Sessions',
+      'pomodoro_settings': 'Settings',
+      'pomodoro_work_time': 'Work time (min)',
+      'pomodoro_break_time': 'Break time (min)',
+      'pomodoro_long_break_time': 'Long break (min)',
+      'pomodoro_sessions_until_long': 'Sessions until long break',
+    },
   };
 
   String translate(String key) {
     return _localizedValues[locale.languageCode]?[key] ??
+        _localizedValues['en']?[key] ??
         _localizedValues['pl']![key] ??
         key;
   }
@@ -528,7 +720,7 @@ class _AppLocalizationsDelegate
 
   @override
   bool isSupported(Locale locale) =>
-      ['pl', 'es'].contains(locale.languageCode);
+      ['pl', 'es', 'en'].contains(locale.languageCode);
 
   @override
   Future<AppLocalizations> load(Locale locale) async {

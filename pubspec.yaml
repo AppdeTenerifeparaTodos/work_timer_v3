@@ -2,7 +2,7 @@ name: work_timer_v4
 description: "Track your time, achieve your goals. Productivity timer with statistics and goal tracking."
 publish_to: 'none'
 
-version: 1.1.2
+version: 1.1.4+14
 
 
 
@@ -41,7 +41,7 @@ generate: true
 flutter_launcher_icons:
   android: true
   ios: true
-  image_path: "assets/icon.jpg"
+  image_path: "assets/WT.png"
   adaptive_icon_background: "#FFFFFF"
-  adaptive_icon_foreground: "assets/icon.jpg"
+  adaptive_icon_foreground: "assets/WT.png"
   min_sdk_android: 21

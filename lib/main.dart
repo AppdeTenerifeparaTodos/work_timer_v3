@@ -4622,6 +4622,40 @@ class _HomePageState extends State<HomePage> {
                                               ],
                                             ),
                                           ),
+// ▶️ SZYBKI START dla celu
+                                          IconButton(
+                                            icon: Icon(
+                                              (_activeStartTime != null && _activeDescController.text == goal.name)
+                                                  ? Icons.stop_circle
+                                                  : Icons.play_circle_filled,
+                                              size: 28,
+                                              color: (_activeStartTime != null && _activeDescController.text == goal.name)
+                                                  ? Colors.orange
+                                                  : Colors.green,
+                                            ),
+                                            tooltip: (_activeStartTime != null && _activeDescController.text == goal.name)
+                                                ? 'Zatrzymaj'
+                                                : 'Start z tym celem',
+                                            onPressed: () {
+                                              if (_activeStartTime != null && _activeDescController.text == goal.name) {
+                                                _stopActiveSession();
+                                              } else {
+                                                setState(() {
+                                                  _activeStartTime = DateTime.now();
+                                                  _activeDescController.text = goal.name;
+                                                  _activeType = goal.activityType ?? 'praca';
+                                                });
+                                                _saveActiveSession();
+                                                ScaffoldMessenger.of(context).showSnackBar(
+                                                  SnackBar(
+                                                    content: Text('▶️ Timer uruchomiony: ${goal.name}'),
+                                                    duration: const Duration(seconds: 2),
+                                                    backgroundColor: Colors.green,
+                                                  ),
+                                                );
+                                              }
+                                            },
+                                          ),
                                           IconButton(
                                             icon: const Icon(Icons.delete, size: 20),
                                             onPressed: () => _deleteGoal(goal.id),

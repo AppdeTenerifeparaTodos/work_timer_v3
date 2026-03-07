@@ -24,23 +24,43 @@ class AppLocalizations {
       'search_hint': 'Szukaj po opisie (np. Margarita, Finca)',
       'instructions_title': 'Instrukcja obsługi',
       'instructions_content':
-      'Work Study Timer pomaga śledzić czas nauki i pracy.\n\n'
-          '1. Start timera\n'
-          '• Na ekranie głównym kliknij przycisk START, aby rozpocząć sesję.\n'
-          '• Kliknij STOP, aby zakończyć – sesja zapisze się w historii.\n\n'
-          '2. Sesje ręczne\n'
-          '• Użyj przycisku dodawania sesji, aby wpisać czas ręcznie.\n\n'
-          '3. Kategorie\n'
-          '• Masz 3 podstawowe kategorie: Praca, Sport, Czas wolny.\n'
-          '• Możesz tworzyć własne kategorie bezpośrednio z listy wyboru.\n\n'
-          '4. Statystyki\n'
-          '• Zakładka Statystyki pokazuje wykres słupkowy z ostatnich 7 dni.\n\n'
-          '5. Cele\n'
-          '• Dodaj cele tygodniowe lub miesięczne.\n\n'
-          '6. Eksport/Import danych\n'
-          '• Użyj opcji eksportu/importu aby zapisać i wczytać dane.\n\n'
-          '8. Prywatność\n'
-          '• Wszystkie dane są zapisywane tylko lokalnie.',
+      'Work Study Timer – śledź czas, osiągaj cele!\n\n'
+          '⏱️ 1. TIMER (zakładka główna)\n'
+          '• Wpisz opis aktywności i wybierz kategorię\n'
+          '• Naciśnij START aby rozpocząć sesję\n'
+          '• Naciśnij STOP aby zapisać sesję w historii\n'
+          '• Możesz też dodać sesję ręcznie – przycisk "USTAW CZAS RĘCZNIE"\n\n'
+          '📊 2. PODSUMOWANIE\n'
+          '• Filtruj dane: Dzisiaj / Ten tydzień / Ten miesiąc / Wszystko\n'
+          '• Wykres słupkowy ostatnich 7 dni\n'
+          '• Wykres kołowy podziału czasu według kategorii\n'
+          '• Szczegółowe statystyki z paskami postępu\n\n'
+          '🎯 3. CELE\n'
+          '• Dodaj cel tygodniowy lub miesięczny\n'
+          '• Ustaw liczbę godzin i kategorię\n'
+          '• Śledź postęp na pasku postępu\n\n'
+          '📅 4. WYDARZENIA\n'
+          '• Dodaj zaplanowane wydarzenia z datą i godziną\n'
+          '• Ustaw przypomnienie (5 min – tydzień przed)\n'
+          '• Kategorie: Praca, Sport, Czas wolny, Inne\n\n'
+          '🍅 5. POMODORO\n'
+          '• Technika Pomodoro: 25 min pracy + 5 min przerwy\n'
+          '• Dostosuj czasy pracy i przerw w ustawieniach\n'
+          '• Po 4 sesjach automatyczna długa przerwa\n\n'
+          '🎮 6. GRY\n'
+          '• Memory Game – 10 poziomów trudności\n'
+          '• Sudoku – 10 poziomów trudności\n'
+          '• Odblokuj kolejne poziomy ukończając poprzednie\n\n'
+          '⚙️ 7. USTAWIENIA (ikona koła zębatego)\n'
+          '• Zmień tło aplikacji (własne zdjęcie)\n'
+          '• Zmień kolor ikon\n'
+          '• Zmień język: 🇵🇱 Polski / 🇪🇸 Español / 🇬🇧 English\n\n'
+          '💾 8. BACKUP DANYCH\n'
+          '• Eksportuj dane – zapisz backup na telefonie\n'
+          '• Udostępnij backup – wyślij plik e-mailem lub WhatsApp\n'
+          '• Importuj dane – wczytaj poprzedni backup\n\n'
+          '🔒 9. PRYWATNOŚĆ\n'
+          '• Wszystkie dane zapisywane są tylko lokalnie na Twoim urządzeniu',
       'work': 'Praca',
       'sport': 'Sport',
       'free_time': 'Czas wolny',
@@ -66,7 +86,7 @@ class AppLocalizations {
       'close_btn': 'Zamknij',
       'new_activity_section': 'Nowa aktywność',
       'start_now_btn': 'START TERAZ',
-      'add_time_range_btn': 'DODAJ ZAKRES CZASU',
+      'add_time_range_btn': 'USTAW CZAS RĘCZNIE',
       'running_since': 'Trwa od',
       'summary_title': 'Podsumowanie',
       'summary_total': 'Suma',
@@ -255,22 +275,43 @@ class AppLocalizations {
       'search_hint': 'Buscar por descripción (p. ej. Margarita, Finca)',
       'instructions_title': 'Instrucciones de uso',
       'instructions_content':
-      'Work Study Timer te ayuda a seguir tu tiempo de estudio y trabajo.\n\n'
-          '1. Iniciar el temporizador\n'
-          '• En la pantalla principal pulsa START para comenzar una sesión.\n'
-          '• Pulsa STOP para terminarla: la sesión se guardará en el historial.\n\n'
-          '2. Sesiones manuales\n'
-          '• Usa el botón de añadir sesión para introducir el tiempo manualmente.\n\n'
-          '3. Categorías\n'
-          '• Tienes 3 categorías básicas: Trabajo, Deporte, Tiempo libre.\n\n'
-          '4. Estadísticas\n'
-          '• La pestaña de Estadísticas muestra un gráfico de barras con los últimos 7 días.\n\n'
-          '5. Objetivos\n'
-          '• Añade objetivos semanales o mensuales.\n\n'
-          '6. Exportar/Importar datos\n'
-          '• Usa las opciones de exportar/importar para guardar y cargar datos.\n\n'
-          '8. Privacidad\n'
-          '• Todos los datos se guardan solo de forma local.',
+      'Work Study Timer – ¡controla tu tiempo, alcanza tus metas!\n\n'
+          '⏱️ 1. TIMER (pestaña principal)\n'
+          '• Escribe una descripción y elige la categoría\n'
+          '• Pulsa START para iniciar la sesión\n'
+          '• Pulsa STOP para guardar la sesión en el historial\n'
+          '• También puedes añadir una sesión manual – botón "AÑADIR HORA MANUALMENTE"\n\n'
+          '📊 2. RESUMEN\n'
+          '• Filtra datos: Hoy / Esta semana / Este mes / Todo\n'
+          '• Gráfico de barras de los últimos 7 días\n'
+          '• Gráfico circular de distribución del tiempo por categoría\n'
+          '• Estadísticas detalladas con barras de progreso\n\n'
+          '🎯 3. OBJETIVOS\n'
+          '• Añade un objetivo semanal o mensual\n'
+          '• Establece el número de horas y la categoría\n'
+          '• Sigue el progreso en la barra de progreso\n\n'
+          '📅 4. EVENTOS\n'
+          '• Añade eventos planificados con fecha y hora\n'
+          '• Configura recordatorio (5 min – 1 semana antes)\n'
+          '• Categorías: Trabajo, Deporte, Tiempo libre, Otro\n\n'
+          '🍅 5. POMODORO\n'
+          '• Técnica Pomodoro: 25 min de trabajo + 5 min de descanso\n'
+          '• Personaliza los tiempos en los ajustes\n'
+          '• Tras 4 sesiones, descanso largo automático\n\n'
+          '🎮 6. JUEGOS\n'
+          '• Juego de Memoria – 10 niveles de dificultad\n'
+          '• Sudoku – 10 niveles de dificultad\n'
+          '• Desbloquea nuevos niveles completando los anteriores\n\n'
+          '⚙️ 7. AJUSTES (icono de engranaje)\n'
+          '• Cambia el fondo de la app (foto propia)\n'
+          '• Cambia el color de los iconos\n'
+          '• Cambia el idioma: 🇵🇱 Polski / 🇪🇸 Español / 🇬🇧 English\n\n'
+          '💾 8. COPIA DE SEGURIDAD\n'
+          '• Exportar datos – guarda la copia en el teléfono\n'
+          '• Compartir copia – envía el archivo por email o WhatsApp\n'
+          '• Importar datos – carga una copia anterior\n\n'
+          '🔒 9. PRIVACIDAD\n'
+          '• Todos los datos se guardan solo localmente en tu dispositivo',
       'work': 'Trabajo',
       'sport': 'Deporte',
       'free_time': 'Tiempo libre',
@@ -296,7 +337,7 @@ class AppLocalizations {
       'close_btn': 'Cerrar',
       'new_activity_section': 'Nueva actividad',
       'start_now_btn': 'INICIAR AHORA',
-      'add_time_range_btn': 'AÑADIR RANGO DE TIEMPO',
+      'add_time_range_btn': 'AÑADIR HORA MANUALMENTE',
       'running_since': 'Ejecutando desde',
       'summary_title': 'Resumen',
       'summary_total': 'Total',
@@ -485,23 +526,43 @@ class AppLocalizations {
       'search_hint': 'Search by description (e.g. Meeting, Study)',
       'instructions_title': 'User Guide',
       'instructions_content':
-      'Work Study Timer helps you track your study and work time.\n\n'
-          '1. Start the timer\n'
-          '• On the main screen tap START to begin a session.\n'
-          '• Tap STOP to finish – the session will be saved to history.\n\n'
-          '2. Manual sessions\n'
-          '• Use the add session button to enter time manually.\n\n'
-          '3. Categories\n'
-          '• You have 3 basic categories: Work, Sport, Free time.\n'
-          '• You can create custom categories from the selection list.\n\n'
-          '4. Statistics\n'
-          '• The Statistics tab shows a bar chart of the last 7 days.\n\n'
-          '5. Goals\n'
-          '• Add weekly or monthly goals.\n\n'
-          '6. Export/Import data\n'
-          '• Use export/import options to save and load your data.\n\n'
-          '8. Privacy\n'
-          '• All data is stored locally on your device only.',
+      'Work Study Timer – track your time, achieve your goals!\n\n'
+          '⏱️ 1. TIMER (main tab)\n'
+          '• Enter an activity description and choose a category\n'
+          '• Tap START to begin a session\n'
+          '• Tap STOP to save the session to history\n'
+          '• You can also add a session manually – tap "ADD TIME MANUALLY"\n\n'
+          '📊 2. SUMMARY\n'
+          '• Filter data: Today / This week / This month / All\n'
+          '• Bar chart of the last 7 days\n'
+          '• Pie chart showing time distribution by category\n'
+          '• Detailed statistics with progress bars\n\n'
+          '🎯 3. GOALS\n'
+          '• Add a weekly or monthly goal\n'
+          '• Set the number of hours and category\n'
+          '• Track progress on the progress bar\n\n'
+          '📅 4. EVENTS\n'
+          '• Add planned events with date and time\n'
+          '• Set a reminder (5 min – 1 week before)\n'
+          '• Categories: Work, Sport, Free time, Other\n\n'
+          '🍅 5. POMODORO\n'
+          '• Pomodoro technique: 25 min work + 5 min break\n'
+          '• Customize work and break times in settings\n'
+          '• After 4 sessions, automatic long break\n\n'
+          '🎮 6. GAMES\n'
+          '• Memory Game – 10 difficulty levels\n'
+          '• Sudoku – 10 difficulty levels\n'
+          '• Unlock new levels by completing previous ones\n\n'
+          '⚙️ 7. SETTINGS (gear icon)\n'
+          '• Change app background (your own photo)\n'
+          '• Change icon color\n'
+          '• Change language: 🇵🇱 Polski / 🇪🇸 Español / 🇬🇧 English\n\n'
+          '💾 8. BACKUP\n'
+          '• Export data – save backup to your phone\n'
+          '• Share backup – send file via email or WhatsApp\n'
+          '• Import data – load a previous backup\n\n'
+          '🔒 9. PRIVACY\n'
+          '• All data is stored locally on your device only',
       'work': 'Work',
       'sport': 'Sport',
       'free_time': 'Free time',
@@ -527,7 +588,7 @@ class AppLocalizations {
       'close_btn': 'Close',
       'new_activity_section': 'New activity',
       'start_now_btn': 'START NOW',
-      'add_time_range_btn': 'ADD TIME RANGE',
+      'add_time_range_btn': 'ADD TIME MANUALLY',
       'running_since': 'Running since',
       'summary_title': 'Summary',
       'summary_total': 'Total',

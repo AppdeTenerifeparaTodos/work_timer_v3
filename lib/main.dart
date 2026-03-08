@@ -14,11 +14,17 @@ import 'instructions_screen.dart';
 import 'notification_service.dart';
 import 'sudoku_game.dart';
 import 'pomodoro_page.dart';
+import 'pet_provider.dart';
+import 'devpet_tab.dart';
 
-
+final PetProvider _globalPet = PetProvider();
+bool _petEnabled = false;
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await NotificationService().init();
+  await _globalPet.load();
+  final prefs = await SharedPreferences.getInstance(); // ← DODAJ
+  _petEnabled = prefs.getBool('pet_enabled') ?? false; // ← DODAJ
   runApp(const WorkStudyTimerApp());
 }
 
@@ -326,10 +332,10 @@ class _MainTabScreenState extends State<MainTabScreen> {
             currentLocale: widget.currentLocale,
           ),
           StatisticsPageWrapper(),
-          GamesMenuPage(), // ← ZMIENIONE!
+          GamesMenuPage(),
           EventsPage(),
-          PomodoroPage()
-
+          PomodoroPage(),
+          if (_petEnabled) DevPetTab(petProvider: _globalPet),
         ],
       ),
       bottomNavigationBar: Container(
@@ -384,6 +390,12 @@ class _MainTabScreenState extends State<MainTabScreen> {
               activeIcon: _navIcon(Icons.timer, const Color(0xFFFF3D3D)),
               label: AppLocalizations.of(context)!.translate('pomodoro_tab'),
             ),
+            if (_petEnabled)
+              const BottomNavigationBarItem(
+                icon: Text('🐾', style: TextStyle(fontSize: 22)),
+                activeIcon: Text('🐾', style: TextStyle(fontSize: 22)),
+                label: 'Pet',
+              ),
           ],
         ),
       ),
@@ -3141,6 +3153,10 @@ class _HomePageState extends State<HomePage> {
       if (hue != null) _iconHue = hue;
     });
   }
+  Future<void> _savePetSetting(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('pet_enabled', value);
+  }
 
   Future<void> _saveSavedDescriptions() async {
     final prefs = await SharedPreferences.getInstance();
@@ -3446,7 +3462,7 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  void _stopActiveSession() {
+  Future<void> _stopActiveSession() async {
     if (_activeStartTime == null) return;
 
     final newEntry = SessionEntry(
@@ -3465,11 +3481,27 @@ class _HomePageState extends State<HomePage> {
     });
 
     _saveHistory();
+    // XP dla maskotki 🐾
+    if (_petEnabled) {
+      final int petMinutes = newEntry.duration.inMinutes;
+      final String? petMsg = await _globalPet.awardXpFromTimer(petMinutes);
+      if (petMsg != null && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(petMsg),
+            backgroundColor: _globalPet.speciesColor.withOpacity(0.9),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    }
     _addDescriptionToSaved(newEntry.description);
     _saveActiveSession(); // NOWE - Wyczyść zapisaną sesję
   }
 
-  void _addManualSession() {
+  Future<void> _addManualSession() async {
     final loc = AppLocalizations.of(context)!;
 
     final startText = _manualStartController.text.trim();
@@ -3555,6 +3587,23 @@ class _HomePageState extends State<HomePage> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(loc.translate('session_added'))),
     );
+
+    // XP dla maskotki 🐾
+    if (_petEnabled) {
+      final int petMinutes = newEntry.duration.inMinutes;
+      final String? petMsg = await _globalPet.awardXpFromTimer(petMinutes);
+      if (petMsg != null && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(petMsg),
+            backgroundColor: _globalPet.speciesColor.withOpacity(0.9),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    }
   }
 
   void _deleteSession(int index) {
@@ -4408,7 +4457,6 @@ class _HomePageState extends State<HomePage> {
             ),
             onSelected: (value) {
               if (value == 'instructions') {
-                // otwieramy ekran instrukcji
                 Navigator.of(context).push(
                   MaterialPageRoute(
                     builder: (_) => const InstructionsScreen(),
@@ -4425,8 +4473,22 @@ class _HomePageState extends State<HomePage> {
                 });
               } else if (value == 'icon_color') {
                 _showIconColorPicker();
-              }  // ← DODAJ TEN NAWIAS!
+              } else if (value == 'pet_toggle') {
+                setState(() {
+                  _petEnabled = !_petEnabled;
+                });
+                _savePetSetting(_petEnabled);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(_petEnabled
+                        ? '🐾 DevPet włączony! Sprawdź nową zakładkę.'
+                        : '🐾 DevPet wyłączony.'),
+                    duration: const Duration(seconds: 2),
+                  ),
+                );
+              }
             },
+
             itemBuilder: (context) => [
               PopupMenuItem(
                 value: 'change_bg',
@@ -4470,7 +4532,20 @@ class _HomePageState extends State<HomePage> {
               ),
 
               // ⬇️ OSTATNIA POZYCJA – Instrukcja obsługi
+
               PopupMenuItem(
+                value: 'pet_toggle',
+                child: Row(
+                  children: [
+                    const Text('🐾', style: TextStyle(fontSize: 20)),
+                    const SizedBox(width: 12),
+                    Text(
+                      _petEnabled ? 'DevPet: ON ✅' : 'DevPet: OFF',
+                      style: const TextStyle(fontSize: 16, color: Colors.black87),
+                    ),
+                  ],
+                ),
+              ),PopupMenuItem(
                 value: 'instructions',
                 child: Row(
                   children: [

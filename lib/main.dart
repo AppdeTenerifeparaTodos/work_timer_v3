@@ -16,6 +16,8 @@ import 'sudoku_game.dart';
 import 'pomodoro_page.dart';
 import 'pet_provider.dart';
 import 'devpet_tab.dart';
+import 'notatnik_page.dart';  // ← NOWY
+
 
 final PetProvider _globalPet = PetProvider();
 bool _petEnabled = false;
@@ -336,6 +338,7 @@ class _MainTabScreenState extends State<MainTabScreen> {
           EventsPage(),
           PomodoroPage(),
           if (_petEnabled) DevPetTab(petProvider: _globalPet),
+          const NotatnikPage(),
         ],
       ),
       bottomNavigationBar: Container(
@@ -390,12 +393,19 @@ class _MainTabScreenState extends State<MainTabScreen> {
               activeIcon: _navIcon(Icons.timer, const Color(0xFFFF3D3D)),
               label: AppLocalizations.of(context)!.translate('pomodoro_tab'),
             ),
+
             if (_petEnabled)
               const BottomNavigationBarItem(
                 icon: Text('🐾', style: TextStyle(fontSize: 22)),
                 activeIcon: Text('🐾', style: TextStyle(fontSize: 22)),
                 label: 'Pet',
               ),
+            // ← TWOJA NOWA ZAKŁADKA
+            BottomNavigationBarItem(
+              icon: const Icon(Icons.note),
+              activeIcon: _navIcon(Icons.note, const Color(0xFF00BFFF)),
+              label: AppLocalizations.of(context)!.translate('notes_tab'),
+            ),
           ],
         ),
       ),

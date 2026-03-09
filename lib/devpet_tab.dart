@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'pet_provider.dart';
+import 'app_localizations.dart';
 
 // ══════════════════════════════════════════
 // ZAKŁADKA DEVPET — 6. zakładka w work_timer_v4
@@ -38,7 +39,6 @@ class _DevPetTabState extends State<DevPetTab>
   void _onPetChanged() {
     if (mounted) {
       setState(() {});
-      // Sprawdź nagrody
       final rewards = _pet.popPendingRewards();
       for (final r in rewards) {
         _showRewardDialog(r);
@@ -53,7 +53,6 @@ class _DevPetTabState extends State<DevPetTab>
     super.dispose();
   }
 
-  // ── Kolory ─────────────────────────────
   Color get _color => _pet.speciesColor;
 
   Color _energyColor(int e) {
@@ -62,20 +61,35 @@ class _DevPetTabState extends State<DevPetTab>
     return Colors.redAccent;
   }
 
-  // ── UI ─────────────────────────────────
+  // ── tłumaczenie etapu maskotki ──────────────────────────────────────────
+  String _translateStage(BuildContext context, String stageName) {
+    final loc = AppLocalizations.of(context);
+    final map = {
+      'Jajko':    loc.translate('pet_stage_egg'),
+      'Niemowlę': loc.translate('pet_stage_baby'),
+      'Junior':   loc.translate('pet_stage_junior'),
+      'Senior':   loc.translate('pet_stage_senior'),
+      'Mistrz':   loc.translate('pet_stage_master'),
+      'Emeryt':   loc.translate('pet_stage_retired'),
+    };
+    return map[stageName] ?? stageName;
+  }
+
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
     return Scaffold(
       backgroundColor: const Color(0xFF0A0A0F),
       appBar: AppBar(
-        title: const Text('DevPet 🐾', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: Text(loc.translate('pet_title'),
+            style: const TextStyle(fontWeight: FontWeight.bold)),
         backgroundColor: const Color(0xFF0D0D14),
         foregroundColor: Colors.white,
         elevation: 0,
         actions: [
           IconButton(
             icon: const Icon(Icons.collections_outlined),
-            tooltip: 'Kolekcja maskotek',
+            tooltip: loc.translate('pet_collection_title'),
             onPressed: _showCollection,
           ),
         ],
@@ -84,15 +98,15 @@ class _DevPetTabState extends State<DevPetTab>
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            _buildPetCard(),
+            _buildPetCard(context),
             const SizedBox(height: 14),
-            _buildDailyXpCard(),
+            _buildDailyXpCard(context),
             const SizedBox(height: 14),
-            _buildStatsRow(),
+            _buildStatsRow(context),
             const SizedBox(height: 14),
-            _buildRewardsCard(),
+            _buildRewardsCard(context),
             const SizedBox(height: 14),
-            _buildTipsCard(),
+            _buildTipsCard(context),
             const SizedBox(height: 20),
           ],
         ),
@@ -101,7 +115,10 @@ class _DevPetTabState extends State<DevPetTab>
   }
 
   // ── KARTA MASKOTKI ─────────────────────
-  Widget _buildPetCard() {
+  Widget _buildPetCard(BuildContext context) {
+    final loc = AppLocalizations.of(context);
+    final stageName = _translateStage(context, _pet.stageName);
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(24),
@@ -114,18 +131,16 @@ class _DevPetTabState extends State<DevPetTab>
         ],
       ),
       child: Column(children: [
-        // Nagłówek: nazwa + etap
         Row(mainAxisAlignment: MainAxisAlignment.center, children: [
           Text(
             _pet.speciesName,
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: _color),
           ),
           const SizedBox(width: 8),
-          _chip(_pet.stageName, _pet.stageEmoji),
+          _chip(stageName, _pet.stageEmoji),
         ]),
         const SizedBox(height: 20),
 
-        // Animowana maskotka + mood
         AnimatedBuilder(
           animation: _bounceAnim,
           builder: (_, child) => Transform.translate(
@@ -140,30 +155,27 @@ class _DevPetTabState extends State<DevPetTab>
         ),
         const SizedBox(height: 20),
 
-        // Pasek XP (etap)
         _buildBar(
-          label: '${_pet.stageName} ${_pet.stageEmoji}  →  ${_pet.xp} XP',
+          label: '$stageName ${_pet.stageEmoji}  →  ${_pet.xp} XP',
           value: _pet.stageProgress,
           color: _color,
         ),
         const SizedBox(height: 10),
 
-        // Pasek energii
         _buildBar(
-          label: 'Energia  ${_pet.energy}%',
+          label: '${loc.translate('pet_stats_stage')}  ${_pet.energy}%',
           value: _pet.energy / 100,
           color: _energyColor(_pet.energy),
         ),
         const SizedBox(height: 20),
 
-        // Przycisk karmienia
         ElevatedButton.icon(
           onPressed: () {
             _pet.feed();
-            _snack('😋 ${_pet.speciesName} nakarmiony! +15 energii 🍎');
+            _snack('😋 ${_pet.speciesName} ${loc.translate('pet_snack_fed')}');
           },
           icon: const Text('🍎', style: TextStyle(fontSize: 18)),
-          label: const Text('Nakarm'),
+          label: Text(loc.translate('pet_feed_btn')),
           style: ElevatedButton.styleFrom(
             backgroundColor: _color.withOpacity(0.2),
             foregroundColor: _color,
@@ -176,17 +188,18 @@ class _DevPetTabState extends State<DevPetTab>
   }
 
   // ── DZIENNY XP ─────────────────────────
-  Widget _buildDailyXpCard() {
+  Widget _buildDailyXpCard(BuildContext context) {
+    final loc = AppLocalizations.of(context);
     final pct  = (_pet.xpToday / PetProvider.kDailyXpLimit).clamp(0.0, 1.0);
     final done = _pet.xpToday >= PetProvider.kDailyXpLimit;
 
     return _card(
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-          const Text('⏱️  Dzienny XP',
-              style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.white)),
+          Text('⏱️  ${loc.translate('pet_daily_xp')}',
+              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.white)),
           Text(
-            done ? '✅ Max!' : '${_pet.xpToday} / ${PetProvider.kDailyXpLimit}',
+            done ? loc.translate('pet_daily_max') : '${_pet.xpToday} / ${PetProvider.kDailyXpLimit}',
             style: TextStyle(
               fontSize: 13,
               color: done ? Colors.greenAccent : Colors.white70,
@@ -208,22 +221,24 @@ class _DevPetTabState extends State<DevPetTab>
         const SizedBox(height: 8),
         Text(
           done
-            ? '🎉 Świetna robota! Jutro możesz zdobyć kolejne XP.'
-            : '1 XP za każde 5 min nauki. Max ${PetProvider.kDailyXpLimit} XP dziennie.',
+              ? loc.translate('pet_daily_done')
+              : loc.translate('pet_daily_tip'),
           style: const TextStyle(fontSize: 11, color: Colors.white38),
         ),
       ]),
     );
   }
 
-  // ── STATYSTYKI (3 kafle) ────────────────
-  Widget _buildStatsRow() {
+  // ── STATYSTYKI ─────────────────────────
+  Widget _buildStatsRow(BuildContext context) {
+    final loc = AppLocalizations.of(context);
+    final stageName = _translateStage(context, _pet.stageName);
     return Row(children: [
-      _statTile('Łączne XP',  '${_pet.xp}',                   '⭐'),
+      _statTile(loc.translate('pet_stats_total_xp'), '${_pet.xp}', '⭐'),
       const SizedBox(width: 12),
-      _statTile('Kolekcja',   '${_pet.collection.length}/10',  '🏆'),
+      _statTile(loc.translate('pet_stats_collection'), '${_pet.collection.length}/10', '🏆'),
       const SizedBox(width: 12),
-      _statTile('Etap',       _pet.stageName,                  _pet.stageEmoji),
+      _statTile(loc.translate('pet_stats_stage'), stageName, _pet.stageEmoji),
     ]);
   }
 
@@ -251,11 +266,12 @@ class _DevPetTabState extends State<DevPetTab>
   }
 
   // ── NAGRODY ────────────────────────────
-  Widget _buildRewardsCard() {
+  Widget _buildRewardsCard(BuildContext context) {
+    final loc = AppLocalizations.of(context);
     return _card(
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        const Text('🎁  Nagrody za kolekcję',
-            style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.white)),
+        Text('🎁  ${loc.translate('pet_rewards_title')}',
+            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.white)),
         const SizedBox(height: 14),
         ...kCollectionRewards.entries.map((e) {
           final unlocked = _pet.collection.length >= e.key;
@@ -300,17 +316,18 @@ class _DevPetTabState extends State<DevPetTab>
   }
 
   // ── PORADY ─────────────────────────────
-  Widget _buildTipsCard() {
+  Widget _buildTipsCard(BuildContext context) {
+    final loc = AppLocalizations.of(context);
     return _card(
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        const Text('💡  Jak to działa?',
-            style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.white)),
+        Text('💡  ${loc.translate('pet_tips_title')}',
+            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.white)),
         const SizedBox(height: 12),
-        _tip('⏱️', 'Pracuj/ucz się — za każde 5 minut dostajesz 1 XP'),
-        _tip('🌙', 'Max 100 XP dziennie — limit resetuje się o północy'),
-        _tip('🦅', 'Po 1000 XP maskotka przechodzi na emeryturę'),
-        _tip('🔄', 'Zbierz wszystkie 10 maskotek i odblokuj nagrody!'),
-        _tip('😴', 'Karm maskotkę — energia spada gdy nie pracujesz'),
+        _tip('⏱️', loc.translate('pet_tip_1')),
+        _tip('🌙', loc.translate('pet_tip_2')),
+        _tip('🦅', loc.translate('pet_tip_3')),
+        _tip('🔄', loc.translate('pet_tip_4')),
+        _tip('😴', loc.translate('pet_tip_5')),
       ]),
     );
   }
@@ -330,6 +347,7 @@ class _DevPetTabState extends State<DevPetTab>
 
   // ── KOLEKCJA (modal) ───────────────────
   void _showCollection() {
+    final loc = AppLocalizations.of(context);
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -353,9 +371,9 @@ class _DevPetTabState extends State<DevPetTab>
               ),
             ),
             const SizedBox(height: 16),
-            const Text(
-              '🏆 Kolekcja Maskotek',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+            Text(
+              loc.translate('pet_collection_title'),
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
             ),
             const SizedBox(height: 4),
             Text(
@@ -378,7 +396,7 @@ class _DevPetTabState extends State<DevPetTab>
                   final sp = PetSpecies.values[i];
                   final info = kSpeciesInfo[sp]!;
                   final collected = _pet.collection.firstWhere(
-                    (c) => c.species == sp,
+                        (c) => c.species == sp,
                     orElse: () => CollectedPet(species: sp, retiredAt: DateTime.now(), totalXp: 0),
                   );
                   final isCollected = _pet.collection.any((c) => c.species == sp);
@@ -396,8 +414,8 @@ class _DevPetTabState extends State<DevPetTab>
                         color: isCurrent
                             ? color.withOpacity(0.7)
                             : isCollected
-                                ? color.withOpacity(0.35)
-                                : Colors.white10,
+                            ? color.withOpacity(0.35)
+                            : Colors.white10,
                         width: isCurrent ? 2 : 1,
                       ),
                     ),
@@ -433,7 +451,7 @@ class _DevPetTabState extends State<DevPetTab>
                           ),
                         if (isCurrent && !isCollected)
                           Text(
-                            'Aktualny',
+                            loc.translate('pet_collection_current'),
                             style: TextStyle(fontSize: 10, color: color.withOpacity(0.7)),
                           ),
                       ],
@@ -451,6 +469,7 @@ class _DevPetTabState extends State<DevPetTab>
 
   // ── Nagroda dialog ─────────────────────
   void _showRewardDialog(Map<String, String> reward) {
+    final loc = AppLocalizations.of(context);
     showDialog(
       context: context,
       builder: (_) => Dialog(
@@ -462,7 +481,7 @@ class _DevPetTabState extends State<DevPetTab>
             Text(reward['emoji']!, style: const TextStyle(fontSize: 56)),
             const SizedBox(height: 12),
             Text(
-              '🎊 Nagroda odblokowana!',
+              loc.translate('pet_reward_unlocked'),
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
             ),
             const SizedBox(height: 8),
@@ -485,7 +504,8 @@ class _DevPetTabState extends State<DevPetTab>
                 foregroundColor: Colors.black,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
-              child: const Text('Super! 🎉', style: TextStyle(fontWeight: FontWeight.bold)),
+              child: Text(loc.translate('pet_reward_btn'),
+                  style: const TextStyle(fontWeight: FontWeight.bold)),
             ),
           ]),
         ),

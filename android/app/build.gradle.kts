@@ -33,8 +33,8 @@ android {
         applicationId = "com.appdetenerife.worktimer"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
-        versionCode = 15
-        versionName = "1.1.5"
+        versionCode = 17
+        versionName = "1.1.7"
     }
 
     signingConfigs {

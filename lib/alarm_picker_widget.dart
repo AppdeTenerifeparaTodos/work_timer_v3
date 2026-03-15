@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'alarm_service.dart';
+import 'app_localizations.dart';
 
 /// Pokazuje bottomSheet z listą dźwięków do wyboru.
 /// Zwraca wybrany AlarmSound lub null jeśli anulowano.
@@ -50,8 +51,8 @@ class _AlarmPickerSheetState extends State<_AlarmPickerSheet> {
         Container(width: 40, height: 4,
             decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(2))),
         const SizedBox(height: 16),
-        const Text('Wybierz dźwięk alarmu',
-            style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700)),
+        Text(AppLocalizations.of(context)!.translate('alarm_pick_title'),
+            style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700)),
         const SizedBox(height: 12),
         Flexible(
           child: ListView.builder(
@@ -123,7 +124,7 @@ class _AlarmPickerSheetState extends State<_AlarmPickerSheet> {
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     padding: const EdgeInsets.symmetric(vertical: 14),
                   ),
-                  child: const Text('Anuluj'),
+                  child: Text(AppLocalizations.of(context)!.translate('alarm_pick_cancel')),
                 ),
               ),
               const SizedBox(width: 12),
@@ -138,7 +139,7 @@ class _AlarmPickerSheetState extends State<_AlarmPickerSheet> {
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     padding: const EdgeInsets.symmetric(vertical: 14),
                   ),
-                  child: const Text('Wybierz', style: TextStyle(color: Colors.white)),
+                  child: Text(AppLocalizations.of(context)!.translate('alarm_pick_select'), style: const TextStyle(color: Colors.white)),
                 ),
               ),
             ],
@@ -157,12 +158,15 @@ class AlarmStopScreen extends StatelessWidget {
   final String title;
   final String subtitle;
   final VoidCallback onStop;
+  /// Etiqueta del botón STOP (traducida). Si no se pasa, se usa "STOP".
+  final String? stopButtonLabel;
 
   const AlarmStopScreen({
     super.key,
     required this.title,
     required this.subtitle,
     required this.onStop,
+    this.stopButtonLabel,
   });
 
   @override
@@ -205,7 +209,7 @@ class AlarmStopScreen extends StatelessWidget {
                   child: ElevatedButton.icon(
                     onPressed: onStop,
                     icon: const Icon(Icons.stop_circle_outlined, size: 28),
-                    label: const Text('STOP', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, letterSpacing: 2)),
+                    label: Text(stopButtonLabel ?? 'STOP', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800, letterSpacing: 2)),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.red.shade700,
                       foregroundColor: Colors.white,

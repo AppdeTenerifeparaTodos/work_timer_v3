@@ -37,6 +37,10 @@ class NotificationService {
     required DateTime eventDateTime,
     required int reminderMinutes,
     String reminderMode = 'alarm',
+    String? channelName,
+    String? channelDescription,
+    String? stopButton,
+    String? notificationTitle,
   }) async {
     final reminderTime =
     eventDateTime.subtract(Duration(minutes: reminderMinutes));
@@ -71,7 +75,7 @@ class NotificationService {
           notificationSettings: NotificationSettings(
             title: '🚨 $title',
             body: dateLabel,
-            stopButton: 'STOP',
+            stopButton: stopButton ?? 'STOP',
           ),
         ),
       );
@@ -90,17 +94,17 @@ class NotificationService {
           notificationSettings: NotificationSettings(
             title: '📳 $title',
             body: dateLabel,
-            stopButton: 'STOP',
+            stopButton: stopButton ?? 'STOP',
           ),
         ),
       );
     } else {
       final tzTime = tz.TZDateTime.from(reminderTime, tz.local);
 
-      const androidDetails = AndroidNotificationDetails(
+      final androidDetails = AndroidNotificationDetails(
         'event_reminders',
-        'Przypomnienia',
-        channelDescription: 'Powiadomienia o wydarzeniach',
+        channelName ?? 'Reminders',
+        channelDescription: channelDescription ?? 'Event notifications',
         importance: Importance.max,
         priority: Priority.max,
         playSound: true,
@@ -111,7 +115,7 @@ class NotificationService {
 
       await _plugin.zonedSchedule(
         eventId.hashCode,
-        '🔔 Przypomnienie',
+        notificationTitle ?? '🔔 Reminder',
         title,
         tzTime,
         const NotificationDetails(android: androidDetails),

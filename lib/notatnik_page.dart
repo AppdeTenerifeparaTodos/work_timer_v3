@@ -273,67 +273,66 @@ class _NotatnikPageState extends State<NotatnikPage> {
     if (!mounted) return;
     await showDialog<void>(
       context: context,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setStateDialog) => AlertDialog(
-          backgroundColor: const Color(0xFF1A1A24),
-          title: const Text(
-            'Tryb przypomnienia',
-            style: TextStyle(color: Colors.white),
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              SegmentedButton<String>(
-                segments: const [
-                  ButtonSegment(
-                    value: 'notification',
-                    icon: Icon(Icons.notifications, size: 16),
-                    label: Text('Powiad.', style: TextStyle(fontSize: 11)),
-                  ),
-                  ButtonSegment(
-                    value: 'vibration',
-                    icon: Icon(Icons.vibration, size: 16),
-                    label: Text('Wibr.', style: TextStyle(fontSize: 11)),
-                  ),
-                  ButtonSegment(
-                    value: 'alarm',
-                    icon: Icon(Icons.alarm, size: 16),
-                    label: Text('Alarm', style: TextStyle(fontSize: 11)),
-                  ),
-                ],
-                selected: {reminderMode},
-                onSelectionChanged: (val) =>
-                    setStateDialog(() => reminderMode = val.first),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                reminderMode == 'alarm'
-                    ? '🚨 Alarm w pętli — działa gdy app zamknięta'
-                    : reminderMode == 'vibration'
-                    ? '📳 Tylko wibracja, przycisk STOP'
-                    : '🔔 Krótki dźwięk systemowy',
-                style: const TextStyle(
-                  color: Colors.white54,
-                  fontSize: 11,
-                  fontStyle: FontStyle.italic,
+        builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setStateDialog) {
+          final loc = AppLocalizations.of(ctx)!;
+          return AlertDialog(
+            backgroundColor: const Color(0xFF1A1A24),
+            title: Text(
+              loc.translate('reminder_mode_title'),
+              style: const TextStyle(color: Colors.white),
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SegmentedButton<String>(
+                  segments: [
+                    ButtonSegment(
+                      value: 'notification',
+                      icon: const Icon(Icons.notifications, size: 16),
+                      label: Text(loc.translate('event_mode_notification'), style: const TextStyle(fontSize: 11)),
+                    ),
+                    ButtonSegment(
+                      value: 'vibration',
+                      icon: const Icon(Icons.vibration, size: 16),
+                      label: Text(loc.translate('event_mode_vibration'), style: const TextStyle(fontSize: 11)),
+                    ),
+                    ButtonSegment(
+                      value: 'alarm',
+                      icon: const Icon(Icons.alarm, size: 16),
+                      label: Text(loc.translate('event_mode_alarm'), style: const TextStyle(fontSize: 11)),
+                    ),
+                  ],
+                  selected: {reminderMode},
+                  onSelectionChanged: (val) =>
+                      setStateDialog(() => reminderMode = val.first),
                 ),
+                const SizedBox(height: 12),
+                Text(
+                  loc.translate('event_mode_desc_$reminderMode'),
+                  style: const TextStyle(
+                    color: Colors.white54,
+                    fontSize: 11,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(),
+                child: Text(loc.translate('cancel'),
+                    style: const TextStyle(color: Colors.white54)),
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF6366F1)),
+                onPressed: () => Navigator.of(ctx).pop(),
+                child: Text(loc.translate('save')),
               ),
             ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(ctx).pop(),
-              child: const Text('Anuluj',
-                  style: TextStyle(color: Colors.white54)),
-            ),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF6366F1)),
-              onPressed: () => Navigator.of(ctx).pop(),
-              child: const Text('OK'),
-            ),
-          ],
-        ),
+          );
+        },
       ),
     );
     if (!mounted) return;
@@ -344,14 +343,17 @@ class _NotatnikPageState extends State<NotatnikPage> {
       pickedTime.hour, pickedTime.minute,
     );
 
-    // Używamy prefiksu note_ żeby notification_service wiedział
-    // że ma użyć klucza 'alarm_sound_notes' a nie 'alarm_sound_events'
+    final loc = AppLocalizations.of(context)!;
     await NotificationService().scheduleEventReminder(
       eventId: 'note_${note.id}',
       title: '🔔 ${note.text}',
       eventDateTime: reminderDateTime,
       reminderMinutes: 0,
       reminderMode: reminderMode,
+      channelName: loc.translate('notification_channel_reminders'),
+      channelDescription: loc.translate('notification_channel_reminders_desc'),
+      stopButton: loc.translate('alarm_stop'),
+      notificationTitle: loc.translate('alarm_reminder_title'),
     );
 
     final idx = _notes.indexWhere((n) => n.id == note.id);

@@ -239,6 +239,7 @@ class AppLocalizations {
       'event_category_custom': 'Wpisz nazwę kategorii',
       'event_category_custom_hint': 'np. Spotkanie, Nauka, Zakupy',
       'event_added': 'Wydarzenie dodane!',
+      'event_updated': 'Wydarzenie zaktualizowane',
       'event_deleted': 'Wydarzenie usunięte',
       'reminder_before': 'przed',
       'reminder_day': 'dzień przed',
@@ -311,6 +312,7 @@ class AppLocalizations {
       'notes_reminder_cancel': '🔕 Przypomnienie anulowane',
       'notes_reminder_tooltip_set': 'Ustaw przypomnienie',
       'notes_reminder_tooltip_cancel': 'Anuluj przypomnienie',
+      'reminder_mode_title': 'Tryb przypomnienia',
       // ── ALARM ──────────────────────────────────────────────
       'alarm_pick_title': 'Wybierz dźwięk alarmu',
       'alarm_pick_cancel': 'Anuluj',
@@ -319,6 +321,18 @@ class AppLocalizations {
       'alarm_stop': 'STOP',
       'alarm_test_tooltip': 'Testuj alarm',
       'alarm_sound_label': 'Dźwięk: ',
+      'event_reminder_none': 'Brak przypomnienia',
+      'event_mode_notification': 'Powiad.',
+      'event_mode_vibration': 'Wibr.',
+      'event_mode_alarm': 'Alarm',
+      'event_mode_desc_notification': '🔔 Krótki dźwięk systemowy',
+      'event_mode_desc_vibration': '📳 Tylko wibracja, bez dźwięku',
+      'event_mode_desc_alarm': '🚨 Alarm w pętli — działa nawet gdy app jest zamknięta',
+      'notification_channel_reminders': 'Przypomnienia',
+      'notification_channel_reminders_desc': 'Powiadomienia o wydarzeniach',
+      'stats_refreshed': 'Statystyki odświeżone',
+      'refresh_tooltip': 'Odśwież',
+      'edit_event': 'Edytuj wydarzenie',
     },
 
     'es': {
@@ -547,6 +561,7 @@ class AppLocalizations {
       'event_category_custom': 'Escribe el nombre de la categoría',
       'event_category_custom_hint': 'ej. Reunión, Estudio, Compras',
       'event_added': '¡Evento añadido!',
+      'event_updated': 'Evento actualizado',
       'event_deleted': 'Evento eliminado',
       'reminder_before': 'antes',
       'reminder_day': 'día antes',
@@ -619,6 +634,7 @@ class AppLocalizations {
       'notes_reminder_cancel': '🔕 Recordatorio cancelado',
       'notes_reminder_tooltip_set': 'Establecer recordatorio',
       'notes_reminder_tooltip_cancel': 'Cancelar recordatorio',
+      'reminder_mode_title': 'Modo de recordatorio',
       // ── ALARM ──────────────────────────────────────────────
       'alarm_pick_title': 'Elige el sonido de alarma',
       'alarm_pick_cancel': 'Cancelar',
@@ -627,6 +643,18 @@ class AppLocalizations {
       'alarm_stop': 'PARAR',
       'alarm_test_tooltip': 'Probar alarma',
       'alarm_sound_label': 'Sonido: ',
+      'event_reminder_none': 'Sin recordatorio',
+      'event_mode_notification': 'Notif.',
+      'event_mode_vibration': 'Vibr.',
+      'event_mode_alarm': 'Alarma',
+      'event_mode_desc_notification': '🔔 Sonido corto del sistema',
+      'event_mode_desc_vibration': '📳 Solo vibración, sin sonido',
+      'event_mode_desc_alarm': '🚨 Alarma en bucle — funciona con la app cerrada',
+      'notification_channel_reminders': 'Recordatorios',
+      'notification_channel_reminders_desc': 'Notificaciones de eventos',
+      'stats_refreshed': 'Estadísticas actualizadas',
+      'refresh_tooltip': 'Actualizar',
+      'edit_event': 'Editar evento',
     },
 
     'en': {
@@ -855,6 +883,7 @@ class AppLocalizations {
       'event_category_custom': 'Enter category name',
       'event_category_custom_hint': 'e.g. Meeting, Study, Shopping',
       'event_added': 'Event added!',
+      'event_updated': 'Event updated',
       'event_deleted': 'Event deleted',
       'reminder_before': 'before',
       'reminder_day': 'day before',
@@ -927,6 +956,7 @@ class AppLocalizations {
       'notes_reminder_cancel': '🔕 Reminder cancelled',
       'notes_reminder_tooltip_set': 'Set reminder',
       'notes_reminder_tooltip_cancel': 'Cancel reminder',
+      'reminder_mode_title': 'Reminder mode',
       // ── ALARM ──────────────────────────────────────────────
       'alarm_pick_title': 'Choose alarm sound',
       'alarm_pick_cancel': 'Cancel',
@@ -935,8 +965,28 @@ class AppLocalizations {
       'alarm_stop': 'STOP',
       'alarm_test_tooltip': 'Test alarm',
       'alarm_sound_label': 'Sound: ',
+      'event_reminder_none': 'No reminder',
+      'event_mode_notification': 'Notif.',
+      'event_mode_vibration': 'Vibr.',
+      'event_mode_alarm': 'Alarm',
+      'event_mode_desc_notification': '🔔 Short system sound',
+      'event_mode_desc_vibration': '📳 Vibration only, no sound',
+      'event_mode_desc_alarm': '🚨 Looping alarm — works when app is closed',
+      'notification_channel_reminders': 'Reminders',
+      'notification_channel_reminders_desc': 'Event notifications',
+      'stats_refreshed': 'Statistics updated',
+      'refresh_tooltip': 'Refresh',
+      'edit_event': 'Edit event',
     },
   };
+
+  /// Returns translation for [key] in [languageCode] without BuildContext.
+  static String getTranslation(String languageCode, String key) {
+    return _localizedValues[languageCode]?[key] ??
+        _localizedValues['en']?[key] ??
+        _localizedValues['pl']?[key] ??
+        key;
+  }
 
   String translate(String key) {
     return _localizedValues[locale.languageCode]?[key] ??

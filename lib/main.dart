@@ -34,13 +34,21 @@ void main() async {
   _petEnabled = prefs.getBool('pet_enabled') ?? false;
   runApp(const WorkStudyTimerApp());
 
-  // Poproś o zezwolenie na wyświetlanie na wierzchu
+  // Zezwolenie na wyświetlanie na wierzchu (fullscreen intent / overlay)
   if (await Permission.systemAlertWindow.isDenied) {
     await Permission.systemAlertWindow.request();
   }
 
-  // Nasłuchuj na dzwoniące alarmy i pokaż ekran STOP
-  Alarm.ringStream.stream.listen((alarmSettings) {
+  // Android 13+: zezwolenie na powiadomienia (POST_NOTIFICATIONS)
+  if (await Permission.notification.isDenied) {
+    await Permission.notification.request();
+  }
+
+  // Nasłuchuj na dzwoniące alarmy i pokaż ekran STOP (fullscreen / lock screen)
+  Alarm.ringStream.stream.listen((alarmSettings) async {
+    final prefs = await SharedPreferences.getInstance();
+    final lang = prefs.getString('selected_language') ?? 'en';
+    final stopLabel = AppLocalizations.getTranslation(lang, 'alarm_stop');
     navigatorKey.currentState?.push(
       MaterialPageRoute(
         builder: (_) => AlarmStopScreen(
@@ -50,6 +58,7 @@ void main() async {
             Alarm.stop(alarmSettings.id);
             navigatorKey.currentState?.pop();
           },
+          stopButtonLabel: stopLabel,
         ),
       ),
     );
@@ -540,6 +549,7 @@ class _EventsPageState extends State<EventsPage> {
     final encoded = jsonEncode(jsonList);
     await prefs.setString('calendar_events', encoded);
 
+    final loc = AppLocalizations.of(context)!;
     for (final event in _events) {
       if (event.reminderMinutes != null && event.reminderMode != 'none') {
         await NotificationService().scheduleEventReminder(
@@ -547,7 +557,11 @@ class _EventsPageState extends State<EventsPage> {
           title: event.title,
           eventDateTime: event.dateTime,
           reminderMinutes: event.reminderMinutes!,
-          reminderMode: event.reminderMode, // ← NOWE
+          reminderMode: event.reminderMode,
+          channelName: loc.translate('notification_channel_reminders'),
+          channelDescription: loc.translate('notification_channel_reminders_desc'),
+          stopButton: loc.translate('alarm_stop'),
+          notificationTitle: loc.translate('alarm_reminder_title'),
         );
       }
     }
@@ -579,7 +593,7 @@ class _EventsPageState extends State<EventsPage> {
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (context, setStateDialog) => AlertDialog(
-          title: Text('✏️ ${loc.translate('edit_session')}'),
+          title: Text('✏️ ${loc.translate('edit_event')}'),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -645,21 +659,21 @@ class _EventsPageState extends State<EventsPage> {
                   const Divider(),
                   const SizedBox(height: 4),
                   SegmentedButton<String>(
-                    segments: const [
+                    segments: [
                       ButtonSegment(
                         value: 'notification',
-                        icon: Icon(Icons.notifications, size: 16),
-                        label: Text('Powiad.', style: TextStyle(fontSize: 11)),
+                        icon: const Icon(Icons.notifications, size: 16),
+                        label: Text(loc.translate('event_mode_notification'), style: const TextStyle(fontSize: 11)),
                       ),
                       ButtonSegment(
                         value: 'vibration',
-                        icon: Icon(Icons.vibration, size: 16),
-                        label: Text('Wibr.', style: TextStyle(fontSize: 11)),
+                        icon: const Icon(Icons.vibration, size: 16),
+                        label: Text(loc.translate('event_mode_vibration'), style: const TextStyle(fontSize: 11)),
                       ),
                       ButtonSegment(
                         value: 'alarm',
-                        icon: Icon(Icons.alarm, size: 16),
-                        label: Text('Alarm', style: TextStyle(fontSize: 11)),
+                        icon: const Icon(Icons.alarm, size: 16),
+                        label: Text(loc.translate('event_mode_alarm'), style: const TextStyle(fontSize: 11)),
                       ),
                     ],
                     selected: {reminderMode},
@@ -668,7 +682,7 @@ class _EventsPageState extends State<EventsPage> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    _getModeDescription(reminderMode),
+                    _getModeDescription(context, reminderMode),
                     style: TextStyle(fontSize: 11, color: Colors.grey[600], fontStyle: FontStyle.italic),
                   ),
                 ],
@@ -713,7 +727,7 @@ class _EventsPageState extends State<EventsPage> {
                 _saveEvents();
                 Navigator.of(ctx).pop();
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(loc.translate('session_updated'))),
+                  SnackBar(content: Text(loc.translate('event_updated'))),
                 );
               },
               child: Text(loc.translate('save')),
@@ -838,7 +852,7 @@ class _EventsPageState extends State<EventsPage> {
                     ListTile(
                       title: Text(loc.translate('event_reminder')),
                       subtitle: reminderMinutes == null
-                          ? const Text('Brak przypomnienia')
+                          ? Text(loc.translate('event_reminder_none'))
                           : Text(_getReminderLabel(reminderMinutes!)),
                       trailing: const Icon(Icons.notifications),
                       onTap: () async {
@@ -879,21 +893,21 @@ class _EventsPageState extends State<EventsPage> {
                       const Divider(),
                       const SizedBox(height: 4),
                       SegmentedButton<String>(
-                        segments: const [
+                        segments: [
                           ButtonSegment(
                             value: 'notification',
-                            icon: Icon(Icons.notifications, size: 16),
-                            label: Text('Powiad.', style: TextStyle(fontSize: 11)),
+                            icon: const Icon(Icons.notifications, size: 16),
+                            label: Text(loc.translate('event_mode_notification'), style: const TextStyle(fontSize: 11)),
                           ),
                           ButtonSegment(
                             value: 'vibration',
-                            icon: Icon(Icons.vibration, size: 16),
-                            label: Text('Wibr.', style: TextStyle(fontSize: 11)),
+                            icon: const Icon(Icons.vibration, size: 16),
+                            label: Text(loc.translate('event_mode_vibration'), style: const TextStyle(fontSize: 11)),
                           ),
                           ButtonSegment(
                             value: 'alarm',
-                            icon: Icon(Icons.alarm, size: 16),
-                            label: Text('Alarm', style: TextStyle(fontSize: 11)),
+                            icon: const Icon(Icons.alarm, size: 16),
+                            label: Text(loc.translate('event_mode_alarm'), style: const TextStyle(fontSize: 11)),
                           ),
                         ],
                         selected: {reminderMode},
@@ -902,7 +916,7 @@ class _EventsPageState extends State<EventsPage> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        _getModeDescription(reminderMode),
+                        _getModeDescription(context, reminderMode),
                         style: TextStyle(fontSize: 11, color: Colors.grey[600], fontStyle: FontStyle.italic),
                       ),
                     ],
@@ -975,14 +989,10 @@ class _EventsPageState extends State<EventsPage> {
     notesController.dispose();
   }
 
-  // ← NOWE: opis trybu
-  String _getModeDescription(String mode) {
-    switch (mode) {
-      case 'notification': return '🔔 Krótki dźwięk systemowy';
-      case 'vibration':    return '📳 Tylko wibracja, bez dźwięku';
-      case 'alarm':        return '🚨 Alarm w pętli — działa nawet gdy app jest zamknięta';
-      default:             return '';
-    }
+  String _getModeDescription(BuildContext context, String mode) {
+    final loc = AppLocalizations.of(context)!;
+    final key = 'event_mode_desc_$mode';
+    return mode.isNotEmpty ? loc.translate(key) : '';
   }
 
   // 🔔 Odpal alarm dla wydarzenia
@@ -992,6 +1002,7 @@ class _EventsPageState extends State<EventsPage> {
     setState(() => _alarmActive = true);
 
     if (!mounted) return;
+    final loc = AppLocalizations.of(context)!;
     await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => AlarmStopScreen(
@@ -1002,6 +1013,7 @@ class _EventsPageState extends State<EventsPage> {
             AlarmService().stop();
             setState(() => _alarmActive = false);
           },
+          stopButtonLabel: loc.translate('alarm_stop'),
         ),
       ),
     );
@@ -2448,15 +2460,15 @@ class _StatisticsPageContentState extends State<StatisticsPageContent> {
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
-            tooltip: 'Odśwież',
+            tooltip: AppLocalizations.of(context)!.translate('refresh_tooltip'),
             onPressed: () {
               setState(() {
                 _loadHistory();
               });
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Statystyki odświeżone'),
-                  duration: Duration(seconds: 1),
+                SnackBar(
+                  content: Text(AppLocalizations.of(context)!.translate('stats_refreshed')),
+                  duration: const Duration(seconds: 1),
                 ),
               );
             },
@@ -5395,7 +5407,8 @@ class _HomePageState extends State<HomePage> {
                         final endTime =
                             '${entry.end.hour.toString().padLeft(2, '0')}:${entry.end.minute.toString().padLeft(2, '0')}';
                         final typeText = _typeLabel(entry.type, context);
-                        final modeText = entry.isManual ? 'Manualnie' : 'Start/Stop';
+                        final loc = AppLocalizations.of(context)!;
+                        final modeText = entry.isManual ? loc.translate('mode_manual') : loc.translate('mode_auto');
                         final dayName = _getDayNameHome(entry.start.weekday);
                         final dateLabel =
                             '$dayName ${entry.start.year}-${entry.start.month.toString().padLeft(2, '0')}-${entry.start.day.toString().padLeft(2, '0')}';
@@ -5404,7 +5417,7 @@ class _HomePageState extends State<HomePage> {
                           child: ListTile(
                             title: Text(entry.description),
                             subtitle: Text(
-                              '$dateLabel  $startTime - $endTime  $durationText  $typeText  Tryb: $modeText',
+                              '$dateLabel  $startTime - $endTime  $durationText  $typeText  ${loc.translate('field_mode')}$modeText',
                             ),
                             trailing: Row(
                               mainAxisSize: MainAxisSize.min,

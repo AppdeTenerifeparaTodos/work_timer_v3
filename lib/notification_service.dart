@@ -50,12 +50,7 @@ class NotificationService {
         '${eventDateTime.hour.toString().padLeft(2, '0')}:${eventDateTime.minute.toString().padLeft(2, '0')}';
 
     if (reminderMode == 'alarm') {
-      // 🚨 ALARM — głośny, w pętli, przycisk STOP
-
       final prefs = await SharedPreferences.getInstance();
-
-      // Notatki używają klucza 'alarm_sound_notes',
-      // Wydarzenia używają klucza 'alarm_sound_events'
       final soundKey = eventId.startsWith('note_')
           ? 'alarm_sound_notes'
           : 'alarm_sound_events';
@@ -81,7 +76,6 @@ class NotificationService {
         ),
       );
     } else if (reminderMode == 'vibration') {
-      // 📳 WIBRACJA — pakiet alarm z volume=0, ma przycisk STOP
       await Alarm.set(
         alarmSettings: AlarmSettings(
           id: alarmId,
@@ -101,7 +95,6 @@ class NotificationService {
         ),
       );
     } else {
-      // 🔔 POWIADOMIENIE — krótki dźwięk systemowy, bez wibracji
       final tzTime = tz.TZDateTime.from(reminderTime, tz.local);
 
       const androidDetails = AndroidNotificationDetails(

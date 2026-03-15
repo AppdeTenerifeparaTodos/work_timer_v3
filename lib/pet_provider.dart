@@ -55,10 +55,11 @@ const Map<PetSpecies, Map<String, String>> kSpeciesInfo = {
 // 3  → motyw aplikacji
 // 5  → animacja ewolucji
 // 10 → Full Stack Master
+/// Keys for title/desc are localization keys (app_localizations).
 const Map<int, Map<String, String>> kCollectionRewards = {
-  3:  {'title': 'Motyw Aplikacji',   'emoji': '🎨', 'desc': 'Odblokowano ciemny motyw neonowy!'},
-  5:  {'title': 'Animacja Ewolucji', 'emoji': '✨', 'desc': 'Odblokowano ekskluzywną animację ewolucji!'},
-  10: {'title': 'Full Stack Master', 'emoji': '🏆', 'desc': 'Kolekcja ukończona! Odznaka Full Stack Master!'},
+  3:  {'title': 'pet_reward_theme_title',   'emoji': '🎨', 'desc': 'pet_reward_theme_desc'},
+  5:  {'title': 'pet_reward_evolution_title', 'emoji': '✨', 'desc': 'pet_reward_evolution_desc'},
+  10: {'title': 'pet_reward_master_title', 'emoji': '🏆', 'desc': 'pet_reward_master_desc'},
 };
 
 // ── Model zebranej maskotki ─────────────

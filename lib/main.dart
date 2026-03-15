@@ -685,6 +685,22 @@ class _EventsPageState extends State<EventsPage> {
                     _getModeDescription(context, reminderMode),
                     style: TextStyle(fontSize: 11, color: Colors.grey[600], fontStyle: FontStyle.italic),
                   ),
+                  if (reminderMode == 'alarm') ...[
+                    const SizedBox(height: 8),
+                    ListTile(
+                      leading: const Icon(Icons.music_note, color: Colors.orange),
+                      title: Text(loc.translate('alarm_pick_title'), style: const TextStyle(fontSize: 14)),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () async {
+                        final currentId = await AlarmService().loadSoundForEvents();
+                        final picked = await showAlarmPicker(context: ctx, currentSoundId: currentId);
+                        if (picked != null) {
+                          await AlarmService().saveSoundForEvents(picked.id);
+                          if (ctx.mounted) setStateDialog(() {});
+                        }
+                      },
+                    ),
+                  ],
                 ],
                 // ─────────────────────────────────────────────
 
@@ -919,6 +935,22 @@ class _EventsPageState extends State<EventsPage> {
                         _getModeDescription(context, reminderMode),
                         style: TextStyle(fontSize: 11, color: Colors.grey[600], fontStyle: FontStyle.italic),
                       ),
+                      if (reminderMode == 'alarm') ...[
+                        const SizedBox(height: 8),
+                        ListTile(
+                          leading: const Icon(Icons.music_note, color: Colors.orange),
+                          title: Text(loc.translate('alarm_pick_title'), style: const TextStyle(fontSize: 14)),
+                          trailing: const Icon(Icons.chevron_right),
+                          onTap: () async {
+                            final currentId = await AlarmService().loadSoundForEvents();
+                            final picked = await showAlarmPicker(context: ctx, currentSoundId: currentId);
+                            if (picked != null) {
+                              await AlarmService().saveSoundForEvents(picked.id);
+                              if (ctx.mounted) setStateDialog(() {});
+                            }
+                          },
+                        ),
+                      ],
                     ],
                     // ─────────────────────────────────────────────
                   ],
@@ -3126,9 +3158,9 @@ class _HomePageState extends State<HomePage> {
                         const SizedBox(width: 8),
                         DropdownButton<String>(
                           value: selectedPeriod,
-                          items: const [
-                            DropdownMenuItem(value: 'week', child: Text('Tydzień')),
-                            DropdownMenuItem(value: 'month', child: Text('Miesiąc')),
+                          items: [
+                            DropdownMenuItem(value: 'week', child: Text(loc.translate('goal_week'))),
+                            DropdownMenuItem(value: 'month', child: Text(loc.translate('goal_month'))),
                           ],
                           onChanged: (value) {
                             if (value != null) {
@@ -4848,8 +4880,8 @@ class _HomePageState extends State<HomePage> {
                                                 ),
                                                 const SizedBox(height: 4),
                                                 Text(
-                                                  '${goal.period == 'week' ? 'Tydzień' : 'Miesiąc'}'
-                                                      '${goal.activityType != null ? ' • ${_typeLabel(goal.activityType!, context)}' : ' • Wszystkie'}',
+                                                  '${goal.period == 'week' ? loc.translate('goal_week') : loc.translate('goal_month')}'
+                                                      '${goal.activityType != null ? ' • ${_typeLabel(goal.activityType!, context)}' : ' • ${loc.translate('goal_all_types')}'}',
                                                   style: TextStyle(
                                                     fontSize: 12,
                                                     color: Colors.grey[600],

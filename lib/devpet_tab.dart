@@ -275,6 +275,8 @@ class _DevPetTabState extends State<DevPetTab>
         const SizedBox(height: 14),
         ...kCollectionRewards.entries.map((e) {
           final unlocked = _pet.collection.length >= e.key;
+          final titleKey = e.value['title']!;
+          final descKey = e.value['desc']!;
           return Padding(
             padding: const EdgeInsets.only(bottom: 10),
             child: Row(children: [
@@ -282,7 +284,7 @@ class _DevPetTabState extends State<DevPetTab>
               const SizedBox(width: 10),
               Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Text(
-                  e.value['title']!,
+                  loc.translate(titleKey),
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
@@ -290,7 +292,7 @@ class _DevPetTabState extends State<DevPetTab>
                   ),
                 ),
                 Text(
-                  '${e.key} maskotek — ${e.value['desc']!}',
+                  '${e.key} ${loc.translate('pet_rewards_pets')} — ${loc.translate(descKey)}',
                   style: const TextStyle(fontSize: 11, color: Colors.white30),
                 ),
               ])),
@@ -486,13 +488,13 @@ class _DevPetTabState extends State<DevPetTab>
             ),
             const SizedBox(height: 8),
             Text(
-              reward['title']!,
+              loc.translate(reward['title']!),
               style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.amberAccent),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
             Text(
-              reward['desc']!,
+              loc.translate(reward['desc']!),
               style: const TextStyle(fontSize: 13, color: Colors.white60),
               textAlign: TextAlign.center,
             ),

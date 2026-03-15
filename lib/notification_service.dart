@@ -118,7 +118,7 @@ class NotificationService {
         notificationTitle ?? '🔔 Reminder',
         title,
         tzTime,
-        const NotificationDetails(android: androidDetails),
+        NotificationDetails(android: androidDetails),
         androidScheduleMode: AndroidScheduleMode.alarmClock,
         uiLocalNotificationDateInterpretation:
         UILocalNotificationDateInterpretation.absoluteTime,

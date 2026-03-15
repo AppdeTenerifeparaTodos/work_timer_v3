@@ -343,7 +343,7 @@ class _NotatnikPageState extends State<NotatnikPage> {
       pickedTime.hour, pickedTime.minute,
     );
 
-    final loc = AppLocalizations.of(context)!;
+
     await NotificationService().scheduleEventReminder(
       eventId: 'note_${note.id}',
       title: '🔔 ${note.text}',

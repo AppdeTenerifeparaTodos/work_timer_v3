@@ -17,17 +17,43 @@ import 'pomodoro_page.dart';
 import 'pet_provider.dart';
 import 'devpet_tab.dart';
 import 'notatnik_page.dart';  // ← NOWY
-
+import 'alarm_service.dart';
+import 'alarm_picker_widget.dart';
+import 'package:alarm/alarm.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 final PetProvider _globalPet = PetProvider();
 bool _petEnabled = false;
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await NotificationService().init();
   await _globalPet.load();
-  final prefs = await SharedPreferences.getInstance(); // ← DODAJ
-  _petEnabled = prefs.getBool('pet_enabled') ?? false; // ← DODAJ
+  final prefs = await SharedPreferences.getInstance();
+  _petEnabled = prefs.getBool('pet_enabled') ?? false;
   runApp(const WorkStudyTimerApp());
+
+  // Poproś o zezwolenie na wyświetlanie na wierzchu
+  if (await Permission.systemAlertWindow.isDenied) {
+    await Permission.systemAlertWindow.request();
+  }
+
+  // Nasłuchuj na dzwoniące alarmy i pokaż ekran STOP
+  Alarm.ringStream.stream.listen((alarmSettings) {
+    navigatorKey.currentState?.push(
+      MaterialPageRoute(
+        builder: (_) => AlarmStopScreen(
+          title: alarmSettings.notificationSettings.title,
+          subtitle: alarmSettings.notificationSettings.body,
+          onStop: () {
+            Alarm.stop(alarmSettings.id);
+            navigatorKey.currentState?.pop();
+          },
+        ),
+      ),
+    );
+  });
 }
 
 // Główna aplikacja
@@ -65,6 +91,7 @@ class _WorkStudyTimerAppState extends State<WorkStudyTimerApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Work Study Timer',
+      navigatorKey: navigatorKey,
       locale: _locale,
       localizationsDelegates: const [
         AppLocalizations.delegate,
@@ -267,7 +294,8 @@ class CalendarEvent {
   final DateTime dateTime;
   final String category;
   final String? notes;
-  final int? reminderMinutes; // null = brak, 5 = 5 min przed, 15 = 15 min przed, itd.
+  final int? reminderMinutes;
+  final String reminderMode; // 'none' | 'notification' | 'vibration' | 'alarm'
   final DateTime createdAt;
 
   CalendarEvent({
@@ -277,32 +305,31 @@ class CalendarEvent {
     required this.category,
     this.notes,
     this.reminderMinutes,
+    this.reminderMode = 'alarm',
     required this.createdAt,
   });
 
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'title': title,
-      'dateTime': dateTime.toIso8601String(),
-      'category': category,
-      'notes': notes,
-      'reminderMinutes': reminderMinutes,
-      'createdAt': createdAt.toIso8601String(),
-    };
-  }
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'title': title,
+    'dateTime': dateTime.toIso8601String(),
+    'category': category,
+    'notes': notes,
+    'reminderMinutes': reminderMinutes,
+    'reminderMode': reminderMode,
+    'createdAt': createdAt.toIso8601String(),
+  };
 
-  factory CalendarEvent.fromJson(Map<String, dynamic> json) {
-    return CalendarEvent(
-      id: json['id'] as String,
-      title: json['title'] as String,
-      dateTime: DateTime.parse(json['dateTime'] as String),
-      category: json['category'] as String,
-      notes: json['notes'] as String?,
-      reminderMinutes: json['reminderMinutes'] as int?,
-      createdAt: DateTime.parse(json['createdAt'] as String),
-    );
-  }
+  factory CalendarEvent.fromJson(Map<String, dynamic> json) => CalendarEvent(
+    id: json['id'] as String,
+    title: json['title'] as String,
+    dateTime: DateTime.parse(json['dateTime'] as String),
+    category: json['category'] as String,
+    notes: json['notes'] as String?,
+    reminderMinutes: json['reminderMinutes'] as int?,
+    reminderMode: json['reminderMode'] as String? ?? 'alarm',
+    createdAt: DateTime.parse(json['createdAt'] as String),
+  );
 }
 
 // Główny ekran z zakładkami
@@ -474,11 +501,18 @@ class EventsPage extends StatefulWidget {
 
 class _EventsPageState extends State<EventsPage> {
   List<CalendarEvent> _events = [];
+  bool _alarmActive = false;
 
   @override
   void initState() {
     super.initState();
     _loadEvents();
+  }
+
+  @override
+  void dispose() {
+    AlarmService().stop();
+    super.dispose();
   }
 
   Future<void> _loadEvents() async {
@@ -493,7 +527,6 @@ class _EventsPageState extends State<EventsPage> {
         for (var item in decoded) {
           _events.add(CalendarEvent.fromJson(item as Map<String, dynamic>));
         }
-        // Sortuj po dacie
         _events.sort((a, b) => a.dateTime.compareTo(b.dateTime));
       });
     } catch (e) {
@@ -508,12 +541,13 @@ class _EventsPageState extends State<EventsPage> {
     await prefs.setString('calendar_events', encoded);
 
     for (final event in _events) {
-      if (event.reminderMinutes != null) {
+      if (event.reminderMinutes != null && event.reminderMode != 'none') {
         await NotificationService().scheduleEventReminder(
           eventId: event.id,
           title: event.title,
           eventDateTime: event.dateTime,
           reminderMinutes: event.reminderMinutes!,
+          reminderMode: event.reminderMode, // ← NOWE
         );
       }
     }
@@ -539,6 +573,7 @@ class _EventsPageState extends State<EventsPage> {
     DateTime selectedDate = event.dateTime;
     String selectedCategory = event.category;
     int? selectedReminder = event.reminderMinutes;
+    String reminderMode = event.reminderMode; // ← NOWE
 
     showDialog(
       context: context,
@@ -549,7 +584,6 @@ class _EventsPageState extends State<EventsPage> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Tytuł
                 TextField(
                   controller: titleController,
                   decoration: InputDecoration(
@@ -558,7 +592,6 @@ class _EventsPageState extends State<EventsPage> {
                   ),
                 ),
                 const SizedBox(height: 12),
-                // Data i godzina
                 ListTile(
                   leading: const Icon(Icons.calendar_today, color: Colors.indigo),
                   title: Text(
@@ -589,7 +622,6 @@ class _EventsPageState extends State<EventsPage> {
                   },
                 ),
                 const SizedBox(height: 12),
-                // Przypomnienie
                 DropdownButtonFormField<int?>(
                   value: selectedReminder,
                   decoration: InputDecoration(
@@ -606,8 +638,43 @@ class _EventsPageState extends State<EventsPage> {
                   ],
                   onChanged: (val) => setStateDialog(() => selectedReminder = val),
                 ),
+
+                // ── NOWE: Wybór trybu alarmu ──────────────────
+                if (selectedReminder != null) ...[
+                  const SizedBox(height: 12),
+                  const Divider(),
+                  const SizedBox(height: 4),
+                  SegmentedButton<String>(
+                    segments: const [
+                      ButtonSegment(
+                        value: 'notification',
+                        icon: Icon(Icons.notifications, size: 16),
+                        label: Text('Powiad.', style: TextStyle(fontSize: 11)),
+                      ),
+                      ButtonSegment(
+                        value: 'vibration',
+                        icon: Icon(Icons.vibration, size: 16),
+                        label: Text('Wibr.', style: TextStyle(fontSize: 11)),
+                      ),
+                      ButtonSegment(
+                        value: 'alarm',
+                        icon: Icon(Icons.alarm, size: 16),
+                        label: Text('Alarm', style: TextStyle(fontSize: 11)),
+                      ),
+                    ],
+                    selected: {reminderMode},
+                    onSelectionChanged: (val) =>
+                        setStateDialog(() => reminderMode = val.first),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    _getModeDescription(reminderMode),
+                    style: TextStyle(fontSize: 11, color: Colors.grey[600], fontStyle: FontStyle.italic),
+                  ),
+                ],
+                // ─────────────────────────────────────────────
+
                 const SizedBox(height: 12),
-                // Notatki
                 TextField(
                   controller: notesController,
                   decoration: InputDecoration(
@@ -636,6 +703,7 @@ class _EventsPageState extends State<EventsPage> {
                       ? null
                       : notesController.text.trim(),
                   reminderMinutes: selectedReminder,
+                  reminderMode: selectedReminder == null ? 'none' : reminderMode, // ← NOWE
                   createdAt: event.createdAt,
                 );
                 setState(() {
@@ -666,8 +734,9 @@ class _EventsPageState extends State<EventsPage> {
     String selectedCategory = 'praca';
     String? customCategory;
     int? reminderMinutes = 15;
+    String reminderMode = 'alarm'; // ← NOWE (domyślnie alarm)
 
-    CalendarEvent? newEvent; // ← NOWE: event tworzony wewnątrz dialogu
+    CalendarEvent? newEvent;
 
     await showDialog<void>(
       context: context,
@@ -694,13 +763,13 @@ class _EventsPageState extends State<EventsPage> {
                         '${selectedDate.day}.${selectedDate.month}.${selectedDate.year} '
                             '${selectedTime.hour.toString().padLeft(2, '0')}:${selectedTime.minute.toString().padLeft(2, '0')}',
                       ),
-                      trailing: Icon(Icons.calendar_today),
+                      trailing: const Icon(Icons.calendar_today),
                       onTap: () async {
                         final date = await showDatePicker(
                           context: ctx,
                           initialDate: selectedDate,
                           firstDate: DateTime.now(),
-                          lastDate: DateTime.now().add(Duration(days: 365)),
+                          lastDate: DateTime.now().add(const Duration(days: 365)),
                         );
                         if (date != null) {
                           final time = await showTimePicker(
@@ -716,6 +785,7 @@ class _EventsPageState extends State<EventsPage> {
                         }
                       },
                     ),
+                    const SizedBox(height: 8),
                     const SizedBox(height: 8),
                     Row(
                       children: [
@@ -733,9 +803,7 @@ class _EventsPageState extends State<EventsPage> {
                             ],
                             onChanged: (value) {
                               if (value != null) {
-                                setStateDialog(() {
-                                  selectedCategory = value;
-                                });
+                                setStateDialog(() => selectedCategory = value);
                               }
                             },
                           ),
@@ -748,7 +816,7 @@ class _EventsPageState extends State<EventsPage> {
                         decoration: InputDecoration(
                           labelText: loc.translate('event_category_custom'),
                           hintText: loc.translate('event_category_custom_hint'),
-                          border: OutlineInputBorder(),
+                          border: const OutlineInputBorder(),
                         ),
                         onChanged: (value) {
                           setStateDialog(() {
@@ -770,9 +838,9 @@ class _EventsPageState extends State<EventsPage> {
                     ListTile(
                       title: Text(loc.translate('event_reminder')),
                       subtitle: reminderMinutes == null
-                          ? Text('Brak przypomnienia')
+                          ? const Text('Brak przypomnienia')
                           : Text(_getReminderLabel(reminderMinutes!)),
-                      trailing: Icon(Icons.notifications),
+                      trailing: const Icon(Icons.notifications),
                       onTap: () async {
                         final selected = await showDialog<int?>(
                           context: ctx,
@@ -800,10 +868,45 @@ class _EventsPageState extends State<EventsPage> {
                         if (selected != null) {
                           setStateDialog(() {
                             reminderMinutes = selected == -1 ? null : selected;
+                            if (selected == -1) reminderMode = 'none';
                           });
                         }
                       },
                     ),
+
+                    // ── NOWE: Wybór trybu alarmu ──────────────────
+                    if (reminderMinutes != null) ...[
+                      const Divider(),
+                      const SizedBox(height: 4),
+                      SegmentedButton<String>(
+                        segments: const [
+                          ButtonSegment(
+                            value: 'notification',
+                            icon: Icon(Icons.notifications, size: 16),
+                            label: Text('Powiad.', style: TextStyle(fontSize: 11)),
+                          ),
+                          ButtonSegment(
+                            value: 'vibration',
+                            icon: Icon(Icons.vibration, size: 16),
+                            label: Text('Wibr.', style: TextStyle(fontSize: 11)),
+                          ),
+                          ButtonSegment(
+                            value: 'alarm',
+                            icon: Icon(Icons.alarm, size: 16),
+                            label: Text('Alarm', style: TextStyle(fontSize: 11)),
+                          ),
+                        ],
+                        selected: {reminderMode},
+                        onSelectionChanged: (val) =>
+                            setStateDialog(() => reminderMode = val.first),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        _getModeDescription(reminderMode),
+                        style: TextStyle(fontSize: 11, color: Colors.grey[600], fontStyle: FontStyle.italic),
+                      ),
+                    ],
+                    // ─────────────────────────────────────────────
                   ],
                 ),
               ),
@@ -816,7 +919,7 @@ class _EventsPageState extends State<EventsPage> {
                   onPressed: () {
                     final title = titleController.text.trim();
                     if (title.isEmpty) {
-                      setStateDialog(() {}); // odświeżenie bez błędu
+                      setStateDialog(() {});
                       return;
                     }
 
@@ -828,7 +931,6 @@ class _EventsPageState extends State<EventsPage> {
                       selectedTime.minute,
                     );
 
-                    // ← KLUCZOWE: zapisujemy event do zmiennej zewnętrznej
                     newEvent = CalendarEvent(
                       id: DateTime.now().millisecondsSinceEpoch.toString(),
                       title: title,
@@ -840,10 +942,11 @@ class _EventsPageState extends State<EventsPage> {
                           ? null
                           : notesController.text.trim(),
                       reminderMinutes: reminderMinutes,
+                      reminderMode: reminderMinutes == null ? 'none' : reminderMode, // ← NOWE
                       createdAt: DateTime.now(),
                     );
 
-                    Navigator.of(ctx).pop(); // zamknij dialog
+                    Navigator.of(ctx).pop();
                   },
                   child: Text(loc.translate('add_btn')),
                 ),
@@ -854,7 +957,6 @@ class _EventsPageState extends State<EventsPage> {
       },
     );
 
-    // ← PO zamknięciu dialogu - bezpieczne miejsce na setState
     if (newEvent != null && mounted) {
       setState(() {
         _events.add(newEvent!);
@@ -871,6 +973,40 @@ class _EventsPageState extends State<EventsPage> {
 
     titleController.dispose();
     notesController.dispose();
+  }
+
+  // ← NOWE: opis trybu
+  String _getModeDescription(String mode) {
+    switch (mode) {
+      case 'notification': return '🔔 Krótki dźwięk systemowy';
+      case 'vibration':    return '📳 Tylko wibracja, bez dźwięku';
+      case 'alarm':        return '🚨 Alarm w pętli — działa nawet gdy app jest zamknięta';
+      default:             return '';
+    }
+  }
+
+  // 🔔 Odpal alarm dla wydarzenia
+  Future<void> _triggerAlarm(CalendarEvent event) async {
+    final soundId = await AlarmService().loadSoundForEvents();
+    await AlarmService().playLooping(soundId);
+    setState(() => _alarmActive = true);
+
+    if (!mounted) return;
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => AlarmStopScreen(
+          title: '🔔 ${event.title}',
+          subtitle: '${event.dateTime.day}.${event.dateTime.month}.${event.dateTime.year} '
+              '${event.dateTime.hour.toString().padLeft(2, '0')}:${event.dateTime.minute.toString().padLeft(2, '0')}',
+          onStop: () {
+            AlarmService().stop();
+            setState(() => _alarmActive = false);
+          },
+        ),
+      ),
+    );
+    AlarmService().stop();
+    setState(() => _alarmActive = false);
   }
 
   @override
@@ -893,13 +1029,26 @@ class _EventsPageState extends State<EventsPage> {
         centerTitle: true,
         backgroundColor: Colors.indigo,
         foregroundColor: Colors.white,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.music_note),
+            tooltip: loc.translate('alarm_pick_title'),
+            onPressed: () async {
+              final currentId = await AlarmService().loadSoundForEvents();
+              final picked = await showAlarmPicker(context: context, currentSoundId: currentId);
+              if (picked != null) {
+                await AlarmService().saveSoundForEvents(picked.id);
+              }
+            },
+          ),
+        ],
       ),
       body: _events.isEmpty
           ? Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.event_busy, size: 80, color: Colors.grey),
+            const Icon(Icons.event_busy, size: 80, color: Colors.grey),
             const SizedBox(height: 16),
             Text(
               loc.translate('no_events'),
@@ -911,30 +1060,19 @@ class _EventsPageState extends State<EventsPage> {
           : ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          // Dziś
           if (todayEvents.isNotEmpty) ...[
             Text(
               '📅 ${loc.translate('today_events')}',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.indigo.shade900,
-              ),
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.indigo.shade900),
             ),
             const SizedBox(height: 12),
             ...todayEvents.map((event) => _buildEventCard(event)),
             const SizedBox(height: 24),
           ],
-
-          // Nadchodzące
           if (upcomingEvents.isNotEmpty) ...[
             Text(
               '🔜 ${loc.translate('upcoming_events')}',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.indigo.shade900,
-              ),
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.indigo.shade900),
             ),
             const SizedBox(height: 12),
             ...upcomingEvents.map((event) => _buildEventCard(event)),
@@ -952,6 +1090,13 @@ class _EventsPageState extends State<EventsPage> {
   Widget _buildEventCard(CalendarEvent event) {
     final loc = AppLocalizations.of(context)!;
 
+    // ← NOWE: ikona trybu
+    final modeIcon = event.reminderMode == 'alarm'
+        ? '🚨'
+        : event.reminderMode == 'vibration'
+        ? '📳'
+        : '🔔';
+
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       elevation: 3,
@@ -965,13 +1110,15 @@ class _EventsPageState extends State<EventsPage> {
                 Expanded(
                   child: Text(
                     event.title,
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.indigo.shade900,
-                    ),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.indigo.shade900),
                   ),
                 ),
+                if (event.reminderMinutes != null)
+                  IconButton(
+                    icon: const Icon(Icons.alarm, color: Colors.orange),
+                    tooltip: loc.translate('alarm_test_tooltip'),
+                    onPressed: () => _triggerAlarm(event),
+                  ),
                 IconButton(
                   icon: const Icon(Icons.edit, color: Colors.indigo),
                   onPressed: () => _editEventDialog(event),
@@ -999,28 +1146,22 @@ class _EventsPageState extends State<EventsPage> {
               children: [
                 Icon(Icons.category, size: 16, color: Colors.grey[600]),
                 const SizedBox(width: 4),
-                Text(
-                  _getCategoryLabel(event.category),
-                  style: TextStyle(color: Colors.grey[600]),
-                ),
+                Text(_getCategoryLabel(event.category), style: TextStyle(color: Colors.grey[600])),
               ],
             ),
             if (event.notes != null) ...[
               const SizedBox(height: 8),
-              Text(
-                event.notes!,
-                style: TextStyle(color: Colors.grey[700]),
-              ),
+              Text(event.notes!, style: TextStyle(color: Colors.grey[700])),
             ],
-            if (event.reminderMinutes != null) ...[
+            if (event.reminderMinutes != null && event.reminderMode != 'none') ...[
               const SizedBox(height: 8),
               Row(
                 children: [
-                  Icon(Icons.notifications_active, size: 16, color: Colors.orange),
+                  Text(modeIcon, style: const TextStyle(fontSize: 14)),
                   const SizedBox(width: 4),
                   Text(
                     _getReminderLabel(event.reminderMinutes!),
-                    style: TextStyle(color: Colors.orange),
+                    style: const TextStyle(color: Colors.orange),
                   ),
                 ],
               ),
@@ -1049,14 +1190,10 @@ class _EventsPageState extends State<EventsPage> {
   String _getCategoryLabel(String category) {
     final loc = AppLocalizations.of(context)!;
     switch (category) {
-      case 'praca':
-        return loc.translate('work');
-      case 'sport':
-        return loc.translate('sport');
-      case 'czas_wolny':
-        return loc.translate('free_time');
-      default:
-        return category;
+      case 'praca': return loc.translate('work');
+      case 'sport': return loc.translate('sport');
+      case 'czas_wolny': return loc.translate('free_time');
+      default: return category;
     }
   }
 
@@ -3658,6 +3795,8 @@ class _HomePageState extends State<HomePage> {
       builder: (ctx) {
         return StatefulBuilder(builder: (ctx, setStateDialog) {
           return AlertDialog(
+            backgroundColor: Colors.white,
+            surfaceTintColor: Colors.transparent,
             title: Text(loc.translate('edit_session')),
             content: SingleChildScrollView(
               child: Column(

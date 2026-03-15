@@ -311,6 +311,14 @@ class AppLocalizations {
       'notes_reminder_cancel': '🔕 Przypomnienie anulowane',
       'notes_reminder_tooltip_set': 'Ustaw przypomnienie',
       'notes_reminder_tooltip_cancel': 'Anuluj przypomnienie',
+      // ── ALARM ──────────────────────────────────────────────
+      'alarm_pick_title': 'Wybierz dźwięk alarmu',
+      'alarm_pick_cancel': 'Anuluj',
+      'alarm_pick_select': 'Wybierz',
+      'alarm_reminder_title': '🔔 Przypomnienie',
+      'alarm_stop': 'STOP',
+      'alarm_test_tooltip': 'Testuj alarm',
+      'alarm_sound_label': 'Dźwięk: ',
     },
 
     'es': {
@@ -611,6 +619,14 @@ class AppLocalizations {
       'notes_reminder_cancel': '🔕 Recordatorio cancelado',
       'notes_reminder_tooltip_set': 'Establecer recordatorio',
       'notes_reminder_tooltip_cancel': 'Cancelar recordatorio',
+      // ── ALARM ──────────────────────────────────────────────
+      'alarm_pick_title': 'Elige el sonido de alarma',
+      'alarm_pick_cancel': 'Cancelar',
+      'alarm_pick_select': 'Elegir',
+      'alarm_reminder_title': '🔔 Recordatorio',
+      'alarm_stop': 'PARAR',
+      'alarm_test_tooltip': 'Probar alarma',
+      'alarm_sound_label': 'Sonido: ',
     },
 
     'en': {
@@ -911,6 +927,14 @@ class AppLocalizations {
       'notes_reminder_cancel': '🔕 Reminder cancelled',
       'notes_reminder_tooltip_set': 'Set reminder',
       'notes_reminder_tooltip_cancel': 'Cancel reminder',
+      // ── ALARM ──────────────────────────────────────────────
+      'alarm_pick_title': 'Choose alarm sound',
+      'alarm_pick_cancel': 'Cancel',
+      'alarm_pick_select': 'Select',
+      'alarm_reminder_title': '🔔 Reminder',
+      'alarm_stop': 'STOP',
+      'alarm_test_tooltip': 'Test alarm',
+      'alarm_sound_label': 'Sound: ',
     },
   };
 

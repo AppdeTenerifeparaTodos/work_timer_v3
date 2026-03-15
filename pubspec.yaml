@@ -17,13 +17,13 @@ dependencies:
   path_provider: ^2.1.0
   image_picker: ^1.1.2
   fl_chart: ^0.69.0
-  share_plus: ^10.0.0   # ⬅️ DODANE
+  share_plus: ^10.0.0
   flutter_local_notifications: ^17.2.3
   timezone: ^0.9.4
   speech_to_text: 7.0.0
-  audioplayers: ^6.1.0    # https://pub.dev/packages/audioplayers
-  permission_handler: ^11.3.1  # https://pub.dev/packages/permission_handler
-
+  audioplayers: ^6.1.0
+  permission_handler: ^11.3.1
+  alarm: ^4.1.0
 
 dev_dependencies:
   flutter_test:
@@ -36,6 +36,7 @@ flutter:
 
   assets:
     - assets/
+    - assets/sounds/
 
 generate: true
 

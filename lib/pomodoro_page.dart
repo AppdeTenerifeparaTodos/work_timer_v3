@@ -61,6 +61,8 @@ class _PomodoroPageState extends State<PomodoroPage>
   Color  get _bg       => _modeBg[_mode]!;
   double get _progress => _left / _total;
 
+  AppLocalizations get loc => AppLocalizations.of(context)!;
+
   @override
   void initState() {
     super.initState();

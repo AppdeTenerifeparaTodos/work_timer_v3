@@ -1552,7 +1552,7 @@ class _MemoryLevelsPageState extends State<MemoryLevelsPage> {
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
-            tooltip: 'Reset poziomów',
+            tooltip: loc.translate('reset_levels'),
             onPressed: () async {
               final prefs = await SharedPreferences.getInstance();
               await prefs.remove('memory_max_level_v2'); // ten sam klucz co w _loadProgress/_saveProgress
@@ -1561,8 +1561,8 @@ class _MemoryLevelsPageState extends State<MemoryLevelsPage> {
               });
 
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Postęp poziomów zresetowany'),
+                SnackBar(
+                  content: Text(loc.translate('progress_levels_reset')),
                   duration: Duration(seconds: 2),
                 ),
               );
@@ -1970,7 +1970,7 @@ class _MemoryGamePageState extends State<MemoryGamePage> {
             ),
             ElevatedButton(
               onPressed: () => Navigator.of(ctx).pop(),
-              child: const Text('OK'),
+              child: Text(loc.translate('ok')),
             ),
           ],
         );
@@ -2412,18 +2412,19 @@ class _StatisticsPageContentState extends State<StatisticsPageContent> {
     return '${hours}h ${minutes}min';
   }
 
-  String _typeLabel(String type) {
+  String _typeLabel(String type, BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
     switch (type) {
       case 'nauka':
-        return 'Nauka';
+        return loc.translate('type_nauka');
       case 'praca_platna':
-        return 'Praca płatna';
+        return loc.translate('type_praca_platna');
       case 'praca_nieplatna':
-        return 'Praca niepłatna';
+        return loc.translate('type_praca_nieplatna');
       case 'sport':
-        return 'Sport';
+        return loc.translate('sport');
       case 'czas_wolny':
-        return 'Czas wolny';
+        return loc.translate('free_time');
       default:
         return type;
     }
@@ -2754,7 +2755,7 @@ class _StatisticsPageContentState extends State<StatisticsPageContent> {
                                         const SizedBox(width: 8),
                                         Expanded(
                                           child: Text(
-                                            _typeLabel(entry.key),
+                                            _typeLabel(entry.key, context),
                                             style: TextStyle(fontSize: 12),
                                             overflow: TextOverflow.ellipsis,
                                           ),
@@ -2811,7 +2812,7 @@ class _StatisticsPageContentState extends State<StatisticsPageContent> {
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text(
-                                      _typeLabel(entry.key),
+                                      _typeLabel(entry.key, context),
                                       style: TextStyle(
                                         fontWeight: FontWeight.w500,
                                       ),
@@ -3449,8 +3450,8 @@ class _HomePageState extends State<HomePage> {
 
   // NOWE: eksport całej bazy (historia + cele + wydarzenia) do jednego pliku JSON
   Future<File?> _exportAllData() async {
+    final loc = AppLocalizations.of(context)!;
     try {
-      final loc = AppLocalizations.of(context)!;
 
       // 1. Katalog na backup (tak jak w starym exportHistory)
       final directory = await getApplicationDocumentsDirectory();
@@ -3483,7 +3484,7 @@ class _HomePageState extends State<HomePage> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Błąd eksportu: $e')),
+          SnackBar(content: Text('${loc.translate('export_error')} $e')),
         );
       }
       return null;
@@ -3500,7 +3501,7 @@ class _HomePageState extends State<HomePage> {
 
       if (!await backupDir.exists()) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Brak folderu z backupem')),
+          SnackBar(content: Text(loc.translate('backup_no_folder'))),
         );
         return;
       }
@@ -3514,7 +3515,7 @@ class _HomePageState extends State<HomePage> {
 
       if (files.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Brak plików backupu (.json)')),
+          SnackBar(content: Text(loc.translate('backup_no_files'))),
         );
         return;
       }
@@ -3538,7 +3539,7 @@ class _HomePageState extends State<HomePage> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Zaimportowano historię (stary format pliku)'),
+              content: Text(loc.translate('import_legacy_format')),
             ),
           );
         }
@@ -3584,7 +3585,7 @@ class _HomePageState extends State<HomePage> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Zaimportowano historię, cele i wydarzenia'),
+              content: Text(loc.translate('import_full')),
             ),
           );
         }
@@ -3594,11 +3595,11 @@ class _HomePageState extends State<HomePage> {
 
       // Format nieznany
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Nieznany format pliku backupu')),
+        SnackBar(content: Text(loc.translate('backup_unknown_format'))),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Błąd importu: $e')),
+        SnackBar(content: Text('${loc.translate('import_error')} $e')),
       );
     }
   }
@@ -4572,7 +4573,7 @@ class _HomePageState extends State<HomePage> {
             onPressed: () {
               widget.onLanguageChange('pl');
             },
-            tooltip: 'Polski',
+            tooltip: loc.translate('lang_polish'),
           ),
           // Flaga hiszpańska
           IconButton(
@@ -4598,7 +4599,7 @@ class _HomePageState extends State<HomePage> {
             onPressed: () {
               widget.onLanguageChange('es');
             },
-            tooltip: 'Español',
+            tooltip: loc.translate('lang_spanish'),
           ),
           IconButton(
             icon: Container(
@@ -4618,7 +4619,7 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
             onPressed: () => widget.onLanguageChange('en'),
-            tooltip: 'English',
+            tooltip: loc.translate('lang_english'),
           ),
           const SizedBox(width: 8),
           // Menu z ustawieniami - bardziej widoczne
@@ -4902,8 +4903,8 @@ class _HomePageState extends State<HomePage> {
                                                   : Colors.green,
                                             ),
                                             tooltip: (_activeStartTime != null && _activeDescController.text == goal.name)
-                                                ? 'Zatrzymaj'
-                                                : 'Start z tym celem',
+                                                ? loc.translate('goal_stop')
+                                                : loc.translate('goal_start_with'),
                                             onPressed: () {
                                               if (_activeStartTime != null && _activeDescController.text == goal.name) {
                                                 _stopActiveSession();
@@ -4916,7 +4917,7 @@ class _HomePageState extends State<HomePage> {
                                                 _saveActiveSession();
                                                 ScaffoldMessenger.of(context).showSnackBar(
                                                   SnackBar(
-                                                    content: Text('▶️ Timer uruchomiony: ${goal.name}'),
+                                                    content: Text('▶️ ${loc.translate('timer_started')} ${goal.name}'),
                                                     duration: const Duration(seconds: 2),
                                                     backgroundColor: Colors.green,
                                                   ),
@@ -5314,7 +5315,7 @@ class _HomePageState extends State<HomePage> {
                         ),
                       // 2. Udostępnij backup (np. e‑mail, WhatsApp)
                         IconButton(
-                          tooltip: 'Udostępnij backup',
+                          tooltip: loc.translate('share_backup'),
                           icon: Icon(
                             Icons.share,
                             color: Colors.grey[700],
@@ -5324,7 +5325,7 @@ class _HomePageState extends State<HomePage> {
                           if (file != null) {
                             await Share.shareXFiles(
                               [XFile(file.path)],
-                              text: 'Backup WorkStudyTimer',
+                              text: loc.translate('backup_share_subject'),
                             );
                           }
                         },
@@ -5455,12 +5456,12 @@ class _HomePageState extends State<HomePage> {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 IconButton(
-                                  tooltip: 'Edytuj',
+                                  tooltip: loc.translate('edit'),
                                   icon: const Icon(Icons.edit),
                                   onPressed: () => _editSession(index),
                                 ),
                                 IconButton(
-                                  tooltip: 'Usuń',
+                                  tooltip: loc.translate('delete'),
                                   icon: const Icon(Icons.delete),
                                   onPressed: () => _deleteSession(index),
                                 ),

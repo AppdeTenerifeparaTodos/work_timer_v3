@@ -379,7 +379,7 @@ class _DevPetTabState extends State<DevPetTab>
             ),
             const SizedBox(height: 4),
             Text(
-              '${_pet.collection.length} / ${PetSpecies.values.length} zebrano',
+              '${_pet.collection.length} / ${PetSpecies.values.length} ${loc.translate('pet_collection_collected')}',
               style: const TextStyle(fontSize: 13, color: Colors.white38),
             ),
             const SizedBox(height: 16),

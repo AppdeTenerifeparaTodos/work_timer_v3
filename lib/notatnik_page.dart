@@ -452,7 +452,7 @@ class _NotatnikPageState extends State<NotatnikPage> {
         actions: [
           IconButton(
             icon: const Icon(Icons.music_note, color: Color(0xFF6366F1)),
-            tooltip: 'Dźwięk: ${_selectedSound.displayName}',
+            tooltip: '${loc.translate('alarm_sound_label')}${_selectedSound.displayName}',
             onPressed: _openAlarmPicker,
           ),
           if (_notes.isNotEmpty)
@@ -667,7 +667,7 @@ class _NotatnikPageState extends State<NotatnikPage> {
                                       color: Colors.orange, size: 22),
                                   onPressed: () =>
                                       _triggerAlarm(note),
-                                  tooltip: 'Testuj alarm',
+                                  tooltip: loc.translate('alarm_test_tooltip'),
                                 ),
                                 const SizedBox(width: 16),
                               ],

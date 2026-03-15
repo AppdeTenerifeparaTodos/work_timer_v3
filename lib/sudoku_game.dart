@@ -92,7 +92,7 @@ class _SudokuLevelsPageState extends State<SudokuLevelsPage> {
           // Przycisk reset postępu
           IconButton(
             icon: const Icon(Icons.refresh),
-            tooltip: 'Reset poziomów',
+            tooltip: loc.translate('reset_levels'),
             onPressed: () async {
               final prefs = await SharedPreferences.getInstance();
               await prefs.setInt('sudoku_max_level', 1);
@@ -100,7 +100,7 @@ class _SudokuLevelsPageState extends State<SudokuLevelsPage> {
                 _maxUnlockedLevel = 1;
               });
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Postęp zresetowany')),
+                SnackBar(content: Text(loc.translate('progress_reset'))),
               );
             },
           ),
@@ -507,7 +507,7 @@ class _SudokuGamePageState extends State<SudokuGamePage> {
           ),
           ElevatedButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('OK'),
+            child: Text(loc.translate('ok')),
           ),
         ],
       ),

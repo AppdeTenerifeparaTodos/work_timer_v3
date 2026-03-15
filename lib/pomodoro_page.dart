@@ -16,10 +16,11 @@ const _modeBg = {
   'long':  Color(0xFF0D0815),
 };
 
-const _modeStatusLabel = {
-  'work':  'FOKUS',
-  'break': 'PRZERWA',
-  'long':  'RELAKS',
+/// Klucze do tłumaczeń etykiet trybu (pomodoro_status_focus, pomodoro_status_break, pomodoro_status_relax).
+const _modeStatusLabelKey = {
+  'work':  'pomodoro_status_focus',
+  'break': 'pomodoro_status_break',
+  'long':  'pomodoro_status_relax',
 };
 
 class PomodoroPage extends StatefulWidget {
@@ -278,7 +279,7 @@ class _PomodoroPageState extends State<PomodoroPage>
                     const SizedBox(height: 10),
 
                     // ── Statystyki ───────────────────────────────────────────
-                    _buildStats(),
+                    _buildStats(loc),
 
                     const SizedBox(height: 16),
 
@@ -440,8 +441,8 @@ class _PomodoroPageState extends State<PomodoroPage>
             ),
             const SizedBox(width: 6),
             Text(
-              _running ? (_modeStatusLabel[_mode] ?? 'FOKUS')
-                  : (_left < _total ? 'PAUZA' : 'GOTOWY'),
+              _running ? (loc.translate(_modeStatusLabelKey[_mode] ?? 'pomodoro_status_focus'))
+                  : (_left < _total ? loc.translate('pomodoro_status_pause') : loc.translate('pomodoro_status_ready')),
               style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600,
                   letterSpacing: 3, color: _c1),
             ),
@@ -520,7 +521,7 @@ class _PomodoroPageState extends State<PomodoroPage>
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Row(children: [
-            Text('SESJE',
+            Text(loc.translate('pomodoro_sessions_label'),
                 style: TextStyle(fontSize: 9, fontWeight: FontWeight.w700,
                     letterSpacing: 2, color: Colors.white.withOpacity(0.3))),
             const SizedBox(width: 8),
@@ -560,11 +561,11 @@ class _PomodoroPageState extends State<PomodoroPage>
     );
   }
 
-  Widget _buildStats() {
+  Widget _buildStats(AppLocalizations loc) {
     return Row(children: [
-      Expanded(child: _statCard('${_worked ~/ 60} min', 'DZIŚ ŁĄCZNIE')),
+      Expanded(child: _statCard('${_worked ~/ 60} min', loc.translate('pomodoro_today_total'))),
       const SizedBox(width: 10),
-      Expanded(child: _statCard('$_best', 'REKORD SESJI')),
+      Expanded(child: _statCard('$_best', loc.translate('pomodoro_session_record'))),
     ]);
   }
 
